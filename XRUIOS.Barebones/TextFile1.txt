@@ -1,0 +1,301 @@
+﻿        public class DataSlots
+            {
+
+                public static List<DataSlot> GetDataSlotDirectory()
+                {
+
+                    //Get the JSON File holding the MusicDirectory object for the user
+                    var FileWithDataDirectory = UniversalSave.Load(DataStore.DataSlotDirectoryPath, DataFormat.JSON);
+
+                    //This file has a lot of things in it, so we are getting the variable called MusicDirectory, aka the object we are looking for
+                    List<DataSlot> CurrentDataSlotDirectory = (List<DataSlot>)FileWithDataDirectory.Get("DataSlots");
+
+                    List<DataSlot> finallist = new List<DataSlot>();
+
+                    foreach (DataSlot item in CurrentDataSlotDirectory)
+                    {
+                        finallist.Add(DecryptDataSlot(item, UserPassword));
+                    }
+
+                    return finallist;
+                }
+
+                public static void SaveDataSlot(DataSlot slot, string DataSlotTitle)
+                {
+                    var listofslots = GetDataSlotDirectory();
+                    listofslots.Add(slot);
+
+                    List<DataSlot> final = new List<DataSlot>();
+
+                    foreach (DataSlot item in listofslots)
+                    {
+                        final.Add(new DataSlot(item, UserPassword));
+                    }
+
+                    var newsave = new UniversalSave();
+
+                    newsave.Set("DataSlots", listofslots);
+
+                    UniversalSave.Save(DataStore.DataSlotDirectoryPath, newsave);
+
+                }
+
+                public static DataSlot LoadDataSlot(string DataSlotTitle)
+                {
+                    var listofslots = DataSlots.GetDataSlotDirectory();
+                    DataSlot final = default;
+                    foreach (DataSlot item in listofslots)
+                    {
+                        if (DataSlotTitle == item.Title)
+                        {
+                            final = item;
+                            break;
+                        }
+                    }
+                    return final;
+                }
+
+                public static void UpdateDataSlot(DataSlot slot, string DataSlotTitle)
+                {
+                    var listofslots = GetDataSlotDirectory();
+
+                    foreach (DataSlot item in listofslots)
+                    {
+                        if (DataSlotTitle == item.Title)
+                        {
+                            var indexnumber = listofslots.IndexOf(item);
+                            listofslots.RemoveAt(indexnumber);
+                            listofslots.Insert(indexnumber, slot);
+                            break;
+                        }
+                    }
+
+                    List<DataSlot> final = new List<DataSlot>();
+
+                    foreach (DataSlot item in listofslots)
+                    {
+                        final.Add(new DataSlot(item, UserPassword));
+                    }
+
+                    var newsave = new UniversalSave();
+
+                    newsave.Set("DataSlots", listofslots);
+
+                    UniversalSave.Save(DataStore.DataSlotDirectoryPath, newsave);
+
+                }
+
+                public static void DeleteDataSlot(string DataSlotTitle)
+                {
+                    var listofslots = GetDataSlotDirectory();
+
+                    foreach (DataSlot item in listofslots)
+                    {
+                        if (DataSlotTitle == item.Title)
+                        {
+                            listofslots.Remove(item);
+                            break;
+                        }
+                    }
+
+                    List<DataSlot> final = new List<DataSlot>();
+
+                    foreach (DataSlot item in listofslots)
+                    {
+                        final.Add(new DataSlot(item, UserPassword));
+                    }
+
+                    var newsave = new UniversalSave();
+
+                    newsave.Set("DataSlots", listofslots);
+
+                    UniversalSave.Save(DataStore.DataSlotDirectoryPath, newsave);
+
+                }
+
+                public static List<DataSlot> GetAllDataSlots()
+                {
+                    var listofslots = GetDataSlotDirectory();
+                    return listofslots;
+                }
+
+                public void UnpackDataSlot()
+                {
+
+                }
+
+
+
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                    public class WorldPoints
+            {
+
+
+
+                public void SaveWorldPoint(WorldPoint point, string DataSlotTitle) //Dataslot must exist first
+                {
+                    DataSlot targetdataslot = DataSlots.LoadDataSlot(DataSlotTitle);
+
+                    targetdataslot.WorldPoints.Add(point);
+
+                    List<DataSlot> final = new List<DataSlot>();
+
+                    DataSlots.UpdateDataSlot(targetdataslot, DataSlotTitle);
+
+                }
+
+                public List<WorldPoint> LoadWorldPoints(string pointname, string DataSlotTitle)
+                {
+                    DataSlot targetdataslot = DataSlots.LoadDataSlot(DataSlotTitle);
+
+                    List<WorldPoint> points = targetdataslot.WorldPoints;
+
+                    return points;
+
+
+                }
+
+                public WorldPoint LoadSpecificWorldPoint(string pointname, string DataSlotTitle)
+                {
+                    DataSlot targetdataslot = DataSlots.LoadDataSlot(DataSlotTitle);
+
+                    WorldPoint target = default;
+
+                    foreach (WorldPoint item in targetdataslot.WorldPoints)
+                    {
+                        if (item.PointName == pointname)
+                        {
+                            target = item;
+                            break;
+                        }
+                    }
+
+                    return target;
+
+
+                }
+
+                public void UpdateWorldPoint(WorldPoint point, string DataSlotTitle, string pointname)
+                {
+                    DataSlot targetdataslot = DataSlots.LoadDataSlot(DataSlotTitle);
+
+                    foreach (WorldPoint item in targetdataslot.WorldPoints)
+                    {
+                        if (item.PointName == pointname)
+                        {
+                            var indexnumber = targetdataslot.WorldPoints.IndexOf(item);
+                            targetdataslot.WorldPoints.Remove(item);
+                            targetdataslot.WorldPoints.Insert(indexnumber, item);
+                            break;
+
+                        }
+                    }
+
+                    DataSlots.UpdateDataSlot(targetdataslot, DataSlotTitle);
+
+                }
+
+                public void DeleteWorldPoint(string DataSlotTitle, string pointname)
+                {
+                    DataSlot targetdataslot = DataSlots.LoadDataSlot(DataSlotTitle);
+
+                    foreach (WorldPoint item in targetdataslot.WorldPoints)
+                    {
+                        if (item.PointName == pointname)
+                        {
+
+                            targetdataslot.WorldPoints.Remove(item);
+
+                            break;
+
+                        }
+                    }
+
+                    DataSlots.UpdateDataSlot(targetdataslot, DataSlotTitle);
+
+                }
+            }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
