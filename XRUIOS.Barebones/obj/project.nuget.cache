@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "2zUC93K1sto=",
+  "dgSpecHash": "pabUCCN4jXw=",
   "success": true,
   "projectFilePath": "C:\\Users\\WalkerDev\\source\\repos\\XRUIOS.Barebones\\XRUIOS.Barebones\\XRUIOS.Barebones.csproj",
   "expectedPackageFiles": [
@@ -12,6 +12,7 @@
     "C:\\Users\\WalkerDev\\.nuget\\packages\\data.hashfunction.interfaces\\3.1.2\\data.hashfunction.interfaces.3.1.2.nupkg.sha512",
     "C:\\Users\\WalkerDev\\.nuget\\packages\\easycompressor\\2.1.0\\easycompressor.2.1.0.nupkg.sha512",
     "C:\\Users\\WalkerDev\\.nuget\\packages\\easycompressor.lz4\\2.1.0\\easycompressor.lz4.2.1.0.nupkg.sha512",
+    "C:\\Users\\WalkerDev\\.nuget\\packages\\geocoordinate.netcore\\1.0.0.1\\geocoordinate.netcore.1.0.0.1.nupkg.sha512",
     "C:\\Users\\WalkerDev\\.nuget\\packages\\hangfire\\1.8.22\\hangfire.1.8.22.nupkg.sha512",
     "C:\\Users\\WalkerDev\\.nuget\\packages\\hangfire.aspnetcore\\1.8.22\\hangfire.aspnetcore.1.8.22.nupkg.sha512",
     "C:\\Users\\WalkerDev\\.nuget\\packages\\hangfire.core\\1.8.22\\hangfire.core.1.8.22.nupkg.sha512",
@@ -29,6 +30,8 @@
     "C:\\Users\\WalkerDev\\.nuget\\packages\\microsoft.extensions.hosting.abstractions\\3.0.0\\microsoft.extensions.hosting.abstractions.3.0.0.nupkg.sha512",
     "C:\\Users\\WalkerDev\\.nuget\\packages\\microsoft.extensions.logging.abstractions\\3.0.0\\microsoft.extensions.logging.abstractions.3.0.0.nupkg.sha512",
     "C:\\Users\\WalkerDev\\.nuget\\packages\\microsoft.extensions.primitives\\3.0.0\\microsoft.extensions.primitives.3.0.0.nupkg.sha512",
+    "C:\\Users\\WalkerDev\\.nuget\\packages\\microsoft.maui.essentials\\10.0.30\\microsoft.maui.essentials.10.0.30.nupkg.sha512",
+    "C:\\Users\\WalkerDev\\.nuget\\packages\\microsoft.maui.graphics\\10.0.30\\microsoft.maui.graphics.10.0.30.nupkg.sha512",
     "C:\\Users\\WalkerDev\\.nuget\\packages\\microsoft.netcore.platforms\\1.1.0\\microsoft.netcore.platforms.1.1.0.nupkg.sha512",
     "C:\\Users\\WalkerDev\\.nuget\\packages\\netadmin.csvhelper\\1.0.0\\netadmin.csvhelper.1.0.0.nupkg.sha512",
     "C:\\Users\\WalkerDev\\.nuget\\packages\\netstandard.library\\1.6.1\\netstandard.library.1.6.1.nupkg.sha512",

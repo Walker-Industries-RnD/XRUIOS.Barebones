@@ -151,6 +151,19 @@
           }
         }
       },
+      "GeoCoordinate.NetCore/1.0.0.1": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard1.6/GeoCoordinate.NetCore.dll": {
+            "related": ".deps.json"
+          }
+        },
+        "runtime": {
+          "lib/netstandard1.6/GeoCoordinate.NetCore.dll": {
+            "related": ".deps.json"
+          }
+        }
+      },
       "Hangfire/1.8.22": {
         "type": "package",
         "dependencies": {
@@ -450,6 +463,35 @@
           }
         }
       },
+      "Microsoft.Maui.Essentials/10.0.30": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Maui.Graphics": "10.0.30"
+        },
+        "compile": {
+          "lib/net10.0/Microsoft.Maui.Essentials.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/Microsoft.Maui.Essentials.dll": {
+            "related": ".pdb;.xml"
+          }
+        }
+      },
+      "Microsoft.Maui.Graphics/10.0.30": {
+        "type": "package",
+        "compile": {
+          "lib/net10.0/Microsoft.Maui.Graphics.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/Microsoft.Maui.Graphics.dll": {
+            "related": ".pdb;.xml"
+          }
+        }
+      },
       "Microsoft.NETCore.Platforms/1.1.0": {
         "type": "package",
         "compile": {
@@ -713,6 +755,19 @@
         "lib/netstandard2.0/EasyCompressor.LZ4.xml",
         "lib/netstandard2.1/EasyCompressor.LZ4.dll",
         "lib/netstandard2.1/EasyCompressor.LZ4.xml"
+      ]
+    },
+    "GeoCoordinate.NetCore/1.0.0.1": {
+      "sha512": "VrR5MLkh0u2qka79JcQ/GUrgHwGidayCA7nKy2430qYX/JHdrHLgwp1MuBTSsygWs0s2V6GQ0Hp8HUMatHiWFw==",
+      "type": "package",
+      "path": "geocoordinate.netcore/1.0.0.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "geocoordinate.netcore.1.0.0.1.nupkg.sha512",
+        "geocoordinate.netcore.nuspec",
+        "lib/netstandard1.6/GeoCoordinate.NetCore.deps.json",
+        "lib/netstandard1.6/GeoCoordinate.NetCore.dll"
       ]
     },
     "Hangfire/1.8.22": {
@@ -1121,6 +1176,88 @@
         "microsoft.extensions.primitives.nuspec"
       ]
     },
+    "Microsoft.Maui.Essentials/10.0.30": {
+      "sha512": "KCcqDAckbyDbao5etGRR2gck7wj1mhPTnRQSpZS+Q+w+09TU7P8m5HY/evYfU8w4iLkeoDYOkp5xtlAeZ8zd6A==",
+      "type": "package",
+      "path": "microsoft.maui.essentials/10.0.30",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "LICENSE.TXT",
+        "README.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/net10.0-android36.0/Microsoft.Maui.Essentials.aar",
+        "lib/net10.0-android36.0/Microsoft.Maui.Essentials.dll",
+        "lib/net10.0-android36.0/Microsoft.Maui.Essentials.pdb",
+        "lib/net10.0-android36.0/Microsoft.Maui.Essentials.xml",
+        "lib/net10.0-ios26.0/Microsoft.Maui.Essentials.dll",
+        "lib/net10.0-ios26.0/Microsoft.Maui.Essentials.pdb",
+        "lib/net10.0-ios26.0/Microsoft.Maui.Essentials.xml",
+        "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Essentials.dll",
+        "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Essentials.pdb",
+        "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Essentials.xml",
+        "lib/net10.0-windows10.0.19041/Microsoft.Maui.Essentials.dll",
+        "lib/net10.0-windows10.0.19041/Microsoft.Maui.Essentials.pdb",
+        "lib/net10.0-windows10.0.19041/Microsoft.Maui.Essentials.xml",
+        "lib/net10.0-windows10.0.20348/Microsoft.Maui.Essentials.dll",
+        "lib/net10.0-windows10.0.20348/Microsoft.Maui.Essentials.pdb",
+        "lib/net10.0-windows10.0.20348/Microsoft.Maui.Essentials.xml",
+        "lib/net10.0/Microsoft.Maui.Essentials.dll",
+        "lib/net10.0/Microsoft.Maui.Essentials.pdb",
+        "lib/net10.0/Microsoft.Maui.Essentials.xml",
+        "lib/netstandard2.0/Microsoft.Maui.Essentials.dll",
+        "lib/netstandard2.0/Microsoft.Maui.Essentials.pdb",
+        "lib/netstandard2.0/Microsoft.Maui.Essentials.xml",
+        "lib/netstandard2.1/Microsoft.Maui.Essentials.dll",
+        "lib/netstandard2.1/Microsoft.Maui.Essentials.pdb",
+        "lib/netstandard2.1/Microsoft.Maui.Essentials.xml",
+        "microsoft.maui.essentials.10.0.30.nupkg.sha512",
+        "microsoft.maui.essentials.nuspec"
+      ]
+    },
+    "Microsoft.Maui.Graphics/10.0.30": {
+      "sha512": "Q7IBqGcdcQ7tzuPpDgisQ/svWXeJmmNhqjoGYi22vbQLtodJOMsAq6izdZrXi+WQME9Q1GNC4Wqwaq5KqpeTow==",
+      "type": "package",
+      "path": "microsoft.maui.graphics/10.0.30",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "LICENSE.TXT",
+        "README.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/net10.0-android36.0/Microsoft.Maui.Graphics.dll",
+        "lib/net10.0-android36.0/Microsoft.Maui.Graphics.pdb",
+        "lib/net10.0-android36.0/Microsoft.Maui.Graphics.xml",
+        "lib/net10.0-ios26.0/Microsoft.Maui.Graphics.dll",
+        "lib/net10.0-ios26.0/Microsoft.Maui.Graphics.pdb",
+        "lib/net10.0-ios26.0/Microsoft.Maui.Graphics.xml",
+        "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Graphics.dll",
+        "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Graphics.pdb",
+        "lib/net10.0-maccatalyst26.0/Microsoft.Maui.Graphics.xml",
+        "lib/net10.0-macos26.0/Microsoft.Maui.Graphics.dll",
+        "lib/net10.0-macos26.0/Microsoft.Maui.Graphics.pdb",
+        "lib/net10.0-macos26.0/Microsoft.Maui.Graphics.xml",
+        "lib/net10.0-windows10.0.19041/Microsoft.Maui.Graphics.dll",
+        "lib/net10.0-windows10.0.19041/Microsoft.Maui.Graphics.pdb",
+        "lib/net10.0-windows10.0.19041/Microsoft.Maui.Graphics.xml",
+        "lib/net10.0-windows10.0.20348/Microsoft.Maui.Graphics.dll",
+        "lib/net10.0-windows10.0.20348/Microsoft.Maui.Graphics.pdb",
+        "lib/net10.0-windows10.0.20348/Microsoft.Maui.Graphics.xml",
+        "lib/net10.0/Microsoft.Maui.Graphics.dll",
+        "lib/net10.0/Microsoft.Maui.Graphics.pdb",
+        "lib/net10.0/Microsoft.Maui.Graphics.xml",
+        "lib/netstandard2.0/Microsoft.Maui.Graphics.dll",
+        "lib/netstandard2.0/Microsoft.Maui.Graphics.pdb",
+        "lib/netstandard2.0/Microsoft.Maui.Graphics.xml",
+        "lib/netstandard2.1/Microsoft.Maui.Graphics.dll",
+        "lib/netstandard2.1/Microsoft.Maui.Graphics.pdb",
+        "lib/netstandard2.1/Microsoft.Maui.Graphics.xml",
+        "microsoft.maui.graphics.10.0.30.nupkg.sha512",
+        "microsoft.maui.graphics.nuspec"
+      ]
+    },
     "Microsoft.NETCore.Platforms/1.1.0": {
       "sha512": "kz0PEW2lhqygehI/d6XsPCQzD7ff7gUJaVGPVETX611eadGsA3A877GdSlU0LRVMCTH/+P3o2iDTak+S08V2+A==",
       "type": "package",
@@ -1295,10 +1432,12 @@
       "Ceras >= 4.1.7",
       "Data.HashFunction.Blake3 >= 3.1.2",
       "EasyCompressor.LZ4 >= 2.1.0",
+      "GeoCoordinate.NetCore >= 1.0.0.1",
       "Hangfire >= 1.8.22",
       "Ical.Net >= 5.2.0",
       "K4os.Compression.LZ4 >= 1.3.8",
       "Konscious.Security.Cryptography.Argon2 >= 1.3.1",
+      "Microsoft.Maui.Essentials >= 10.0.30",
       "NetAdmin.CsvHelper >= 1.0.0",
       "Newtonsoft.Json >= 13.0.4",
       "Standart.Hash.xxHash >= 4.0.5",
@@ -1377,6 +1516,10 @@
             "target": "Package",
             "version": "[2.1.0, )"
           },
+          "GeoCoordinate.NetCore": {
+            "target": "Package",
+            "version": "[1.0.0.1, )"
+          },
           "Hangfire": {
             "target": "Package",
             "version": "[1.8.22, )"
@@ -1392,6 +1535,10 @@
           "Konscious.Security.Cryptography.Argon2": {
             "target": "Package",
             "version": "[1.3.1, )"
+          },
+          "Microsoft.Maui.Essentials": {
+            "target": "Package",
+            "version": "[10.0.30, )"
           },
           "NetAdmin.CsvHelper": {
             "target": "Package",
