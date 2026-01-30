@@ -7,7 +7,9 @@ using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones
 {
-    //Originally made for music, it's pretty expandable!
+
+
+    //Originally made for music, it's pretty expandable! 
     public class CreatorClass
     {
         public record Creator
@@ -96,15 +98,13 @@ namespace XRUIOS.Barebones
 
                 var newCreator = new Creator(CreatorName, Description, PossiblePFP, Files);
 
-                var saveable = await BinaryConverter.NCObjectToByteArrayAsync<Creator>(newCreator);
-
                 //And now we save
 
                 await DataHandler.JSONDataHandler.CreateJsonFile(CreatorName, directoryPath, new JsonObject());
 
                 var creatorFile = await DataHandler.JSONDataHandler.LoadJsonFile(CreatorName, directoryPath);
 
-                var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<byte[]>>(creatorFile, "Data", saveable, encryptionKey);
+                var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<Creator>(creatorFile, "Data", newCreator, encryptionKey);
 
                 await DataHandler.JSONDataHandler.SaveJson(editedJSON);
 
@@ -129,11 +129,9 @@ namespace XRUIOS.Barebones
 
                 var creatorFile = await DataHandler.JSONDataHandler.LoadJsonFile(CreatorName, directoryPath);
 
-                var CreatorData = (byte[])await DataHandler.JSONDataHandler.GetVariable<List<byte[]>>(creatorFile, "Data", encryptionKey);
+                var CreatorData = (Creator)await DataHandler.JSONDataHandler.GetVariable<Creator>(creatorFile, "Data", encryptionKey);
 
-                var data = (Creator)await BinaryConverter.NCByteArrayToObjectAsync<Creator>(CreatorData);
-
-                return data;
+                return CreatorData;
 
             }
 
@@ -155,11 +153,9 @@ namespace XRUIOS.Barebones
 
                 var creatorFile = await DataHandler.JSONDataHandler.LoadJsonFile(CreatorName, directoryPath);
 
-                var CreatorData = (byte[])await DataHandler.JSONDataHandler.GetVariable<List<byte[]>>(creatorFile, "Data", encryptionKey);
+                var CreatorData = (Creator)await DataHandler.JSONDataHandler.GetVariable<Creator>(creatorFile, "Data", encryptionKey);
 
-                var data = (Creator)await BinaryConverter.NCByteArrayToObjectAsync<Creator>(CreatorData);
-
-                return (data.Name, data.Description);
+                return (CreatorData.Name, CreatorData.Description);
 
             }
 
@@ -181,11 +177,9 @@ namespace XRUIOS.Barebones
 
                 var creatorFile = await DataHandler.JSONDataHandler.LoadJsonFile(CreatorName, directoryPath);
 
-                var CreatorData = (byte[])await DataHandler.JSONDataHandler.GetVariable<List<byte[]>>(creatorFile, "Data", encryptionKey);
+                var CreatorData = (Creator)await DataHandler.JSONDataHandler.GetVariable<Creator>(creatorFile, "Data", encryptionKey);
 
-                var data = (Creator)await BinaryConverter.NCByteArrayToObjectAsync<Creator>(CreatorData);
-
-                return (data.Files);
+                return (CreatorData.Files);
 
             }
 
@@ -207,11 +201,9 @@ namespace XRUIOS.Barebones
 
                 var directoryPath = Path.Combine(DataPath, "Creators", CreatorType);
 
-                var saveable = await BinaryConverter.NCObjectToByteArrayAsync<Creator>(CreatorFile);
+                var CreatorJSON = await DataHandler.JSONDataHandler.LoadJsonFile(CreatorName, directoryPath);
 
-                var creatorFile = await DataHandler.JSONDataHandler.LoadJsonFile(CreatorName, directoryPath);
-
-                var CreatorData = await DataHandler.JSONDataHandler.UpdateJson<List<byte[]>>(creatorFile, "Data", saveable, encryptionKey);
+                var CreatorData = await DataHandler.JSONDataHandler.UpdateJson<Creator>(CreatorJSON, "Data", CreatorFile, encryptionKey);
 
                 await DataHandler.JSONDataHandler.SaveJson(CreatorData);
 
@@ -227,11 +219,9 @@ namespace XRUIOS.Barebones
 
                 var directoryPath = Path.Combine(DataPath, "Creators", CreatorType);
 
-                var saveable = await BinaryConverter.NCObjectToByteArrayAsync<Creator>(CreatorFile);
+                var CreatorJSON = await DataHandler.JSONDataHandler.LoadJsonFile(CreatorName, directoryPath);
 
-                var creatorFile = await DataHandler.JSONDataHandler.LoadJsonFile(CreatorName, directoryPath);
-
-                var CreatorData = await DataHandler.JSONDataHandler.UpdateJson<List<byte[]>>(creatorFile, "Data", saveable, encryptionKey);
+                var CreatorData = await DataHandler.JSONDataHandler.UpdateJson<Creator>(CreatorJSON, "Data", CreatorFile, encryptionKey);
 
                 await DataHandler.JSONDataHandler.SaveJson(CreatorData);
 
@@ -261,9 +251,8 @@ namespace XRUIOS.Barebones
                     }
                 }
 
-                var saveable = await BinaryConverter.NCObjectToByteArrayAsync(creator);
-                var creatorFile = await DataHandler.JSONDataHandler.LoadJsonFile(CreatorName, directoryPath);
-                var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<byte[]>>(creatorFile, "Data", saveable, encryptionKey);
+                var CreatorJSON = await DataHandler.JSONDataHandler.LoadJsonFile(CreatorName, directoryPath);
+                var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<Creator>(CreatorJSON, "Data", creator, encryptionKey);
                 await DataHandler.JSONDataHandler.SaveJson(editedJSON);
             }
         }

@@ -298,6 +298,28 @@
           "lib/net8.0/Ical.Net.dll": {}
         }
       },
+      "IconLib/0.74.3": {
+        "type": "package",
+        "compile": {
+          "lib/net40/IconLib.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net40/IconLib.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Interop.IWshRuntimeLibrary/1.0.1": {
+        "type": "package",
+        "compile": {
+          "lib/net45/Interop.IWshRuntimeLibrary.dll": {}
+        },
+        "runtime": {
+          "lib/net45/Interop.IWshRuntimeLibrary.dll": {}
+        }
+      },
       "K4os.Compression.LZ4/1.3.8": {
         "type": "package",
         "compile": {
@@ -370,6 +392,19 @@
           }
         }
       },
+      "Microsoft.DotNet.PlatformAbstractions/3.1.6": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/Microsoft.DotNet.PlatformAbstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/Microsoft.DotNet.PlatformAbstractions.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Microsoft.Extensions.Configuration.Abstractions/3.0.0": {
         "type": "package",
         "dependencies": {
@@ -395,6 +430,22 @@
         },
         "runtime": {
           "lib/net9.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net8.0/_._": {}
+        }
+      },
+      "Microsoft.Extensions.DependencyModel/9.0.9": {
+        "type": "package",
+        "compile": {
+          "lib/net9.0/Microsoft.Extensions.DependencyModel.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net9.0/Microsoft.Extensions.DependencyModel.dll": {
             "related": ".xml"
           }
         },
@@ -501,6 +552,28 @@
           "lib/netstandard1.0/_._": {}
         }
       },
+      "Microsoft.Win32.SystemEvents/10.0.2": {
+        "type": "package",
+        "compile": {
+          "lib/net10.0/Microsoft.Win32.SystemEvents.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/Microsoft.Win32.SystemEvents.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net8.0/_._": {}
+        },
+        "runtimeTargets": {
+          "runtimes/win/lib/net10.0/Microsoft.Win32.SystemEvents.dll": {
+            "assetType": "runtime",
+            "rid": "win"
+          }
+        }
+      },
       "NetAdmin.CsvHelper/1.0.0": {
         "type": "package",
         "compile": {
@@ -546,6 +619,53 @@
           }
         }
       },
+      "Silk.NET.Core/2.23.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.DotNet.PlatformAbstractions": "3.1.6",
+          "Microsoft.Extensions.DependencyModel": "9.0.9"
+        },
+        "compile": {
+          "lib/net6.0/Silk.NET.Core.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net6.0/Silk.NET.Core.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Silk.NET.Maths/2.23.0": {
+        "type": "package",
+        "compile": {
+          "lib/net5.0/Silk.NET.Maths.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net5.0/Silk.NET.Maths.dll": {
+            "related": ".xml"
+          }
+        }
+      },
+      "Silk.NET.OpenXR/2.23.0": {
+        "type": "package",
+        "dependencies": {
+          "Silk.NET.Core": "2.23.0",
+          "Silk.NET.Maths": "2.23.0"
+        },
+        "compile": {
+          "lib/net5.0/Silk.NET.OpenXR.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net5.0/Silk.NET.OpenXR.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Standart.Hash.xxHash/4.0.5": {
         "type": "package",
         "compile": {
@@ -553,6 +673,22 @@
         },
         "runtime": {
           "lib/net6.0/Standart.Hash.xxHash.dll": {}
+        }
+      },
+      "System.CodeDom/10.0.2": {
+        "type": "package",
+        "compile": {
+          "lib/net10.0/System.CodeDom.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/System.CodeDom.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net8.0/_._": {}
         }
       },
       "System.Data.HashFunction.Interfaces/2.0.0": {
@@ -568,6 +704,62 @@
         "runtime": {
           "lib/netstandard1.1/System.Data.HashFunction.Interfaces.dll": {
             "related": ".xml"
+          }
+        }
+      },
+      "System.Drawing.Common/10.0.2": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Win32.SystemEvents": "10.0.2"
+        },
+        "compile": {
+          "lib/net10.0/System.Drawing.Common.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0/System.Private.Windows.Core.dll": {
+            "related": ".xml"
+          },
+          "lib/net10.0/System.Private.Windows.GdiPlus.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/System.Drawing.Common.dll": {
+            "related": ".pdb;.xml"
+          },
+          "lib/net10.0/System.Private.Windows.Core.dll": {
+            "related": ".xml"
+          },
+          "lib/net10.0/System.Private.Windows.GdiPlus.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net8.0/_._": {}
+        }
+      },
+      "System.Management/10.0.2": {
+        "type": "package",
+        "dependencies": {
+          "System.CodeDom": "10.0.2"
+        },
+        "compile": {
+          "lib/net10.0/System.Management.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net10.0/System.Management.dll": {
+            "related": ".xml"
+          }
+        },
+        "build": {
+          "buildTransitive/net8.0/_._": {}
+        },
+        "runtimeTargets": {
+          "runtimes/win/lib/net10.0/System.Management.dll": {
+            "assetType": "runtime",
+            "rid": "win"
           }
         }
       },
@@ -972,6 +1164,31 @@
         "lib/netstandard2.1/Ical.Net.dll"
       ]
     },
+    "IconLib/0.74.3": {
+      "sha512": "9N/qudfqMAcBhbk21UyTKIPi0CyRbZUeI0zenTxe4Lf9QX0svE05mFUtIeRhZabLSzHnwRo1u5moSOHaI6iYUg==",
+      "type": "package",
+      "path": "iconlib/0.74.3",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "iconlib.0.74.3.nupkg.sha512",
+        "iconlib.nuspec",
+        "lib/net40/IconLib.dll",
+        "lib/net40/IconLib.xml"
+      ]
+    },
+    "Interop.IWshRuntimeLibrary/1.0.1": {
+      "sha512": "wUgwJ2GPD7ovBqDM2x426QJxw6W6FFQPSPbsFrl7H6CHrzTiooL/0mN5er/7D7aYLye0KX3wHwwqy3QRRFbMzg==",
+      "type": "package",
+      "path": "interop.iwshruntimelibrary/1.0.1",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "interop.iwshruntimelibrary.1.0.1.nupkg.sha512",
+        "interop.iwshruntimelibrary.nuspec",
+        "lib/net45/Interop.IWshRuntimeLibrary.dll"
+      ]
+    },
     "K4os.Compression.LZ4/1.3.8": {
       "sha512": "LhwlPa7c1zs1OV2XadMtAWdImjLIsqFJPoRcIWAadSRn0Ri1DepK65UbWLPmt4riLqx2d40xjXRk0ogpqNtK7g==",
       "type": "package",
@@ -1073,6 +1290,26 @@
         "lib/netstandard1.3/Konscious.Security.Cryptography.Blake2.xml"
       ]
     },
+    "Microsoft.DotNet.PlatformAbstractions/3.1.6": {
+      "sha512": "jek4XYaQ/PGUwDKKhwR8K47Uh1189PFzMeLqO83mXrXQVIpARZCcfuDedH50YDTepBkfijCZN5U/vZi++erxtg==",
+      "type": "package",
+      "path": "microsoft.dotnet.platformabstractions/3.1.6",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "LICENSE.TXT",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/net45/Microsoft.DotNet.PlatformAbstractions.dll",
+        "lib/net45/Microsoft.DotNet.PlatformAbstractions.xml",
+        "lib/netstandard1.3/Microsoft.DotNet.PlatformAbstractions.dll",
+        "lib/netstandard1.3/Microsoft.DotNet.PlatformAbstractions.xml",
+        "lib/netstandard2.0/Microsoft.DotNet.PlatformAbstractions.dll",
+        "lib/netstandard2.0/Microsoft.DotNet.PlatformAbstractions.xml",
+        "microsoft.dotnet.platformabstractions.3.1.6.nupkg.sha512",
+        "microsoft.dotnet.platformabstractions.nuspec"
+      ]
+    },
     "Microsoft.Extensions.Configuration.Abstractions/3.0.0": {
       "sha512": "Lge/PbXC53jI1MF2J92X5EZOeKV8Q/rlB1aV3H9I/ZTDyQGOyBcL03IAvnviWpHKj43BDkNy6kU2KKoh8kAS0g==",
       "type": "package",
@@ -1115,6 +1352,34 @@
         "lib/netstandard2.1/Microsoft.Extensions.DependencyInjection.Abstractions.xml",
         "microsoft.extensions.dependencyinjection.abstractions.9.0.4.nupkg.sha512",
         "microsoft.extensions.dependencyinjection.abstractions.nuspec",
+        "useSharedDesignerContext.txt"
+      ]
+    },
+    "Microsoft.Extensions.DependencyModel/9.0.9": {
+      "sha512": "fNGvKct2De8ghm0Bpfq0iWthtzIWabgOTi+gJhNOPhNJIowXNEUE2eZNW/zNCzrHVA3PXg2yZ+3cWZndC2IqYA==",
+      "type": "package",
+      "path": "microsoft.extensions.dependencymodel/9.0.9",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "LICENSE.TXT",
+        "PACKAGE.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "buildTransitive/net461/Microsoft.Extensions.DependencyModel.targets",
+        "buildTransitive/net462/_._",
+        "buildTransitive/net8.0/_._",
+        "buildTransitive/netcoreapp2.0/Microsoft.Extensions.DependencyModel.targets",
+        "lib/net462/Microsoft.Extensions.DependencyModel.dll",
+        "lib/net462/Microsoft.Extensions.DependencyModel.xml",
+        "lib/net8.0/Microsoft.Extensions.DependencyModel.dll",
+        "lib/net8.0/Microsoft.Extensions.DependencyModel.xml",
+        "lib/net9.0/Microsoft.Extensions.DependencyModel.dll",
+        "lib/net9.0/Microsoft.Extensions.DependencyModel.xml",
+        "lib/netstandard2.0/Microsoft.Extensions.DependencyModel.dll",
+        "lib/netstandard2.0/Microsoft.Extensions.DependencyModel.xml",
+        "microsoft.extensions.dependencymodel.9.0.9.nupkg.sha512",
+        "microsoft.extensions.dependencymodel.nuspec",
         "useSharedDesignerContext.txt"
       ]
     },
@@ -1273,6 +1538,41 @@
         "runtime.json"
       ]
     },
+    "Microsoft.Win32.SystemEvents/10.0.2": {
+      "sha512": "1G4BdeFwc8E95MpwtR7pO4rEh2YCG/o5gqcOszdQRGrWX1ayHTZtho3xPuYZTbBxKb/3kQHjL3b4nQeNGvbM9g==",
+      "type": "package",
+      "path": "microsoft.win32.systemevents/10.0.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "PACKAGE.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "buildTransitive/net461/Microsoft.Win32.SystemEvents.targets",
+        "buildTransitive/net462/_._",
+        "buildTransitive/net8.0/_._",
+        "buildTransitive/netcoreapp2.0/Microsoft.Win32.SystemEvents.targets",
+        "lib/net10.0/Microsoft.Win32.SystemEvents.dll",
+        "lib/net10.0/Microsoft.Win32.SystemEvents.xml",
+        "lib/net462/Microsoft.Win32.SystemEvents.dll",
+        "lib/net462/Microsoft.Win32.SystemEvents.xml",
+        "lib/net8.0/Microsoft.Win32.SystemEvents.dll",
+        "lib/net8.0/Microsoft.Win32.SystemEvents.xml",
+        "lib/net9.0/Microsoft.Win32.SystemEvents.dll",
+        "lib/net9.0/Microsoft.Win32.SystemEvents.xml",
+        "lib/netstandard2.0/Microsoft.Win32.SystemEvents.dll",
+        "lib/netstandard2.0/Microsoft.Win32.SystemEvents.xml",
+        "microsoft.win32.systemevents.10.0.2.nupkg.sha512",
+        "microsoft.win32.systemevents.nuspec",
+        "runtimes/win/lib/net10.0/Microsoft.Win32.SystemEvents.dll",
+        "runtimes/win/lib/net10.0/Microsoft.Win32.SystemEvents.xml",
+        "runtimes/win/lib/net8.0/Microsoft.Win32.SystemEvents.dll",
+        "runtimes/win/lib/net8.0/Microsoft.Win32.SystemEvents.xml",
+        "runtimes/win/lib/net9.0/Microsoft.Win32.SystemEvents.dll",
+        "runtimes/win/lib/net9.0/Microsoft.Win32.SystemEvents.xml",
+        "useSharedDesignerContext.txt"
+      ]
+    },
     "NetAdmin.CsvHelper/1.0.0": {
       "sha512": "c/j2i8jT/ZoxwhIX4T7bhNObQOYrS+kSLznsC84I12kRJ9iEGyoEKxVuSgtB6Tq9Vr18AP2AUqa+XXGqOTduMg==",
       "type": "package",
@@ -1365,6 +1665,75 @@
         "nodatime.nuspec"
       ]
     },
+    "Silk.NET.Core/2.23.0": {
+      "sha512": "D7AT/nnwlB+4RZ84XY8QNGBZMJI5z9l4CSSETIJ1wCfRJzRt/341y3MRZ4HbnFz4r/IGaWOEZr86iE+0/65yyQ==",
+      "type": "package",
+      "path": "silk.net.core/2.23.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "lib/net5.0/Silk.NET.Core.dll",
+        "lib/net5.0/Silk.NET.Core.xml",
+        "lib/net6.0/Silk.NET.Core.dll",
+        "lib/net6.0/Silk.NET.Core.xml",
+        "lib/netcoreapp3.1/Silk.NET.Core.dll",
+        "lib/netcoreapp3.1/Silk.NET.Core.xml",
+        "lib/netstandard2.0/Silk.NET.Core.dll",
+        "lib/netstandard2.0/Silk.NET.Core.xml",
+        "lib/netstandard2.1/Silk.NET.Core.dll",
+        "lib/netstandard2.1/Silk.NET.Core.xml",
+        "silk.net.core.2.23.0.nupkg.sha512",
+        "silk.net.core.nuspec",
+        "silkdotnet_v3.png"
+      ]
+    },
+    "Silk.NET.Maths/2.23.0": {
+      "sha512": "r8PdIVzME8EH0qAgbmRPO87I4GfgR2j8TofT7EMuRJDf1QluoQwnVypDoFJjQ2ZBSRsGYk5unYxxogI05Ogsmw==",
+      "type": "package",
+      "path": "silk.net.maths/2.23.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "lib/net5.0/Silk.NET.Maths.dll",
+        "lib/net5.0/Silk.NET.Maths.xml",
+        "lib/net7.0-android33.0/Silk.NET.Maths.dll",
+        "lib/net7.0-android33.0/Silk.NET.Maths.xml",
+        "lib/net7.0-ios16.1/Silk.NET.Maths.dll",
+        "lib/net7.0-ios16.1/Silk.NET.Maths.xml",
+        "lib/netcoreapp3.1/Silk.NET.Maths.dll",
+        "lib/netcoreapp3.1/Silk.NET.Maths.xml",
+        "lib/netstandard2.0/Silk.NET.Maths.dll",
+        "lib/netstandard2.0/Silk.NET.Maths.xml",
+        "lib/netstandard2.1/Silk.NET.Maths.dll",
+        "lib/netstandard2.1/Silk.NET.Maths.xml",
+        "silk.net.maths.2.23.0.nupkg.sha512",
+        "silk.net.maths.nuspec",
+        "silkdotnet_v3.png"
+      ]
+    },
+    "Silk.NET.OpenXR/2.23.0": {
+      "sha512": "pKU+12sIosw1+lTlYam8rpgPgnpCUQKEJI3UO6t2RoZ3Vqc7UgS0bL79qd0aPIU1FM7ilxOYC7pd7B92bSLOeQ==",
+      "type": "package",
+      "path": "silk.net.openxr/2.23.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "README.md",
+        "lib/net5.0/Silk.NET.OpenXR.dll",
+        "lib/net5.0/Silk.NET.OpenXR.xml",
+        "lib/netcoreapp3.1/Silk.NET.OpenXR.dll",
+        "lib/netcoreapp3.1/Silk.NET.OpenXR.xml",
+        "lib/netstandard2.0/Silk.NET.OpenXR.dll",
+        "lib/netstandard2.0/Silk.NET.OpenXR.xml",
+        "lib/netstandard2.1/Silk.NET.OpenXR.dll",
+        "lib/netstandard2.1/Silk.NET.OpenXR.xml",
+        "silk.net.openxr.2.23.0.nupkg.sha512",
+        "silk.net.openxr.nuspec",
+        "silkdotnet_v3.png"
+      ]
+    },
     "Standart.Hash.xxHash/4.0.5": {
       "sha512": "2QC9zDPFT/SOnP7iFdK3AwakEcJ7D3zDoU7IwIAOyEhY4WQ2GQBvLqZ29/R1BSujPNtGHMITmVW1d+VjvLg6lg==",
       "type": "package",
@@ -1376,6 +1745,35 @@
         "lib/net6.0/Standart.Hash.xxHash.dll",
         "standart.hash.xxhash.4.0.5.nupkg.sha512",
         "standart.hash.xxhash.nuspec"
+      ]
+    },
+    "System.CodeDom/10.0.2": {
+      "sha512": "eih1MnL4tnSjHUhzae0dmpu50Sm0s54faHZc8yhzYfmubAubkBIIulYYN28fasD1m41mhl6Cenhs9/F0aLv3FA==",
+      "type": "package",
+      "path": "system.codedom/10.0.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "PACKAGE.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "buildTransitive/net461/System.CodeDom.targets",
+        "buildTransitive/net462/_._",
+        "buildTransitive/net8.0/_._",
+        "buildTransitive/netcoreapp2.0/System.CodeDom.targets",
+        "lib/net10.0/System.CodeDom.dll",
+        "lib/net10.0/System.CodeDom.xml",
+        "lib/net462/System.CodeDom.dll",
+        "lib/net462/System.CodeDom.xml",
+        "lib/net8.0/System.CodeDom.dll",
+        "lib/net8.0/System.CodeDom.xml",
+        "lib/net9.0/System.CodeDom.dll",
+        "lib/net9.0/System.CodeDom.xml",
+        "lib/netstandard2.0/System.CodeDom.dll",
+        "lib/netstandard2.0/System.CodeDom.xml",
+        "system.codedom.10.0.2.nupkg.sha512",
+        "system.codedom.nuspec",
+        "useSharedDesignerContext.txt"
       ]
     },
     "System.Data.HashFunction.Interfaces/2.0.0": {
@@ -1391,6 +1789,91 @@
         "lib/netstandard1.1/System.Data.HashFunction.Interfaces.xml",
         "system.data.hashfunction.interfaces.2.0.0.nupkg.sha512",
         "system.data.hashfunction.interfaces.nuspec"
+      ]
+    },
+    "System.Drawing.Common/10.0.2": {
+      "sha512": "nCq8jeGD4vWaUjX3nGaDMKYqfFPposw2f4KCFnuY5Rt3NhK6zMZ/c0a52a3TZK/nnkCJfyQMwb+POKwAnZexZw==",
+      "type": "package",
+      "path": "system.drawing.common/10.0.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "LICENSE.TXT",
+        "PACKAGE.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "buildTransitive/net461/System.Drawing.Common.targets",
+        "buildTransitive/net462/_._",
+        "buildTransitive/net8.0/_._",
+        "buildTransitive/netcoreapp2.0/System.Drawing.Common.targets",
+        "lib/MonoAndroid10/_._",
+        "lib/MonoTouch10/_._",
+        "lib/net10.0/System.Drawing.Common.dll",
+        "lib/net10.0/System.Drawing.Common.pdb",
+        "lib/net10.0/System.Drawing.Common.xml",
+        "lib/net10.0/System.Private.Windows.Core.dll",
+        "lib/net10.0/System.Private.Windows.Core.xml",
+        "lib/net10.0/System.Private.Windows.GdiPlus.dll",
+        "lib/net10.0/System.Private.Windows.GdiPlus.xml",
+        "lib/net462/System.Drawing.Common.dll",
+        "lib/net462/System.Drawing.Common.pdb",
+        "lib/net462/System.Drawing.Common.xml",
+        "lib/net8.0/System.Drawing.Common.dll",
+        "lib/net8.0/System.Drawing.Common.pdb",
+        "lib/net8.0/System.Drawing.Common.xml",
+        "lib/net8.0/System.Private.Windows.Core.dll",
+        "lib/net8.0/System.Private.Windows.Core.xml",
+        "lib/net8.0/System.Private.Windows.GdiPlus.dll",
+        "lib/net8.0/System.Private.Windows.GdiPlus.xml",
+        "lib/net9.0/System.Drawing.Common.dll",
+        "lib/net9.0/System.Drawing.Common.pdb",
+        "lib/net9.0/System.Drawing.Common.xml",
+        "lib/net9.0/System.Private.Windows.Core.dll",
+        "lib/net9.0/System.Private.Windows.Core.xml",
+        "lib/net9.0/System.Private.Windows.GdiPlus.dll",
+        "lib/net9.0/System.Private.Windows.GdiPlus.xml",
+        "lib/netstandard2.0/System.Drawing.Common.dll",
+        "lib/netstandard2.0/System.Drawing.Common.pdb",
+        "lib/netstandard2.0/System.Drawing.Common.xml",
+        "lib/xamarinios10/_._",
+        "lib/xamarinmac20/_._",
+        "lib/xamarintvos10/_._",
+        "lib/xamarinwatchos10/_._",
+        "system.drawing.common.10.0.2.nupkg.sha512",
+        "system.drawing.common.nuspec",
+        "useSharedDesignerContext.txt"
+      ]
+    },
+    "System.Management/10.0.2": {
+      "sha512": "eFftuy3i844lVKCb4lJvvjKfcvPVcW8KrAdSaIOcRL42/Fisj46hwUs8Bky+4avzMe5Snm5t7aSayOI1mybYXg==",
+      "type": "package",
+      "path": "system.management/10.0.2",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "PACKAGE.md",
+        "THIRD-PARTY-NOTICES.TXT",
+        "buildTransitive/net8.0/_._",
+        "buildTransitive/netcoreapp2.0/System.Management.targets",
+        "lib/net10.0/System.Management.dll",
+        "lib/net10.0/System.Management.xml",
+        "lib/net462/_._",
+        "lib/net8.0/System.Management.dll",
+        "lib/net8.0/System.Management.xml",
+        "lib/net9.0/System.Management.dll",
+        "lib/net9.0/System.Management.xml",
+        "lib/netstandard2.0/System.Management.dll",
+        "lib/netstandard2.0/System.Management.xml",
+        "runtimes/win/lib/net10.0/System.Management.dll",
+        "runtimes/win/lib/net10.0/System.Management.xml",
+        "runtimes/win/lib/net8.0/System.Management.dll",
+        "runtimes/win/lib/net8.0/System.Management.xml",
+        "runtimes/win/lib/net9.0/System.Management.dll",
+        "runtimes/win/lib/net9.0/System.Management.xml",
+        "system.management.10.0.2.nupkg.sha512",
+        "system.management.nuspec",
+        "useSharedDesignerContext.txt"
       ]
     },
     "Ude.NetStandard/1.2.0": {
@@ -1435,13 +1918,18 @@
       "GeoCoordinate.NetCore >= 1.0.0.1",
       "Hangfire >= 1.8.22",
       "Ical.Net >= 5.2.0",
+      "IconLib >= 0.74.3",
+      "Interop.IWshRuntimeLibrary >= 1.0.1",
       "K4os.Compression.LZ4 >= 1.3.8",
       "Konscious.Security.Cryptography.Argon2 >= 1.3.1",
       "Microsoft.Maui.Essentials >= 10.0.30",
       "NetAdmin.CsvHelper >= 1.0.0",
       "Newtonsoft.Json >= 13.0.4",
+      "Silk.NET.OpenXR >= 2.23.0",
       "Standart.Hash.xxHash >= 4.0.5",
       "System.Data.HashFunction.Interfaces >= 2.0.0",
+      "System.Drawing.Common >= 10.0.2",
+      "System.Management >= 10.0.2",
       "z440.atl.core >= 7.10.0"
     ]
   },
@@ -1528,6 +2016,14 @@
             "target": "Package",
             "version": "[5.2.0, )"
           },
+          "IconLib": {
+            "target": "Package",
+            "version": "[0.74.3, )"
+          },
+          "Interop.IWshRuntimeLibrary": {
+            "target": "Package",
+            "version": "[1.0.1, )"
+          },
           "K4os.Compression.LZ4": {
             "target": "Package",
             "version": "[1.3.8, )"
@@ -1548,6 +2044,10 @@
             "target": "Package",
             "version": "[13.0.4, )"
           },
+          "Silk.NET.OpenXR": {
+            "target": "Package",
+            "version": "[2.23.0, )"
+          },
           "Standart.Hash.xxHash": {
             "target": "Package",
             "version": "[4.0.5, )"
@@ -1555,6 +2055,14 @@
           "System.Data.HashFunction.Interfaces": {
             "target": "Package",
             "version": "[2.0.0, )"
+          },
+          "System.Drawing.Common": {
+            "target": "Package",
+            "version": "[10.0.2, )"
+          },
+          "System.Management": {
+            "target": "Package",
+            "version": "[10.0.2, )"
           },
           "z440.atl.core": {
             "target": "Package",
@@ -1854,5 +2362,27 @@
         }
       }
     }
-  }
+  },
+  "logs": [
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'IconLib 0.74.3' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net10.0'. This package may not be fully compatible with your project.",
+      "libraryId": "IconLib",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    },
+    {
+      "code": "NU1701",
+      "level": "Warning",
+      "warningLevel": 1,
+      "message": "Package 'Interop.IWshRuntimeLibrary 1.0.1' was restored using '.NETFramework,Version=v4.6.1, .NETFramework,Version=v4.6.2, .NETFramework,Version=v4.7, .NETFramework,Version=v4.7.1, .NETFramework,Version=v4.7.2, .NETFramework,Version=v4.8, .NETFramework,Version=v4.8.1' instead of the project target framework 'net10.0'. This package may not be fully compatible with your project.",
+      "libraryId": "Interop.IWshRuntimeLibrary",
+      "targetGraphs": [
+        "net10.0"
+      ]
+    }
+  ]
 }

@@ -34,6 +34,8 @@ namespace XRUIOS.Barebones
                 IsEnabled = isEnabled;
             }
         }
+
+   
         public static ObservableCollection<Alarm> Alarms = new ObservableCollection<Alarm>();
 
         //C
@@ -45,13 +47,11 @@ namespace XRUIOS.Barebones
             var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
 
             var alarmsFile = await JSONDataHandler.LoadJsonFile("Alarms", directoryPath);
-            var alarmBytes = (byte[])await JSONDataHandler.GetVariable<byte[]>(alarmsFile, "Data", encryptionKey);
+            var alarms = (ObservableCollection<Alarm>) await JSONDataHandler.GetVariable<ObservableCollection<Alarm>>(alarmsFile, "Data", encryptionKey);
 
-            var alarms = (ObservableCollection<Alarm>)await BinaryConverter.NCByteArrayToObjectAsync<ObservableCollection<Alarm>>(alarmBytes);
             alarms.Add(newAlarm);
 
-            var updatedAlarmBytes = await BinaryConverter.NCObjectToByteArrayAsync(alarms);
-            var editedJSON = await JSONDataHandler.UpdateJson<byte[]>(alarmsFile, "Data", updatedAlarmBytes, encryptionKey);
+            var editedJSON = await JSONDataHandler.UpdateJson<ObservableCollection<Alarm>>(alarmsFile, "Data", alarms, encryptionKey);
 
             await JSONDataHandler.SaveJson(editedJSON);
 
@@ -65,9 +65,7 @@ namespace XRUIOS.Barebones
             var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
 
             var alarmsFile = await JSONDataHandler.LoadJsonFile("Alarms", directoryPath);
-            var alarmBytes = (byte[])await JSONDataHandler.GetVariable<byte[]>(alarmsFile, "Data", encryptionKey);
-
-            var alarms = (ObservableCollection<Alarm>)await BinaryConverter.NCByteArrayToObjectAsync<ObservableCollection<Alarm>>(alarmBytes);
+            var alarms = (ObservableCollection<Alarm>)await JSONDataHandler.GetVariable<ObservableCollection<Alarm>>(alarmsFile, "Data", encryptionKey);
             Alarms = alarms;
 
             AlarmScheduler.ScheduleAllAlarms();
@@ -90,17 +88,14 @@ namespace XRUIOS.Barebones
             var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
 
             var alarmsFile = await JSONDataHandler.LoadJsonFile("Alarms", directoryPath);
-            var alarmBytes = (byte[])await JSONDataHandler.GetVariable<byte[]>(alarmsFile, "Data", encryptionKey);
-
-            var alarms = (ObservableCollection<Alarm>)await BinaryConverter.NCByteArrayToObjectAsync<ObservableCollection<Alarm>>(alarmBytes);
+            var alarms = (ObservableCollection<Alarm>)await JSONDataHandler.GetVariable<ObservableCollection<Alarm>>(alarmsFile, "Data", encryptionKey);
 
             // Replace the old alarm object with the updated one
             var index = alarms.IndexOf(alarms.First(a => a.AlarmName == existingAlarm.AlarmName && a.AlarmTime == existingAlarm.AlarmTime));
             if (index >= 0)
                 alarms[index] = existingAlarm;
 
-            var updatedAlarmBytes = await BinaryConverter.NCObjectToByteArrayAsync(alarms);
-            var editedJSON = await JSONDataHandler.UpdateJson<byte[]>(alarmsFile, "Data", updatedAlarmBytes, encryptionKey);
+            var editedJSON = await JSONDataHandler.UpdateJson<ObservableCollection<Alarm>>(alarmsFile, "Data", alarms, encryptionKey);
             await JSONDataHandler.SaveJson(editedJSON);
 
             // Reschedule the updated alarm
@@ -123,14 +118,11 @@ namespace XRUIOS.Barebones
             var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
 
             var alarmsFile = await JSONDataHandler.LoadJsonFile("Alarms", directoryPath);
-            var alarmBytes = (byte[])await JSONDataHandler.GetVariable<byte[]>(alarmsFile, "Data", encryptionKey);
-
-            var alarms = (ObservableCollection<Alarm>)await BinaryConverter.NCByteArrayToObjectAsync<ObservableCollection<Alarm>>(alarmBytes);
+            var alarms = (ObservableCollection<Alarm>)await JSONDataHandler.GetVariable<ObservableCollection<Alarm>>(alarmsFile, "Data", encryptionKey);
 
             alarms.Remove(alarm);
 
-            var updatedAlarmBytes = await BinaryConverter.NCObjectToByteArrayAsync(alarms);
-            var editedJSON = await JSONDataHandler.UpdateJson<byte[]>(alarmsFile, "Data", updatedAlarmBytes, encryptionKey);
+            var editedJSON = await JSONDataHandler.UpdateJson<ObservableCollection<Alarm>>(alarmsFile, "Data", alarm, encryptionKey);
 
             await JSONDataHandler.SaveJson(editedJSON);
         }

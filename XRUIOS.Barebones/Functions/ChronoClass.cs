@@ -77,9 +77,7 @@ namespace XRUIOS.Barebones
 
                 var loadedJSON = await DataHandler.JSONDataHandler.LoadJsonFile("Chrono", directoryPath);
 
-                var DateData = (byte[])await BinaryConverter.NCObjectToByteArrayAsync<DateData>(currentDate);
-
-                var updatedJson = await DataHandler.JSONDataHandler.UpdateJson<byte[]>(loadedJSON, "Data", DateData, encryptionKey);
+                var updatedJson = await DataHandler.JSONDataHandler.UpdateJson<DateData>(loadedJSON, "Data", currentDate, encryptionKey);
 
                 await DataHandler.JSONDataHandler.SaveJson(updatedJson);
 
@@ -93,9 +91,7 @@ namespace XRUIOS.Barebones
 
                 var loadedJSON = await DataHandler.JSONDataHandler.LoadJsonFile("Chrono", directoryPath);
 
-                var dataBytes = (byte[])await DataHandler.JSONDataHandler.GetVariable<byte[]>(loadedJSON, "Data", encryptionKey);
-
-                var DateData = (DateData)await BinaryConverter.NCByteArrayToObjectAsync<DateData>(dataBytes);
+                var DateData = (DateData)await DataHandler.JSONDataHandler.GetVariable<DateData>(loadedJSON, "Data", encryptionKey);
 
                 currentDate = DateData;
 
@@ -219,7 +215,7 @@ namespace XRUIOS.Barebones
 
             //S 
 
-            public static async void SetDate(ShortDate shortDateFormat, LongDate longDateFormat)
+            public static async Task SetDate(ShortDate shortDateFormat, LongDate longDateFormat)
             {
 
                 currentDate.ShortDateFormat = shortDateFormat;
@@ -313,7 +309,7 @@ namespace XRUIOS.Barebones
             }
 
             //S
-            public static async void SetTime(ShortTime shortTimeFormat, LongTime longTimeFormat)
+            public static async Task SetTime(ShortTime shortTimeFormat, LongTime longTimeFormat)
             {
 
                 currentDate.ShortTimeFormat = shortTimeFormat;

@@ -1,225 +1,185 @@
 ﻿using Microsoft.VisualBasic;
+using Org.BouncyCastle.Asn1.X509;
 using Pariah_Cybersecurity;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using static Pariah_Cybersecurity.DataHandler;
+using static Pariah_Cybersecurity.DataHandler.DataRequest;
 using static XRUIOS.Barebones.VolumeClass;
+using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones.Functions
 {
-    public static class mainVolume
+    public static class VolumeClass
     {
 
+        //AudioGroupClass deleted, this is pretty much that but better tbh
+        //Remember we use te master volume in SoundEQ as a main volume switch!
 
-
-        static string UserSoundEQDBPath = "caca";
-
-        public static List<SoundEQClass> GetSoundEQDB()
+        public record VolumeSetting
         {
+            public string VolumeSettingName;
+            public Dictionary<string, int> Volumes;
+
+            public VolumeSetting() { }
+
+            public VolumeSetting(string volumeSettingName, Dictionary<string, int> volumes)
+            {
+                VolumeSettingName = volumeSettingName;
+                Volumes = volumes;
+            }
+        }
+
+
+
+        //Volumes are Dictionary<string, Dictionary<string, int>>
+        //AKA Dictionary<Default, Dictionary<11234:Renderer:Calendar, 50>>
+        //In the string, we format it as (MachineID:OSStyle:AppName OR AppID)
+
+        internal static ObservableProperty<VolumeSetting> VolumeSettings;
+
+        //CurrentSoundSetting (Get, Set)
+        public static async Task<VolumeSetting> GetCurrentVolumeSettings()
+        {
+            return VolumeSettings;
+        }
+
+        public static async Task SetCurrentVolumeSettings(VolumeSetting soundSetting)
+        {
+            VolumeSettings.Set(soundSetting);
+        }
+
+        //Volume Settings (CRUD)
+        //C
+        public static async Task AddVolumeSettings(VolumeSetting VolumeMixingsata)
+        {
+            var directoryPath = Path.Combine(DataPath, "VolumeMixings");
 
             //Get the JSON File holding the MusicDirectory object for the user
-            var FileWithSoundEQDB = UniversalSave.Load(UserSoundEQDBPath, DataFormat.JSON);
+            var FileWithVolumeSettingDB = await JSONDataHandler.LoadJsonFile(directoryPath, "VolumeMixings");
+            var loaded = (List<VolumeSetting>)await JSONDataHandler.GetVariable<List<VolumeSetting>>(FileWithVolumeSettingDB, "VolumeMixings", encryptionKey);
 
-            //This file has a lot of things in it, so we are getting the variable called MusicDirectory, aka the object we are looking for
-            List<SoundEQClass> target = (List<SoundEQClass>)FileWithSoundEQDB.Get("SoundEQDB");
-
-            List<SoundEQClass> ourlist = new List<SoundEQClass>();
-
-            foreach (SoundEQClass soundEQ in target)
+            if (loaded.Any(d => d.GetHashCode() == VolumeMixingsata.GetHashCode()))
             {
-                ourlist.Add(DecryptSoundEQ(soundEQ));
+                throw new InvalidOperationException("This already exists.");
             }
 
+            loaded.Add(VolumeMixingsata);
 
-            return ourlist;
-        }
+            var updatedJSON = await JSONDataHandler.UpdateJson<List<VolumeSetting>>(FileWithVolumeSettingDB, "VolumeMixings", loaded, encryptionKey);
 
-        public static void DeleteFromSoundEQDB(string DBName)
-        {
-
-            var ourdb = GetSoundEQDB();
-
-
-            bool itemexists = false;
-            int round = -1;
-            foreach (SoundEQClass item in ourdb)
-            {
-                round = round + 1;
-                if (item.EQName == DBName)
-                {
-                    itemexists = true;
-                    break;
-                }
-            }
-
-            if (itemexists == true)
-            {
-                ourdb.RemoveAt(round);
-
-                var returnlist = new List<SoundEQClass>();
-
-                foreach (SoundEQClass item in ourdb)
-                {
-                    returnlist.Add(new SoundEQ(item, UserPassword));
-                }
-
-                var FileWithSoundEQDB = UniversalSave.Load(UserSoundEQDBPath, DataFormat.JSON);
-
-                FileWithSoundEQDB.Set("MusicQueue", returnlist);
-
-                UniversalSave.Save(UserSoundEQDBPath, FileWithSoundEQDB);
-            }
-
+            await JSONDataHandler.SaveJson(updatedJSON);
 
         }
 
-        public static void UpdateFromSoundEQDB(string DBName, SoundEQClass input)
+        //R
+        public static async Task<List<VolumeSetting>> GetVolumeSettings()
         {
-
-            var ourdb = GetSoundEQDB();
-
-
-            bool itemexists = false;
-            int round = -1;
-            foreach (SoundEQClass item in ourdb)
-            {
-                round = round + 1;
-                if (item.EQName == DBName)
-                {
-                    itemexists = true;
-                    break;
-                }
-            }
-
-            if (itemexists == true)
-            {
-                ourdb.RemoveAt(round);
-                ourdb.Insert(round, input);
-
-                var returnlist = new List<SoundEQClass>();
-
-                foreach (SoundEQClass item in ourdb)
-                {
-                    returnlist.Add(new SoundEQ(item, UserPassword));
-                }
-
-                var FileWithSoundEQDB = DataHandler.JSONDataHandler.LoadJsonFile(UserSoundEQDBPath, DataFormat.JSON);
-
-                FileWithSoundEQDB.Set("MusicQueue", returnlist);
-
-                UniversalSave.Save(UserSoundEQDBPath, FileWithSoundEQDB);
-            }
-
-
-        }
-
-        public static void AddToSoundEQDB(SoundEQClass input)
-        {
-
-            var ourdb = GetSoundEQDB();
-
-
-            ourdb.Add(input);
-
-            var returnlist = new List<SoundEQClass>();
-
-            foreach (SoundEQClass item in ourdb)
-            {
-                returnlist.Add(new SoundEQ(item, UserPassword));
-            }
-
-            var FileWithSoundEQDB = UniversalSave.Load(UserSoundEQDBPath, DataFormat.JSON);
-
-            FileWithSoundEQDB.Set("MusicQueue", returnlist);
-
-            UniversalSave.Save(UserSoundEQDBPath, FileWithSoundEQDB);
-        }
-
-
-
-        public static SoundEQClass GetDefaultSoundEQ()
-        {
+            var directoryPath = Path.Combine(DataPath, "VolumeMixings");
 
             //Get the JSON File holding the MusicDirectory object for the user
-            var FileWithSoundEQDB = UniversalSave.Load(UserSoundEQDBPath, DataFormat.JSON);
+            var FileWithVolumeSettingDB = await JSONDataHandler.LoadJsonFile(directoryPath, "VolumeMixings");
+            var loaded = (List<VolumeSetting>)await JSONDataHandler.GetVariable<List<VolumeSetting>>(FileWithVolumeSettingDB, "VolumeMixings", encryptionKey);
 
-            //This file has a lot of things in it, so we are getting the variable called MusicDirectory, aka the object we are looking for
-            SoundEQClass target = (SoundEQClass)FileWithSoundEQDB.Get("DefaultSoundEQ");
-
-            SoundEQClass item = DecryptSoundEQ(target);
-
-            return item;
+            return loaded;
         }
 
-        public static SoundEQClass GetUserDefaultSoundEQ()
+        public static async Task<VolumeSetting> GetVolumeSetting(string volumeSettingName)
         {
+            var directoryPath = Path.Combine(DataPath, "VolumeMixings");
+
+            var FileWithVolumeSettingDB = await JSONDataHandler.LoadJsonFile(directoryPath, "VolumeMixings");
+            var loaded = (List<VolumeSetting>)await JSONDataHandler.GetVariable<List<VolumeSetting>>(FileWithVolumeSettingDB, "VolumeMixings", encryptionKey);
+            var returnVal = loaded.FirstOrDefault(d => d.VolumeSettingName == volumeSettingName);
+
+            return returnVal;
+        }
+
+        //App name and stuff/int for this device
+        public static async Task<List<(string, int)>> GetVolumeSettingsForThisDevice()
+        {
+
+            var finalLine = new List<(string, int)>();
+
+
+            var valToCheck = await GetCurrentVolumeSettings();
+
+            foreach (var item in valToCheck.Volumes.Keys)
+            {
+                var split = item.Split(":");
+                if (split[0] == Environment.MachineName)
+                {
+                    finalLine.Add((item, valToCheck.Volumes[item]));
+                }
+            }
+            return finalLine;
+        }
+
+        //U
+        public static async Task UpdateVolumeSettingDB(VolumeSetting originalData, VolumeSetting newData)
+        {
+            var directoryPath = Path.Combine(DataPath, "VolumeMixings");
 
             //Get the JSON File holding the MusicDirectory object for the user
-            var FileWithSoundEQDB = UniversalSave.Load(UserSoundEQDBPath, DataFormat.JSON);
+            var FileWithVolumeSettingDB = await JSONDataHandler.LoadJsonFile(directoryPath, "VolumeMixings");
+            var loaded = (List<VolumeSetting>)await JSONDataHandler.GetVariable<List<VolumeSetting>>(FileWithVolumeSettingDB, "VolumeMixingsata", encryptionKey);
 
-            //This file has a lot of things in it, so we are getting the variable called MusicDirectory, aka the object we are looking for
-            SoundEQClass target = (SoundEQClass)FileWithSoundEQDB.Get("UserDefaultSoundEQ");
+            if (!loaded.Any(d => d.GetHashCode() == originalData.GetHashCode()))
+            {
+                throw new InvalidOperationException("This does not exist as a saved, stored item.");
+            }
 
-            SoundEQClass item = DecryptSoundEQ(target);
+            var dataToRemove = loaded.First(d => d.GetHashCode() == originalData.GetHashCode());
+            {
+                loaded.Remove(dataToRemove);
+                loaded.Add(newData);
+            }
 
-            return item;
+            var updatedJSON = await JSONDataHandler.UpdateJson<List<VolumeSetting>>(FileWithVolumeSettingDB, "VolumeMixingsata", loaded, encryptionKey);
+
+            await JSONDataHandler.SaveJson(FileWithVolumeSettingDB);
         }
 
-        public static bool CheckIfUserDefaultSoundExists()
+
+        //D
+        public static async Task DeleteVolumeSettingDB(VolumeSetting deletedData)
         {
+            var directoryPath = Path.Combine(DataPath, "EQDB");
 
             //Get the JSON File holding the MusicDirectory object for the user
-            var FileWithSoundEQDB = UniversalSave.Load(UserSoundEQDBPath, DataFormat.JSON);
+            var FileWithVolumeSettingDB = await JSONDataHandler.LoadJsonFile(directoryPath, "EQDB");
+            var loaded = (List<VolumeSetting>)await JSONDataHandler.GetVariable<List<VolumeSetting>>(FileWithVolumeSettingDB, "VolumeMixingsata", encryptionKey);
 
-            //This file has a lot of things in it, so we are getting the variable called MusicDirectory, aka the object we are looking for
-            var target = FileWithSoundEQDB.Get("UserDefaultSoundEQ");
-
-            bool ourreturn;
-
-            if (target == null)
+            if (!loaded.Any(d => d.GetHashCode() == deletedData.GetHashCode()))
             {
-                ourreturn = false;
+                throw new InvalidOperationException("This does not exist as a saved, stored item.");
             }
 
-            else
+            var dataToRemove = loaded.First(d => d.GetHashCode() == deletedData.GetHashCode());
             {
-                ourreturn = true;
+                loaded.Remove(dataToRemove);
             }
 
-            return ourreturn;
+            var updatedJSON = await JSONDataHandler.UpdateJson<List<VolumeSetting>>(FileWithVolumeSettingDB, "VolumeMixingsata", loaded, encryptionKey);
+
+            await JSONDataHandler.SaveJson(FileWithVolumeSettingDB);
         }
 
-        public static void SetUserDefaultSoundEQ(SoundEQClass input)
+        public static async Task ClearEQDB()
         {
+            var directoryPath = Path.Combine(DataPath, "EQDB");
 
-            var ourinput = new SoundEQ(input, UserPassword);
+            //Get the JSON File holding the MusicDirectory object for the user
+            var FileWithVolumeSettingDB = await JSONDataHandler.LoadJsonFile(directoryPath, "EQDB");
+            var loaded = (List<VolumeSetting>)await JSONDataHandler.GetVariable<List<VolumeSetting>>(FileWithVolumeSettingDB, "VolumeMixingsata", encryptionKey);
 
-            var FileWithSoundEQDB = UniversalSave.Load(UserSoundEQDBPath, DataFormat.JSON);
+            loaded.Clear();
+            var updatedJSON = await JSONDataHandler.UpdateJson<List<VolumeSetting>>(FileWithVolumeSettingDB, "VolumeMixingsata", loaded, encryptionKey);
 
-            FileWithSoundEQDB.Set("UserDefaultSoundEQ", ourinput);
-
-            UniversalSave.Save(UserSoundEQDBPath, FileWithSoundEQDB);
-
-
+            await JSONDataHandler.SaveJson(FileWithVolumeSettingDB);
         }
 
-        public static void ResetUserDefaultSoundEQ()
-        {
-
-            var fancyoptions = new ExperimentalAudio(false, false, 0, 0);
-
-            var input = new SoundEQClass(default, 100, 100, 100, 100, 100, 100, 100, fancyoptions);
-
-            var ourinput = new SoundEQ(input, UserPassword);
-
-            var FileWithSoundEQDB = UniversalSave.Load(UserSoundEQDBPath, DataFormat.JSON);
-
-            FileWithSoundEQDB.Set("UserDefaultSoundEQ", ourinput);
-
-            UniversalSave.Save(UserSoundEQDBPath, FileWithSoundEQDB);
-
-
-        }
 
     }
 
