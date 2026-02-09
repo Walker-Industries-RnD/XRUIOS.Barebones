@@ -291,3 +291,20 @@ Choose fastest/most recent → Stream/Sync
 
 
 <img width="1844" height="1080" alt="image" src="https://github.com/user-attachments/assets/4d47635f-0d37-4ebc-a05f-a3779dd84e22" />
+
+
+Copyright (c) 2026 Walker Industries R&D
+All rights reserved.
+
+This is a work-in-progress prototype.
+You may view the source code for personal evaluation purposes only.
+NO license is granted (express or implied) for:
+- copying
+- modification
+- distribution
+- commercial use
+- derivative works
+- or any other form of exploitation
+
+It'll be open-sourced when it's actually ready and has examples ready.
+Until then: look, don't touch. Seriously.
