@@ -1,4 +1,11 @@
-Unfinished, there are still chunks that need to be fixed for the v1 (But it should take a few hours; Windows Centric ver.)
+Unfinished, there are still chunks that need to be fixed for the v1 (Windows Centric ver.)
+
+Current Goals Include:
+
+- Getting all test functions working and green 
+- Making the Stride3D runtime
+- Connecting to Project Replicant
+- Putting within Plagues Protocol
 
 <img width="225" height="224" alt="image" src="https://github.com/user-attachments/assets/752b019f-aaec-455a-a311-9b583618c25d" />
 
@@ -26,6 +33,35 @@ You are playing a game with your friends but want to lay down a little. Use a qu
 Your grandma takes a photo on her tablet. Instead of "Where did it go? How do I send it?" It just appears on your phone, your dad's computer, and the digital picture frame automatically.
 
 AND BEST OF ALL NO SUBSCRIPTIONS
+
+## **What The Output Looks Like:**
+
+1. Alarm Logic
+
+<img width="663" height="223" alt="image" src="https://github.com/user-attachments/assets/133ce816-6c09-441b-8860-3d605f796711" />
+
+2. Media Albums
+
+<img width="746" height="241" alt="image" src="https://github.com/user-attachments/assets/598415fc-44ab-4c1e-8316-b30fdfa2f64d" />
+
+3. Sound Settings
+
+<img width="751" height="306" alt="image" src="https://github.com/user-attachments/assets/06452838-b557-43d0-9dfc-573f602dad3c" />
+
+
+4. Data Slots
+
+<img width="844" height="208" alt="image" src="https://github.com/user-attachments/assets/667d3a7e-10e6-4f18-9508-7fc9fb6c5098" />
+
+
+## **What Using The XRUIOS Looks Like:**
+
+<img width="678" height="641" alt="image" src="https://github.com/user-attachments/assets/cde0a424-0ae6-4465-ad9e-b0875b7a632b" />
+
+
+Straight and to the point!
+
+It features ~321 functions across Yuuko Bindings (UUID-based file/folder portability), music/media management, spatial world points & sessions, calendar/alarms/timers, audio mixing & EQ, notifications, themes, journals, clipboard groups, and basic system utils. More are under development as well!
 
 
 ## **It Fixes These Annoying Things:**
@@ -255,297 +291,3 @@ Choose fastest/most recent → Stream/Sync
 
 
 <img width="1844" height="1080" alt="image" src="https://github.com/user-attachments/assets/4d47635f-0d37-4ebc-a05f-a3779dd84e22" />
-
-
-## **Core System Classes**
-
-### **XRUIOS Main Class**
-- `DataPath` (property) - System data directory path
-- `PublicDataPath` (property) - Public data directory path
-- `InitiateFileSync()` - Initiates file synchronization
-- `RemoveHashSetFromCollection()` - Removes hashset from music collection
-- `AddHashSetToCollection()` - Adds hashset to music collection
-- `UpdateCollection()` - Updates music collection
-- `UpdateMedia()` - Updates media files
-- `Update()` - Main update method for song directories
-
-### **Yuuko.Bindings (Directory Management)**
-#### **DirectoryManager Class**
-- `GetDirectoryById()` - Gets directory by ID
-- `GetOrCreateDirectory()` - Safely gets or creates a folder
-- `ResolveDirectory()` - Resolves directory path
-- `DeleteBinding()` - Deletes a binding
-- `UpdateBinding()` - Updates a binding
-- `LoadBindings()` - Loads all saved folder info from disk
-- `GetAllBindings()` - Gets all bindings in memory
-- `GetBindingById()` - Gets binding by UUID
-
-## **Music/Songs Module**
-
-### **Songs Class**
-- `AddSongDirectory()` - Adds a song directory
-- `RefreshDirectory()` - Refreshes directory
-- `Initialize()` - Initializes music system
-
-### **SongClass**
-- `CreateSongInfo()` - Creates song metadata (overview + detailed)
-- `GetSongInfo()` - Gets song information
-- `UpdateSongInfo()` - Updates song information
-- `DeleteSongInfo()` - Deletes song information
-- `PatchTouchesOverview()` - Checks if patch affects overview
-- `PatchTouchesDetailed()` - Checks if patch affects detailed
-- `GetRequiredCapabilities()` - Gets required tag capabilities
-- `GetWritableCapabilities()` - Gets writable tag capabilities
-
-### **SongDirectoriesClass**
-- `AddSongDirectory()` - Adds song directory
-- `GetSongDirectories()` - Gets song directories
-- `UpdateSongDirectory()` - Updates song directory
-- `RemoveSongDirectory()` - Removes song directory
-
-### **SongFavoritesClass**
-- `AddToFavorites()` - Adds song to favorites
-- `GetFavorites()` - Gets favorite songs
-- `GetFavoritePathsAsync()` - Gets favorite paths
-- `RemoveFromFavorites()` - Removes song from favorites
-
-### **SongGetClass**
-- `GetAllSongs()` - Gets all songs
-- `GetSongsInDirectoryAsync()` - Gets songs in specific directory
-- `GetSongsByNameAsync()` - Searches songs by name
-- `GetSongsByTag()` - Searches songs by tag
-
-### **MusicHistoryClass**
-- `AddToPlayHistory()` - Adds song to play history
-- `GetPlayHistory()` - Gets play history
-- `ClearPlayHistory()` - Clears play history
-
-## **Media Management**
-
-### **Media Class**
-- `GetFile()` - Gets media file information
-- `GetOrCreateDirectory()` - Gets or creates directory
-- `AddGenericDirectory()` - Adds generic directory
-- `GetGenericDirectories()` - Gets generic directories
-- `UpdateGenericDirectory()` - Updates generic directory
-- `RemoveGenericDirectory()` - Removes generic directory
-
-## **Calendar System**
-
-### **CalendarClass**
-- `CreateSimpleEvent()` - Creates simple calendar event
-- `CreateRecurringEvent()` - Creates recurring calendar event
-- `LoadAllEvents()` - Loads all events
-- `GetEventByUid()` - Gets event by UID
-- `UpdateEventByUid()` - Updates event by UID
-- `DeleteEventByUid()` - Deletes event by UID
-- `ScheduleUpcomingOccurrences()` - Schedules upcoming occurrences
-
-### **CalendarNotifications**
-- `Notify()` - Sends calendar notification
-
-## **Time Management**
-
-### **StopwatchClass**
-- `CreateStopwatch()` - Creates a stopwatch
-- `GetTimeElapsed()` - Gets elapsed time
-- `CreateLap()` - Creates lap record
-- `DestroyStopwatch()` - Destroys stopwatch
-- `SaveStopwatchValuesAsSheet()` - Saves stopwatch values as CSV
-
-### **TimerManagerClass**
-- `StartTimer()` - Starts a timer
-- `AddTime()` - Adds time to timer
-- `CancelTimer()` - Cancels timer
-- `FireTimer()` - Fires timer notification
-
-## **Clipboard System**
-
-### **ClipboardClass.BaseClipboard**
-- `LoadClipboard()` - Loads clipboard
-- `GetClipboardItem()` - Gets clipboard item
-- `AddToClipboard()` - Adds to clipboard
-- `RemoveFromClipboard()` - Removes from clipboard
-
-### **ClipboardClass.ClipboardGroups**
-- `LoadClipboard()` - Loads clipboard group
-- `GetClipboardItem()` - Gets item from clipboard group
-- `AddToClipboard()` - Adds to clipboard group
-- `RemoveFromClipboard()` - Removes from clipboard group
-
-## **Creator Management**
-
-### **CreatorFileClass**
-- `CreateCreator()` - Creates creator profile
-- `GetCreator()` - Gets creator information
-- `GetCreatorOverview()` - Gets creator overview
-- `GetCreatorFiles()` - Gets creator files
-- `AddFile()` - Adds file to creator
-- `SetDescription()` - Sets creator description
-- `RemoveFiles()` - Removes files from creator
-
-### **CreatorFavoritesClass**
-- `AddToFavorites()` - Adds creator to favorites
-- `GetFavorites()` - Gets favorite creators
-- `GetFavoritePathsAsync()` - Gets favorite creator paths
-- `RemoveFromFavorites()` - Removes creator from favorites
-
-## **Music Player**
-
-### **CurrentlyPlayingClass**
-- `GetCurrentlyPlaying()` - Gets currently playing song
-- `SetCurrentlyPlaying()` - Sets currently playing song
-- `ResetCurrentlyPlaying()` - Resets currently playing
-
-### **MusicQueueClass**
-- `GetCurrentlyPlaying()` - Gets music queue
-- `AddToMusicQueue()` - Adds to music queue
-- `ReorderSong()` - Reorders song in queue
-- `RemoveSong()` - Removes song from queue
-- `ResetQueue()` - Resets queue
-
-## **Volume/Audio Control**
-
-### **ExperimentalVolumeClass**
-- `GetExperimentalAudioSettings()` - Gets experimental audio settings
-- `SetExperimentalAudioSettings()` - Sets experimental audio settings
-- `SaveAudioSettings()` - Saves audio settings
-- `LoadAudioSettings()` - Loads audio settings
-
-### **MasterVolumeClass**
-- `GetMasterVolume()` - Gets master volume
-- `SetMasterVolume()` - Sets master volume
-- `SaveAudioSettings()` - Saves volume settings
-- `LoadAudioSettings()` - Loads volume settings
-
-### **AppVolume Class**
-- `ChangeObjVolume()` - Changes object volume
-
-### **mainVolume Class**
-- `GetSoundEQDB()` - Gets sound EQ database
-- `DeleteFromSoundEQDB()` - Deletes from sound EQ database
-- `UpdateFromSoundEQDB()` - Updates sound EQ database
-- `AddToSoundEQDB()` - Adds to sound EQ database
-- `GetDefaultSoundEQ()` - Gets default sound EQ
-- `GetUserDefaultSoundEQ()` - Gets user default sound EQ
-- `CheckIfUserDefaultSoundExists()` - Checks if user default exists
-- `SetUserDefaultSoundEQ()` - Sets user default sound EQ
-- `ResetUserDefaultSoundEQ()` - Resets user default sound EQ
-
-### **AudioGroups Class**
-- `GetAllAudioGroups()` - Gets all audio groups
-- `DeleteFromAudioGroups()` - Deletes from audio groups
-- `UpdateFromAudioGroups()` - Updates audio groups
-- `AddToAudioGroups()` - Adds to audio groups
-
-## **Alarm System**
-
-### **AlarmClass**
-- `AddAlarm()` - Adds alarm
-- `LoadAlarms()` - Loads alarms
-- `UpdateAlarm()` - Updates alarm
-- `DeleteAlarm()` - Deletes alarm
-
-### **AlarmScheduler**
-- `ScheduleAlarm()` - Schedules alarm
-- `ScheduleAllAlarms()` - Schedules all alarms
-- `FireAlarm()` - Fires alarm (private)
-- `ScheduleNextOccurrence()` - Schedules next occurrence (private)
-
-## **Chrono/Time Display**
-
-### **Date Class**
-- `SaveDateData()` - Saves date preferences
-- `LoadDateData()` - Loads date preferences
-- `GetTimezone()` - Gets timezone
-- `SetTimezone()` - Sets timezone
-- `GetDate()` - Gets formatted date
-- `SetDate()` - Sets date format
-- `GetTime()` - Gets formatted time
-- `SetTime()` - Sets time format
-- `AddWorldTime()` - Adds world time
-- `GetWorldTimezoneCollection()` - Gets world timezone collection
-- `GetWorldTimes()` - Gets world times
-- `GetTimeInTimezone()` - Gets time in specific timezone
-- `DeleteWorldTime()` - Deletes world time
-
-### **Times Class**
-- `GetCurrentTime()` - Gets current time
-- `StopGettingCurrentTime()` - Stops getting time
-- `GetTime()` - Coroutine for time measurement
-- `GetCurrentTimeFromWorldTimes()` - Gets time from world times
-- `StopGettingCurrentTimeWorldTimes()` - Stops world time measurement
-- `GetTimeWorldTimes()` - Coroutine for world times
-- `StartStopwatch()` - Starts stopwatch
-- `StopStopwatch()` - Stops stopwatch
-- `ResetStopwatch()` - Resets stopwatch
-- `RecordTime()` - Records stopwatch time
-- `GetFormattedTime()` - Gets formatted stopwatch time
-
-### **Location Class**
-- `GetExactCoordinates()` - Gets exact GPS coordinates
-- `GetRelativeCoordinates()` - Gets relative coordinates (private)
-
-## **Theme System**
-
-### **ThemeSystem**
-- `SaveTheme()` - Saves theme
-- `GetAllXRUIOSThemes()` - Gets all themes
-- `GetXRUIOSTheme()` - Gets specific theme
-- `GetCurrentTheme()` - Gets current theme
-- `UpdateTheme()` - Updates theme
-- `SetTheme()` - Sets current theme
-- `DeleteXRUIOSTheme()` - Deletes theme
-
-## **Power Management**
-### **PowerOff Class**
-- `ShutDown()` - Shuts down system
-- `Sleep()` - Puts system to sleep
-
-## **Date/Time Utilities**
-
-### **BasicTimeClass**
-- `GetCurrentTimeLocal()` - Gets local time
-- `GetCurrentTimeUTC()` - Gets UTC time
-- `SetCurrentTime()` - Sets system time
-
-### **NumberConvert Class** (static)
-- `NumberToWords()` - Converts numbers to words
-
-### **MonthConverter Class** (static)
-- `ConvertToWordedMonth()` - Converts month number to word
-
-## **Helper Classes**
-
-### **ObservableProperty<T>**
-- `Set()` - Sets value with change notification
-- `Get()` - Gets current value
-
-## **Data Structures (Records)**
-- `DirectoryRecord` - Directory information
-- `FileRecord` - File information
-- `SongOverview` - Basic song metadata
-- `SongDetailed` - Detailed song metadata
-- `SongChapter` - Song chapter information
-- `LyricLine` - Lyric line with timestamp
-- `ResolvedMedia` - Media file information
-- `Alarm` - Alarm configuration
-- `TimerRecord` - Timer information
-- `SoundEQ` - Sound equalizer settings
-- `AudioGroup` - Audio group configuration
-- `ExperimentalAudio` - Advanced audio settings
-- `Creator` - Creator profile
-- `ThemeColors` - Theme color scheme
-- `ThemeTypography` - Theme typography
-- `ThemeSpatial` - Theme spatial settings
-- `ThemeIdentity` - Theme identification
-- `XRUIOSTheme` - Complete theme definition
-
-## **Enums**
-- `MusicInfoStyle` - Song info detail level
-- `SongSearchField` - Song search criteria
-- `AudioTagCapability` - Audio file tag capabilities
-- `TimeFormat` - 12/24 hour format
-- `ShortTime/LongTime` - Time display formats
-- `ShortDate/LongDate` - Date display formats
-
