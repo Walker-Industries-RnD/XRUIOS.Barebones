@@ -1,7 +1,4 @@
 ﻿using Hangfire;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace XRUIOS.Barebones
 {
@@ -14,6 +11,7 @@ namespace XRUIOS.Barebones
             public bool IsRunning;
             public TimeSpan Duration;
             public Action? OnFinish;
+            public string? HangfireJobId; // store actual Hangfire job ID
 
             public TimerRecord(string timerName, TimeSpan duration, Action? onFinish = null)
             {
@@ -27,7 +25,7 @@ namespace XRUIOS.Barebones
 
         public static Dictionary<string, TimerRecord> Timers = new Dictionary<string, TimerRecord>();
 
-        //C
+        // Start or restart timer
         public static void StartTimer(TimerRecord timer)
         {
             if (Timers.ContainsKey(timer.TimerName))
@@ -40,29 +38,45 @@ namespace XRUIOS.Barebones
             ScheduleTimerJob(timer);
         }
 
-
-        //U
+        // Add time to running timer
         public static void AddTime(string timerName, TimeSpan extra)
         {
             if (!Timers.TryGetValue(timerName, out var timer)) return;
 
             if (timer.IsRunning)
+            {
                 timer.EndTime += extra;
+            }
             else
+            {
                 timer.Duration += extra;
+            }
+
+            // Cancel previous Hangfire job if it exists
+            if (!string.IsNullOrEmpty(timer.HangfireJobId))
+            {
+                BackgroundJob.Delete(timer.HangfireJobId);
+            }
 
             ScheduleTimerJob(timer);
         }
 
-
-        //D
+        // Cancel timer
         public static void CancelTimer(string timerName)
         {
-            BackgroundJob.Delete($"timer:{timerName}:*");
-            if (Timers.TryGetValue(timerName, out var timer))
-                timer.IsRunning = false;
+            if (!Timers.TryGetValue(timerName, out var timer)) return;
+
+            timer.IsRunning = false;
+
+            if (!string.IsNullOrEmpty(timer.HangfireJobId))
+            {
+                BackgroundJob.Delete(timer.HangfireJobId);
+            }
+
+            Timers.Remove(timerName);
         }
 
+        // Schedule Hangfire job
         private static void ScheduleTimerJob(TimerRecord timer)
         {
             var delay = timer.EndTime - DateTime.Now;
@@ -72,11 +86,11 @@ namespace XRUIOS.Barebones
                 return;
             }
 
-            var jobId = $"timer:{timer.TimerName}:{timer.EndTime:O}";
-            BackgroundJob.Schedule(jobId, () => FireTimer(timer.TimerName), delay);
+            // Schedule a real Hangfire job and store the job ID
+            timer.HangfireJobId = BackgroundJob.Schedule(() => FireTimer(timer.TimerName), delay);
         }
 
-        //Notification TEMPORARY
+        // Fire timer callback
         public static void FireTimer(string timerName)
         {
             if (!Timers.TryGetValue(timerName, out var timer) || !timer.IsRunning) return;
@@ -86,6 +100,4 @@ namespace XRUIOS.Barebones
             Timers.Remove(timerName);
         }
     }
-
-
 }

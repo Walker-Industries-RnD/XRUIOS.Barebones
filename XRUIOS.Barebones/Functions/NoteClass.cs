@@ -1,11 +1,6 @@
-﻿using Microsoft.VisualBasic;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Pariah_Cybersecurity;
 using System.Text.Json.Nodes;
 using static Pariah_Cybersecurity.DataHandler;
-using static Walker.Crypto.SimpleAESEncryption;
-using static XRUIOS.Barebones.Functions.ThemeSystem;
 using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones.Functions
@@ -25,10 +20,12 @@ namespace XRUIOS.Barebones.Functions
             public string NoteID;
             public string XRUIOSNoteID;
             public FileRecord Markdown;
-            public List<FileRecord> Images;
+            public List<FileRecord>? Images;
+
+            public Note() { }
 
             // Constructor
-            public Note(string title, string category, DateTime created, DateTime lastUpdate, string savedID, string miniDescription, string noteID, string xRUIOSNoteID, FileRecord markdown, FileRecord FileRecord, List<FileRecord> images)
+            public Note(string title, string category, DateTime created, DateTime lastUpdate, string savedID, string miniDescription, string noteID, string xRUIOSNoteID, FileRecord markdown, List<FileRecord>? images)
             {
                 // Assign new fields
                 Title = title;
@@ -37,8 +34,7 @@ namespace XRUIOS.Barebones.Functions
                 LastUpdate = lastUpdate;
                 SavedID = savedID;
                 MiniDescription = miniDescription;
-;
-
+                
                 // Assign existing fields
                 NoteID = noteID;
                 XRUIOSNoteID = xRUIOSNoteID;
@@ -57,6 +53,9 @@ namespace XRUIOS.Barebones.Functions
             public ThemeIdentity Identity;
 
             public List<Category> Categories; //We treat as chapters
+
+            public Journal() { }
+
 
             // Constructor
             public Journal(string journalName, string description, string coverImagePath, List<Category> categories, ThemeIdentity identity)
@@ -79,6 +78,7 @@ namespace XRUIOS.Barebones.Functions
             public string MiniImage;
 
             public List<FileRecord> Notes; //We treat order as pages
+            public Category() { }
 
             public Category(string title, string description, string mainImage, string miniImage, List<FileRecord> notes)
             {
@@ -126,6 +126,9 @@ namespace XRUIOS.Barebones.Functions
         public static async Task SaveJournal(Journal journal)
         {
             var directoryPath = Path.Combine(DataPath, "Journals");
+
+            Directory.CreateDirectory(directoryPath);
+
             var fileName = $"{journal.Identity.Name} v{journal.Identity.Version} by {journal.Identity.Author}, ID {journal.Identity.ThemeID}";
 
             var filePath = Path.Combine(DataPath, "Journals", fileName);
@@ -188,7 +191,7 @@ namespace XRUIOS.Barebones.Functions
                 }
             }
 
-            return null;
+            throw new InvalidOperationException("Category not found.");
         }
 
 
@@ -218,14 +221,195 @@ namespace XRUIOS.Barebones.Functions
             var directoryPath = Path.Combine(DataPath, "Journals");
             var filePath = Path.Combine(DataPath, "Journals", FileName);
 
-            File.Delete(filePath);
+            if (!File.Exists(filePath))
+                throw new InvalidOperationException("Journal does not exist.");
         }
 
 
+        //Favorites
+
+        // C
+        public static async Task AddJournalToFavorites(string JournalId)
+        {
+            var directoryPath = Path.Combine(DataPath, "Journals");
+            var folder = directoryPath;
+
+            var foundFile = Directory.EnumerateFiles(folder, JournalId + ".*").FirstOrDefault();
+            if (foundFile == null)
+                throw new FileNotFoundException("Journal does not exist.");
+
+            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            await manager.LoadBindings();
+
+            var favoritesFile =
+                await DataHandler.JSONDataHandler.LoadJsonFile("JournalFavorites", directoryPath);
+
+            var favorites =
+                (List<string>)await DataHandler.JSONDataHandler.GetVariable<List<string>>(
+                    favoritesFile, "Data", encryptionKey);
+
+            if (favorites.Contains(JournalId))
+                throw new InvalidOperationException("Journal already favorited.");
+
+            favorites.Add(JournalId);
+
+            var editedJSON =
+                await DataHandler.JSONDataHandler.UpdateJson<List<string>>(
+                    favoritesFile, "Data", favorites, encryptionKey);
+
+            await DataHandler.JSONDataHandler.SaveJson(editedJSON);
+        }
 
 
+        // R
+        public static async Task<(List<string> resolved, List<string> unresolved)> GetJournalFavorites()
+        {
+            var directoryPath = Path.Combine(DataPath, "Journals");
+
+            var favoritesFile =
+                await DataHandler.JSONDataHandler.LoadJsonFile("JournalFavorites", directoryPath);
+
+            var favorites =
+                (List<string>)await DataHandler.JSONDataHandler.GetVariable<List<string>>(
+                    favoritesFile, "Data", encryptionKey);
+
+            List<string> resolved = new();
+            List<string> unresolved = new();
+
+            foreach (var journalId in favorites)
+            {
+                var exists = Directory.EnumerateFiles(directoryPath, journalId + ".*").Any();
+
+                if (exists)
+                    resolved.Add(journalId);
+                else
+                    unresolved.Add(journalId);
+            }
+
+            return (resolved, unresolved);
+        }
+
+        public static async Task<List<string>> GetFavoriteJournalIdsAsync(bool onlyResolved = true)
+        {
+            var (resolved, unresolved) = await GetJournalFavorites();
+
+            if (onlyResolved)
+                return resolved;
+
+            var all = new List<string>(resolved);
+            all.AddRange(unresolved);
+            return all;
+        }
+
+        // D
+        public static async Task RemoveJournalFromFavorites(string JournalId)
+        {
+            var directoryPath = Path.Combine(DataPath, "Journals");
+
+            var favoritesFile =
+                await DataHandler.JSONDataHandler.LoadJsonFile("JournalFavorites", directoryPath);
+
+            var favorites =
+                (List<string>)await DataHandler.JSONDataHandler.GetVariable<List<string>>(
+                    favoritesFile, "Data", encryptionKey);
+
+            if (!favorites.Remove(JournalId))
+                throw new InvalidOperationException("Journal not favorited.");
+
+            var editedJSON =
+                await DataHandler.JSONDataHandler.UpdateJson<List<string>>(
+                    favoritesFile, "Data", favorites, encryptionKey);
+
+            await DataHandler.JSONDataHandler.SaveJson(editedJSON);
+        }
 
 
+        //History
+        public record HistoryEntry
+        {
+            public string Action;          // Created, Edited, Viewed, Favorited
+            public string TargetType;      // Journal, Music, App
+            public string TargetID;        // UUID / Identifier
+            public DateTime Timestamp;     // UTC
+            public Dictionary<string, string>? Meta;
+
+            public HistoryEntry(
+                string action,
+                string targetType,
+                string targetID,
+                DateTime timestamp,
+                Dictionary<string, string>? meta = null)
+            {
+                Action = action;
+                TargetType = targetType;
+                TargetID = targetID;
+                Timestamp = timestamp;
+                Meta = meta;
+            }
+        }
+
+        //C
+        public static async Task AddHistoryEntry(
+            string TargetType,
+            string Action,
+            string TargetID,
+            Dictionary<string, string>? Meta = null)
+        {
+            var directoryPath = Path.Combine(DataPath, "Journals");
+            Directory.CreateDirectory(directoryPath);
+
+            var historyFile =
+                await JSONDataHandler.LoadJsonFile("History", directoryPath);
+
+            var entries =
+                (List<HistoryEntry>)await JSONDataHandler.GetVariable<List<HistoryEntry>>(
+                    historyFile, "Data", encryptionKey);
+
+            entries.Add(new HistoryEntry(
+                Action,
+                TargetType,
+                TargetID,
+                DateTime.UtcNow,
+                Meta));
+
+            var editedJSON =
+                await JSONDataHandler.UpdateJson<List<HistoryEntry>>(
+                    historyFile, "Data", entries, encryptionKey);
+
+            await JSONDataHandler.SaveJson(editedJSON);
+        }
+
+        //R
+        public static async Task<List<HistoryEntry>> GetHistory(
+            string TargetType,
+            string? TargetID = null)
+        {
+            var directoryPath = Path.Combine(DataPath, "Journals");
+
+            var historyFile =
+                await JSONDataHandler.LoadJsonFile("History", directoryPath);
+
+            var entries =
+                (List<HistoryEntry>)await JSONDataHandler.GetVariable<List<HistoryEntry>>(
+                    historyFile, "Data", encryptionKey);
+
+            if (TargetID == null)
+            {
+                return entries;
+            }
+
+            List<HistoryEntry> filtered = new();
+
+            foreach (var item in entries)
+            {
+                if (item.TargetID == TargetID)
+                {
+                    filtered.Add(item);
+                }
+            }
+
+            return filtered;
+        }
 
     }
 

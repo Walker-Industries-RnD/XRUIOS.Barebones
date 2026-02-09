@@ -1,12 +1,4 @@
-﻿using Microsoft.VisualBasic;
-using Org.BouncyCastle.Asn1.X509;
-using Pariah_Cybersecurity;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using static Pariah_Cybersecurity.DataHandler;
-using static Pariah_Cybersecurity.DataHandler.DataRequest;
-using static XRUIOS.Barebones.VolumeClass;
+﻿using static Pariah_Cybersecurity.DataHandler;
 using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones.Functions
@@ -52,7 +44,7 @@ namespace XRUIOS.Barebones.Functions
 
         //Volume Settings (CRUD)
         //C
-        public static async Task AddVolumeSettings(VolumeSetting VolumeMixingsata)
+        public static async Task AddVolumeSettings(VolumeSetting VolumeMixings)
         {
             var directoryPath = Path.Combine(DataPath, "VolumeMixings");
 
@@ -60,12 +52,12 @@ namespace XRUIOS.Barebones.Functions
             var FileWithVolumeSettingDB = await JSONDataHandler.LoadJsonFile(directoryPath, "VolumeMixings");
             var loaded = (List<VolumeSetting>)await JSONDataHandler.GetVariable<List<VolumeSetting>>(FileWithVolumeSettingDB, "VolumeMixings", encryptionKey);
 
-            if (loaded.Any(d => d.GetHashCode() == VolumeMixingsata.GetHashCode()))
+            if (loaded.Any(d => d.GetHashCode() == VolumeMixings.GetHashCode()))
             {
                 throw new InvalidOperationException("This already exists.");
             }
 
-            loaded.Add(VolumeMixingsata);
+            loaded.Add(VolumeMixings);
 
             var updatedJSON = await JSONDataHandler.UpdateJson<List<VolumeSetting>>(FileWithVolumeSettingDB, "VolumeMixings", loaded, encryptionKey);
 
@@ -123,7 +115,7 @@ namespace XRUIOS.Barebones.Functions
 
             //Get the JSON File holding the MusicDirectory object for the user
             var FileWithVolumeSettingDB = await JSONDataHandler.LoadJsonFile(directoryPath, "VolumeMixings");
-            var loaded = (List<VolumeSetting>)await JSONDataHandler.GetVariable<List<VolumeSetting>>(FileWithVolumeSettingDB, "VolumeMixingsata", encryptionKey);
+            var loaded = (List<VolumeSetting>)await JSONDataHandler.GetVariable<List<VolumeSetting>>(FileWithVolumeSettingDB, "VolumeMixings", encryptionKey);
 
             if (!loaded.Any(d => d.GetHashCode() == originalData.GetHashCode()))
             {
@@ -136,7 +128,7 @@ namespace XRUIOS.Barebones.Functions
                 loaded.Add(newData);
             }
 
-            var updatedJSON = await JSONDataHandler.UpdateJson<List<VolumeSetting>>(FileWithVolumeSettingDB, "VolumeMixingsata", loaded, encryptionKey);
+            var updatedJSON = await JSONDataHandler.UpdateJson<List<VolumeSetting>>(FileWithVolumeSettingDB, "VolumeMixings", loaded, encryptionKey);
 
             await JSONDataHandler.SaveJson(FileWithVolumeSettingDB);
         }
@@ -145,11 +137,11 @@ namespace XRUIOS.Barebones.Functions
         //D
         public static async Task DeleteVolumeSettingDB(VolumeSetting deletedData)
         {
-            var directoryPath = Path.Combine(DataPath, "EQDB");
+            var directoryPath = Path.Combine(DataPath, "VolumeMixings");
 
             //Get the JSON File holding the MusicDirectory object for the user
-            var FileWithVolumeSettingDB = await JSONDataHandler.LoadJsonFile(directoryPath, "EQDB");
-            var loaded = (List<VolumeSetting>)await JSONDataHandler.GetVariable<List<VolumeSetting>>(FileWithVolumeSettingDB, "VolumeMixingsata", encryptionKey);
+            var FileWithVolumeSettingDB = await JSONDataHandler.LoadJsonFile(directoryPath, "VolumeMixings");
+            var loaded = (List<VolumeSetting>)await JSONDataHandler.GetVariable<List<VolumeSetting>>(FileWithVolumeSettingDB, "VolumeMixings", encryptionKey);
 
             if (!loaded.Any(d => d.GetHashCode() == deletedData.GetHashCode()))
             {
@@ -161,21 +153,21 @@ namespace XRUIOS.Barebones.Functions
                 loaded.Remove(dataToRemove);
             }
 
-            var updatedJSON = await JSONDataHandler.UpdateJson<List<VolumeSetting>>(FileWithVolumeSettingDB, "VolumeMixingsata", loaded, encryptionKey);
+            var updatedJSON = await JSONDataHandler.UpdateJson<List<VolumeSetting>>(FileWithVolumeSettingDB, "VolumeMixings", loaded, encryptionKey);
 
             await JSONDataHandler.SaveJson(FileWithVolumeSettingDB);
         }
 
         public static async Task ClearEQDB()
         {
-            var directoryPath = Path.Combine(DataPath, "EQDB");
+            var directoryPath = Path.Combine(DataPath, "VolumeMixings");
 
             //Get the JSON File holding the MusicDirectory object for the user
-            var FileWithVolumeSettingDB = await JSONDataHandler.LoadJsonFile(directoryPath, "EQDB");
-            var loaded = (List<VolumeSetting>)await JSONDataHandler.GetVariable<List<VolumeSetting>>(FileWithVolumeSettingDB, "VolumeMixingsata", encryptionKey);
+            var FileWithVolumeSettingDB = await JSONDataHandler.LoadJsonFile(directoryPath, "VolumeMixings");
+            var loaded = (List<VolumeSetting>)await JSONDataHandler.GetVariable<List<VolumeSetting>>(FileWithVolumeSettingDB, "VolumeMixings", encryptionKey);
 
             loaded.Clear();
-            var updatedJSON = await JSONDataHandler.UpdateJson<List<VolumeSetting>>(FileWithVolumeSettingDB, "VolumeMixingsata", loaded, encryptionKey);
+            var updatedJSON = await JSONDataHandler.UpdateJson<List<VolumeSetting>>(FileWithVolumeSettingDB, "VolumeMixings", loaded, encryptionKey);
 
             await JSONDataHandler.SaveJson(FileWithVolumeSettingDB);
         }

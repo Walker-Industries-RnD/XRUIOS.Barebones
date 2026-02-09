@@ -2,9 +2,6 @@
 using Ical.Net.CalendarComponents;
 using Ical.Net.DataTypes;
 using Ical.Net.Serialization;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using static XRUIOS.Barebones.XRUIOS;
 using Attachment = Ical.Net.DataTypes.Attachment;
 using Calendar = Ical.Net.Calendar;
@@ -49,15 +46,12 @@ namespace XRUIOS.Barebones
                 var mediaPath = await Media.GetFile(firstAttachment.UUID, firstAttachment.File);
 
                 byte[] fileBytes;
-                using (var fs = new FileStream(
-                    mediaPath.FullPath,
-                    FileMode.Open,
-                    FileAccess.Read,
-                    FileShare.ReadWrite))
+                using (var fs = new FileStream(mediaPath.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     fileBytes = new byte[fs.Length];
                     await fs.ReadAsync(fileBytes, 0, fileBytes.Length);
                 }
+
 
                 var binaryAttachment = new Attachment(fileBytes);
 
@@ -126,15 +120,12 @@ namespace XRUIOS.Barebones
                 var mediaPath = await Media.GetFile(firstAttachment.UUID, firstAttachment.File);
 
                 byte[] fileBytes;
-                using (var fs = new FileStream(
-                    mediaPath.FullPath,
-                    FileMode.Open,
-                    FileAccess.Read,
-                    FileShare.ReadWrite))
+                using (var fs = new FileStream(mediaPath.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
                 {
                     fileBytes = new byte[fs.Length];
                     await fs.ReadAsync(fileBytes, 0, fileBytes.Length);
                 }
+
 
                 var binaryAttachment = new Attachment(fileBytes);
 
@@ -187,6 +178,43 @@ namespace XRUIOS.Barebones
             return allEvents;
         }
 
+        // Get all events on a specific day (local time)
+        public static List<CalendarEvent> GetEventsForDay(DateTime day)
+        {
+            var allEvents = CalendarClass.LoadAllEvents();
+            var startOfDay = day.Date;
+            var endOfDay = startOfDay.AddDays(1);
+
+            return allEvents
+                .Where(ev =>
+                {
+                    var evStart = ev.Start.Value.ToLocalTime();
+                    var evEnd = ev.End.Value.ToLocalTime();
+
+                    return evStart < endOfDay && evEnd > startOfDay;
+                })
+                .ToList();
+        }
+
+        // Get all events within a specific timespan (inclusive)
+        public static List<CalendarEvent> GetEventsInRange(DateTime start, DateTime end)
+        {
+            if (start > end) throw new ArgumentException("Start cannot be after end.");
+
+            var allEvents = CalendarClass.LoadAllEvents();
+
+            return allEvents
+                .Where(ev =>
+                {
+                    var evStart = ev.Start.Value.ToLocalTime();
+                    var evEnd = ev.End.Value.ToLocalTime();
+
+                    return evStart < end && evEnd > start;
+                })
+                .ToList();
+        }
+
+
         public static CalendarEvent? GetEventByUid(string uid)
         {
             var directoryPath = Path.Combine(DataPath, "Calendar");
@@ -202,8 +230,10 @@ namespace XRUIOS.Barebones
             return null;
         }
 
+        //Get events by date/range
+
         // U
-        public static CalendarEvent? UpdateEventByUid(
+        public static async Task<CalendarEvent?> UpdateEventByUid(
         string uid,
         Action<CalendarEvent> updateAction)
         {
@@ -225,7 +255,7 @@ namespace XRUIOS.Barebones
                 updateAction(calendarEvent);
 
                 var serializer = new CalendarSerializer();
-                File.WriteAllText(file, serializer.SerializeToString(calendar));
+                await File.WriteAllTextAsync(file, serializer.SerializeToString(calendar));
 
                 // 4️⃣ Return updated event (caller schedules)
                 return calendarEvent;
@@ -257,7 +287,7 @@ namespace XRUIOS.Barebones
                     if (calendar.Events.Count == 0)
                         File.Delete(file);
                     else
-                        File.WriteAllText(
+                        File.WriteAllTextAsync(
                             file,
                             new CalendarSerializer().SerializeToString(calendar)
                         );

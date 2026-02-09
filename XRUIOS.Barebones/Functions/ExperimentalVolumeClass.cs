@@ -1,16 +1,11 @@
-﻿using Microsoft.VisualBasic;
-using Pariah_Cybersecurity;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Text;
-using System.Text.Json.Nodes;
+﻿using System.Text.Json.Nodes;
 using static Pariah_Cybersecurity.DataHandler;
+using static XRUIOS.Barebones.SoundEQClass;
 using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones
 {
-    public class VolumeClass
+    public class ExperimentalAudioClass
     {
 
 
@@ -43,10 +38,11 @@ namespace XRUIOS.Barebones
         public static class ExperimentalVolumeClass
         {
 
-            public static ExperimentalAudio GetExperimentalAudioSettings(ExperimentalAudio tempAudio)
+            public static ExperimentalAudio GetExperimentalAudioSettings()
             {
                 return AdvancedAudioSettings;
             }
+
 
             public static void SetExperimentalAudioSettings(
                bool? EnvironmentalReduction = null,
@@ -70,7 +66,7 @@ namespace XRUIOS.Barebones
             {
                 var directoryPath = Path.Combine(DataPath, "ExpAudio");
 
-                if (File.Exists(Path.Combine(directoryPath + "ExpAudio.JSON")))
+                if (!File.Exists(Path.Combine(directoryPath, "ExpAudio.JSON")))
                 {
                     await JSONDataHandler.CreateJsonFile(directoryPath, "ExpAudio", new JsonObject());
                 }
@@ -122,7 +118,7 @@ namespace XRUIOS.Barebones
             {
                 var directoryPath = Path.Combine(DataPath, "MasterVol");
 
-                if (File.Exists(Path.Combine(directoryPath + "MasterVol.JSON")))
+                if (!File.Exists(Path.Combine(directoryPath, "MasterVol.JSON")))
                 {
                     await JSONDataHandler.CreateJsonFile(directoryPath, "MasterVol", new JsonObject());
                 }
@@ -157,7 +153,7 @@ namespace XRUIOS.Barebones
         }
 
 
- 
+
 
     }
 

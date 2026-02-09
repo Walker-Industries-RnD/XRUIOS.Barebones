@@ -1,90 +1,61 @@
-﻿using Microsoft.VisualBasic;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using static Pariah_Cybersecurity.DataHandler;
-using static Walker.Crypto.SimpleAESEncryption;
+﻿using static Pariah_Cybersecurity.DataHandler;
 using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones
 {
     public static class RecentlyRecordedClass
     {
-
-        //Basically get and set with an add function
+        private const int MaxRecent = 30;
 
         public static async Task<List<FileRecord>> GetRecentlyRecorded()
         {
             var directoryPath = Path.Combine(DataPath, "RecentlyRecorded");
-
-            var FileWithRecentlyRecorded= await JSONDataHandler.LoadJsonFile(directoryPath, "RecentlyRecorded");
-            var loaded = (List<FileRecord>)await JSONDataHandler.GetVariable<List<FileRecord>>(FileWithRecentlyRecorded, "RecentlyRecorded", encryptionKey);
-
+            var file = await JSONDataHandler.LoadJsonFile(directoryPath, "RecentlyRecorded");
+            var loaded = (List<FileRecord>)await JSONDataHandler.GetVariable<List<FileRecord>>(file, "RecentlyRecorded", encryptionKey);
             return loaded;
         }
 
-        public static async Task AddToRecentlyRecorded(FileRecord NewlyRecorded)
+        public static async Task AddToRecentlyRecorded(FileRecord newlyRecorded)
         {
             var directoryPath = Path.Combine(DataPath, "RecentlyRecorded");
+            var file = await JSONDataHandler.LoadJsonFile(directoryPath, "RecentlyRecorded");
+            var loaded = (List<FileRecord>)await JSONDataHandler.GetVariable<List<FileRecord>>(file, "RecentlyRecorded", encryptionKey);
 
-            //Get the JSON File holding the MusicDirectory object for the user
-            var FileWithRecentlyRecorded = await JSONDataHandler.LoadJsonFile(directoryPath, "RecentlyRecorded");
-            var loaded = (List<FileRecord>)await JSONDataHandler.GetVariable<List<FileRecord>>(FileWithRecentlyRecorded, "RecentlyRecorded", encryptionKey);
+            // Remove oldest if over limit
+            if (loaded.Count >= MaxRecent)
+                loaded.RemoveAt(0);
 
-            if (loaded.Count >= 30)
-            {
-                loaded.RemoveAt(29);
-            }
+            loaded.Add(newlyRecorded);
 
-            loaded.Add(NewlyRecorded);
-
-            var updatedJSON = await JSONDataHandler.UpdateJson<List<FileRecord>>(FileWithRecentlyRecorded, "RecentlyRecorded", loaded, encryptionKey);
-
+            var updatedJSON = await JSONDataHandler.UpdateJson<List<FileRecord>>(file, "RecentlyRecorded", loaded, encryptionKey);
             await JSONDataHandler.SaveJson(updatedJSON);
-
         }
 
         public static async Task DeleteSoundRecentlyRecorded(FileRecord deletedData)
         {
             var directoryPath = Path.Combine(DataPath, "RecentlyRecorded");
+            var file = await JSONDataHandler.LoadJsonFile(directoryPath, "RecentlyRecorded");
+            var loaded = (List<FileRecord>)await JSONDataHandler.GetVariable<List<FileRecord>>(file, "RecentlyRecorded", encryptionKey);
 
-            //Get the JSON File holding the MusicDirectory object for the user
-            var FileWithRecentlyRecorded = await JSONDataHandler.LoadJsonFile(directoryPath, "RecentlyRecorded");
-            var loaded = (List<FileRecord>)await JSONDataHandler.GetVariable<List<FileRecord>>(FileWithRecentlyRecorded, "RecentlyRecorded", encryptionKey);
-
-            if (!loaded.Any(d => d.GetHashCode() == deletedData.GetHashCode()))
-            {
+            var item = loaded.FirstOrDefault(d => d.GetHashCode() == deletedData.GetHashCode());
+            if (item == null)
                 throw new InvalidOperationException("This does not exist as a saved, stored item.");
-            }
 
-            var dataToRemove = loaded.First(d => d.GetHashCode() == deletedData.GetHashCode());
-            {
-                loaded.Remove(dataToRemove);
-            }
+            loaded.Remove(item);
 
-            var updatedJSON = await JSONDataHandler.UpdateJson<List<FileRecord>>(FileWithRecentlyRecorded, "RecentlyRecorded", loaded, encryptionKey);
-
-            await JSONDataHandler.SaveJson(FileWithRecentlyRecorded);
+            var updatedJSON = await JSONDataHandler.UpdateJson<List<FileRecord>>(file, "RecentlyRecorded", loaded, encryptionKey);
+            await JSONDataHandler.SaveJson(updatedJSON);
         }
 
         public static async Task ClearRecentlyRecorded()
         {
             var directoryPath = Path.Combine(DataPath, "RecentlyRecorded");
-
-            //Get the JSON File holding the MusicDirectory object for the user
-            var FileWithRecentlyRecorded = await JSONDataHandler.LoadJsonFile(directoryPath, "RecentlyRecorded");
-            var loaded = (List<FileRecord>)await JSONDataHandler.GetVariable<List<FileRecord>>(FileWithRecentlyRecorded, "RecentlyRecorded", encryptionKey);
+            var file = await JSONDataHandler.LoadJsonFile(directoryPath, "RecentlyRecorded");
+            var loaded = (List<FileRecord>)await JSONDataHandler.GetVariable<List<FileRecord>>(file, "RecentlyRecorded", encryptionKey);
 
             loaded.Clear();
-            var updatedJSON = await JSONDataHandler.UpdateJson<List<FileRecord>>(FileWithRecentlyRecorded, "RecentlyRecorded", loaded, encryptionKey);
-
-            await JSONDataHandler.SaveJson(FileWithRecentlyRecorded);
+            var updatedJSON = await JSONDataHandler.UpdateJson<List<FileRecord>>(file, "RecentlyRecorded", loaded, encryptionKey);
+            await JSONDataHandler.SaveJson(updatedJSON);
         }
-
-
-
-
-
     }
-
 }

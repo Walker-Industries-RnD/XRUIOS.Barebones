@@ -1,8 +1,5 @@
 ﻿using ATL;
 using Pariah_Cybersecurity;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Text.Json.Nodes;
 using static Pariah_Cybersecurity.DataHandler;
 using static XRUIOS.Barebones.XRUIOS;
@@ -11,6 +8,15 @@ namespace XRUIOS.Barebones
 {
     public class Songs
     {
+
+        //Add music playlist support later
+
+
+
+
+
+
+
 
 
 
@@ -857,7 +863,7 @@ namespace XRUIOS.Barebones
                     detailed = await BinaryConverter.NCByteArrayToObjectAsync<SongDetailed>(detailedBytes);
                 }
 
-                // Optional: force full re-parse from audio file (e.g. tags changed externally)
+                // Optional: force full re-parse from audio file (tags changed externally)
                 if (forceReParseFromAudio)
                 {
                     var (freshOverview, freshDetailed) = await CreateSongInfo(audioFile, directoryUUID, autoTag: true);
@@ -1928,6 +1934,27 @@ namespace XRUIOS.Barebones
 
 
         }
+
+        public class Playlists()
+        {
+
+            //We simply use ATLDOTNET for this and metadata for songs, i'm too lazy to do it any other way
+
+            //C
+
+
+
+            //R
+
+
+            //U
+
+
+            //D
+
+
+        }
+
 
     }
 

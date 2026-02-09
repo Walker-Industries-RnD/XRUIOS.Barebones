@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Management;
-using System.Text;
+﻿using System.Management;
 using System.Text.Json.Nodes;
 
 namespace XRUIOS.Barebones.Functions
@@ -26,7 +23,7 @@ namespace XRUIOS.Barebones.Functions
 
                 public SystemSpecs() { }
 
-                static SystemSpecs GenerateSpecs()
+                public SystemSpecs GenerateSpecs()
                 {
                     SystemSpecs specs = new SystemSpecs
                     {
@@ -145,19 +142,19 @@ namespace XRUIOS.Barebones.Functions
 
             static string CheckHardware()
             {
-              //Does this have a display?
-              //Does this have 2D capability?
-              //Does this have 3D capability?
-              //Does this have VR capability?
-              //Is the VR session active?
+                //Does this have a display?
+                //Does this have 2D capability?
+                //Does this have 3D capability?
+                //Does this have VR capability?
+                //Is the VR session active?
 
-               //Nah i'll be lazy LOL, back to this at the end
+                //Nah i'll be lazy LOL, back to this at the end
 
                 return "WOW!";
             }
 
             //Okay what the HELL was younger me doing, we can still use this and it's good but let's format it as a JsonObject Instead
-            
+
             //No, this is past me (Well older than younger me); this is fine
         }
 

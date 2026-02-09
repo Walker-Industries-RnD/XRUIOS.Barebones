@@ -1,9 +1,6 @@
 ﻿using CsvHelper;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Globalization;
-using System.Text;
 using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones
@@ -75,7 +72,7 @@ namespace XRUIOS.Barebones
         //Create Later
         public static void SaveStopwatchValuesAsSheet(List<StopwatchRecord> Values, DateTime RecordedOn, string FileName)
         {
-            var directoryPath = Path.Combine(DataPath, $"{FileName}____RecordedOn_{RecordedOn.ToShortDateString()}_{RecordedOn.ToShortTimeString()}.csv");
+            var directoryPath = Path.Combine(DataPath, $"{FileName}____RecordedOn_{RecordedOn:yyyy-MM-dd_HH-mm-ss}.csv");
 
             using (var writer = new StreamWriter(directoryPath))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))

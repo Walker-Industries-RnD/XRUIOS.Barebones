@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace XRUIOS.Barebones.Functions
+﻿namespace XRUIOS.Barebones
 {
     public class Color
     {
@@ -10,6 +6,8 @@ namespace XRUIOS.Barebones.Functions
         public int G = 0;
         public int B = 0;
         public int A = 0;
+
+        public Color() { }
 
         public Color(int r, int g, int b, int a)
         {
@@ -74,8 +72,6 @@ namespace XRUIOS.Barebones.Functions
         public static readonly Color MakishimaWhite = new Color(240, 240, 240, 255);  // Soft white
         public static readonly Color UltraInstinctWhite = new Color(255, 255, 255, 255);  // Bright white
         public static readonly Color TheDrinkPurple = new Color(128, 0, 255, 255);    // Neon purple
-
-
 
 
     }

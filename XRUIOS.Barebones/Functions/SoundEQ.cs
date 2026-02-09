@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using static Pariah_Cybersecurity.DataHandler;
-using static XRUIOS.Barebones.VolumeClass;
+﻿using static Pariah_Cybersecurity.DataHandler;
+using static XRUIOS.Barebones.ExperimentalAudioClass;
 using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones
@@ -48,7 +45,7 @@ namespace XRUIOS.Barebones
 
         public static async Task SetCurrentEQ(SoundEQ soundSetting)
         {
-            CurrentSoundSetting.Set(soundSetting); 
+            CurrentSoundSetting.Set(soundSetting);
         }
 
 
@@ -92,8 +89,8 @@ namespace XRUIOS.Barebones
 
             return loaded;
         }
-     
-        
+
+
         public static async Task<SoundEQ> GetSoundEQDB(string eqDBName)
         {
             var directoryPath = Path.Combine(DataPath, "EQDB");
@@ -224,3 +221,4 @@ namespace XRUIOS.Barebones
 
     }
 }
+        

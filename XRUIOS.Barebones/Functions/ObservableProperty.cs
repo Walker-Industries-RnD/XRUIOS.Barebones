@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace XRUIOS.Barebones
+﻿namespace XRUIOS.Barebones
 {
 
     //From https://gist.github.com/bugshake/d4a6ea578f2f96f07c5c6c2d701141e6

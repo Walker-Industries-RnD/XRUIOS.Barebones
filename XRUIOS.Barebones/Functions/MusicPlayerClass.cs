@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using static XRUIOS.Barebones.Songs;
+﻿using static XRUIOS.Barebones.Songs;
 
 namespace XRUIOS.Barebones
 {
@@ -9,12 +6,12 @@ namespace XRUIOS.Barebones
     {
 
         internal static Songs.SongOverview? CurrentlyPlaying;
-        internal static List<Songs.SongOverview> Queue;
+        internal static List<Songs.SongOverview> Queue = new List<Songs.SongOverview>();
 
         public static class CurrentlyPlayingClass
         {
             //R
-            public static SongOverview GetCurrentlyPlaying()
+            public static SongOverview? GetCurrentlyPlaying()
             {
                 return CurrentlyPlaying;
             }
@@ -22,25 +19,7 @@ namespace XRUIOS.Barebones
             //U
             public static async Task SetCurrentlyPlaying(string audioFile, string directoryUUID)
             {
-                var overview = await SongClass.GetSongInfo(audioFile, directoryUUID, SongClass.MusicInfoStyle.overview);
-
-                //Try creating if an overview doesn't exist
-                if (overview.Item1 == null)
-                {
-                    await SongClass.CreateSongInfo(audioFile, directoryUUID);
-                    overview = await SongClass.GetSongInfo(audioFile, directoryUUID, SongClass.MusicInfoStyle.overview);
-                }
-
-                if (overview.Item1 == null)
-                {
-
-                    await SongClass.CreateSongInfo(audioFile, directoryUUID);
-
-                    throw new InvalidOperationException("The song overview could not be found or created.");
-                }
-
-                CurrentlyPlaying = (Songs.SongOverview)overview.Item1;
-
+                CurrentlyPlaying = await GetOrCreateOverview(audioFile, directoryUUID);
                 await MusicHistoryClass.AddToPlayHistory(audioFile, directoryUUID);
             }
 
@@ -56,7 +35,7 @@ namespace XRUIOS.Barebones
         public static class MusicQueueClass
         {
             //C
-            public static List<SongOverview> GetCurrentlyPlaying()
+            public static List<SongOverview> GetQueue()
             {
                 return Queue;
             }
@@ -64,56 +43,79 @@ namespace XRUIOS.Barebones
             //R
             public static async Task AddToMusicQueue(string audioFile, string directoryUUID)
             {
-                var overview = await SongClass.GetSongInfo(audioFile, directoryUUID, SongClass.MusicInfoStyle.overview);
-
-                //Try creating if an overview doesn't exist
-                if (overview.Item1 == null)
-                {
-                    await SongClass.CreateSongInfo(audioFile, directoryUUID);
-                    overview = await SongClass.GetSongInfo(audioFile, directoryUUID, SongClass.MusicInfoStyle.overview);
-                }
-
-                if (overview.Item1 == null)
-                {
-
-                    await SongClass.CreateSongInfo(audioFile, directoryUUID);
-
-                    throw new InvalidOperationException("The song overview could not be found or created.");
-                }
-
-                Queue.Add((SongOverview)overview.Item1);
+                var song = await GetOrCreateOverview(audioFile, directoryUUID);
+                Queue.Add(song);
             }
 
             //U
-            public static async Task ReorderSong(SongOverview item, int ReorderNumber)
+            public static async Task ReorderSong(SongOverview item, int newIndex)
             {
-                if (item == null || !Queue.Contains(item) || ReorderNumber < 0 || ReorderNumber >= Queue.Count)
-                {
-                    throw new InvalidOperationException("The reorder number is invalid.");
-                }
+                if (item == null)
+                    throw new ArgumentNullException(nameof(item), "Song cannot be null.");
 
-                Queue.Remove(item);
-                Queue.Insert(ReorderNumber, item);
+                int currentIndex = Queue.IndexOf(item);
+                if (currentIndex == -1)
+                    throw new InvalidOperationException("Song not found in the queue.");
 
+                // Allow moving to end
+                if (newIndex < 0 || newIndex > Queue.Count)
+                    throw new ArgumentOutOfRangeException(nameof(newIndex), "Reorder number is out of range.");
+
+                Queue.RemoveAt(currentIndex);
+
+                // If you removed an item before the newIndex and it was after it, shift newIndex down
+                if (newIndex > currentIndex)
+                    newIndex--;
+
+                Queue.Insert(newIndex, item);
             }
+
 
             //D
-            public static async Task RemoveSong(SongOverview item, int ReorderNumber)
+            public static async Task RemoveSong(SongOverview item)
             {
                 Queue.Remove(item);
 
             }
+
+            public static async Task RemoveSong(int item)
+            {
+                Queue.RemoveAt(item);
+
+            }
+
 
             public static async Task ResetQueue()
             {
                 Queue = new List<Songs.SongOverview>();
             }
+            //Helper
+
+
 
         }
+
+        //Trying something new
+        public static async Task<SongOverview> GetOrCreateOverview(string audioFile, string directoryUUID)
+        {
+            var overview = await SongClass.GetSongInfo(audioFile, directoryUUID, SongClass.MusicInfoStyle.overview);
+
+            if (overview.Item1 == null)
+            {
+                await SongClass.CreateSongInfo(audioFile, directoryUUID);
+                overview = await SongClass.GetSongInfo(audioFile, directoryUUID, SongClass.MusicInfoStyle.overview);
+
+                if (overview.Item1 == null)
+                    throw new InvalidOperationException("The song overview could not be found or created.");
+            }
+
+            return (SongOverview)overview.Item1;
+        }
+
         //Convert musicqueue to playlist
         public static class Random
         {
-
+            //Gets random music stuff, will do later
         }
 
 
