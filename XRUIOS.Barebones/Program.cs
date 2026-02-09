@@ -1143,7 +1143,7 @@ namespace XRUIOS.TestHarness
 
             // Create a theme
             var testTheme = new XRUIOSTheme(
-                new ThemeSystem.ThemeIdentity("sao001", "SAO Dark", "Herman", "1.0", new List<string> { "VR", "Desktop" }),
+                new ThemeSystem.ThemeIdentity("sao001", "SAO Dark", "WalkerDev", "1.0", new List<string> { "VR", "Desktop" }),
                 new ThemeColors(
                     ("", "#0a0a0a"),       // BackgroundPrimary
                     ("", "#1a1a1a"),       // BackgroundSecondary
@@ -1187,7 +1187,7 @@ namespace XRUIOS.TestHarness
             Console.WriteLine("Creating test Evangelion theme...");
 
             var evaTheme = new XRUIOSTheme(
-                new ThemeSystem.ThemeIdentity("eva001", "NERV Dark", "Herman", "1.0", new List<string> { "VR", "Desktop" }),
+                new ThemeSystem.ThemeIdentity("eva001", "NERV Dark", "WalkerDev", "1.0", new List<string> { "VR", "Desktop" }),
                 new ThemeColors(
                     ("", "#0a0a0a"),       // BackgroundPrimary (dark)
                     ("", "#1a1a1a"),       // BackgroundSecondary
