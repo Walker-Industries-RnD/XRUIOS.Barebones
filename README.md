@@ -2,9 +2,10 @@ Unfinished, there are still chunks that need to be fixed for the v1 (Windows Cen
 
 Current Goals Include:
 
-- Getting all test functions working and green 
-- Making the Stride3D runtime
-- Connecting to Project Replicant
+- Adding the Window Renderers for VR to Desktop and Desktop to VR
+- Fixing Songs, Music Queue and Playlists (Possibly Geo stuff too, add virtual Geo)
+- Making the ~~Stride3D~~ Godot runtime
+- Connecting to Project Replicant with Eclipse/Dirac Sea
 - Putting within Plagues Protocol
 
 <img width="225" height="224" alt="image" src="https://github.com/user-attachments/assets/752b019f-aaec-455a-a311-9b583618c25d" />
