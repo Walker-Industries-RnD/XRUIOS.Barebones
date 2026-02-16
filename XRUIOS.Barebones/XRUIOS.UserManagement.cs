@@ -54,6 +54,8 @@ namespace XRUIOS_UserManager
                 throw;
             }
 
+            
+
             var initTasks = new List<Func<Task>>
     {
         async () => { PrintWithPause("[NERV] → Base filesystem check... OK"); },
@@ -63,6 +65,7 @@ namespace XRUIOS_UserManager
         async () => { await InitiateDataManagerFavorites();PrintWithPause("[DATASLOT] → Spatial bookmark favorites loaded"); },
         async () => { await InitiateLocationHistory();     PrintWithPause("[GEO] → Absolute coordinate log initialized"); },
         async () => { await InitiateRelativeCoordinates(); PrintWithPause("[GEO] → Relative AR jitter buffer active"); },
+                async () => { await InitiateVirtualCoordinates(); PrintWithPause("[GEO] → Virtual Coordinate System Activated"); },
         async () => { await InitiateMediaAlbumClassFavorites(); PrintWithPause("[MEDIA] → Album favorites secured"); },
         async () => { await InitiateMediaTaggerFavorites();PrintWithPause("[TAGGER] → Creator metadata vault opened"); },
         async () => { await InitiateNoteFavorites();       PrintWithPause("[JOURNAL] → Favorite entry anchors locked"); },
@@ -73,7 +76,10 @@ namespace XRUIOS_UserManager
         async () => { await InitiateVolume();              PrintWithPause("[AUDIO] → Volume matrix \"NERV BRIDGE MIX\" applied"); },
         async () => { await InitializeExperimentalVolume();     PrintWithPause("[AUDIO] → Experimental EVA Audio Systems Initialized"); },
         async () => { await InitiateCalendar();            PrintWithPause("[SCHEDULE] → Event calendar database initialized"); },
-        async () => { await InitiateWorldPoint();          PrintWithPause("[SPATIAL] → World point anchor system primed"); }
+        async () => { await InitiateWorldPoint();          PrintWithPause("[SPATIAL] → World point anchor system primed"); },
+                async () => { await InitiateTheme();          PrintWithPause("[THEME] → System theme slots created."); },
+                async () => {await InitiateWorldEvents();          PrintWithPause("[EVENTS] → World Event Container Created");}
+
     };
 
             Console.ForegroundColor = ConsoleColor.Red;
@@ -239,6 +245,20 @@ namespace XRUIOS_UserManager
             await JSONDataHandler.SaveJson(relativeCoordFile);
         }
 
+        public static async Task InitiateVirtualCoordinates()
+        {
+            var directoryPath = Path.Combine(DataPath, "Coords");
+            Directory.CreateDirectory(directoryPath);
+            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+
+            await JSONDataHandler.CreateJsonFile("VirtualLocationData", directoryPath, new JsonObject());
+
+            var relativeCoordFile = await JSONDataHandler.LoadJsonFile("VirtualLocationData", directoryPath);
+            relativeCoordFile = await JSONDataHandler.AddToJson<List<LocationPoint>>(relativeCoordFile, "Data", new List<LocationPoint>(), encryptionKey);
+
+            await JSONDataHandler.SaveJson(relativeCoordFile);
+        }
+
         public static async Task InitiateMediaAlbumClassFavorites()
         {
             var directoryPath = Path.Combine(DataPath, "MediaAlbum");
@@ -336,9 +356,9 @@ namespace XRUIOS_UserManager
             favoritesFile = await JSONDataHandler.AddToJson<List<SoundEQ>>(favoritesFile, "Data", new List<SoundEQ>(), encryptionKey);
 
             var fancyoptions = new ExperimentalAudio(false, false, 0, 0);
-            var loaded = new SoundEQ(default, 100, 100, 100, 100, 100, 100, 100, fancyoptions);
+            var loaded = new SoundEQ("Default", 100, 100, 100, 100, 100, 100, 100, fancyoptions);
 
-            await JSONDataHandler.UpdateJson<SoundEQ>(favoritesFile, "DefaultEQDB", loaded, encryptionKey);
+            await JSONDataHandler.AddToJson<SoundEQ>(favoritesFile, "DefaultEQDB", loaded, encryptionKey);
             await JSONDataHandler.SaveJson(favoritesFile);
         }
 
@@ -351,7 +371,7 @@ namespace XRUIOS_UserManager
             await JSONDataHandler.CreateJsonFile("VolumeMixings", directoryPath, new JsonObject());
 
             var favoritesFile = await JSONDataHandler.LoadJsonFile("VolumeMixings", directoryPath);
-            favoritesFile = await JSONDataHandler.AddToJson<List<VolumeSetting>>(favoritesFile, "Data", new List<VolumeSetting>(), encryptionKey);
+            favoritesFile = await JSONDataHandler.AddToJson<List<VolumeSetting>>(favoritesFile, "VolumeMixings", new List<VolumeSetting>(), encryptionKey);
 
             await JSONDataHandler.SaveJson(favoritesFile);
         }
@@ -386,8 +406,26 @@ namespace XRUIOS_UserManager
         }
 
 
+        public static async Task InitiateTheme()
+        {
+            var directoryPath = Path.Combine(DataPath, "Themes");
+            Directory.CreateDirectory(directoryPath);
 
+        }
 
+        public static async Task InitiateWorldEvents()
+        {
+            var directoryPath = Path.Combine(DataPath, "WorldEvents");
+            Directory.CreateDirectory(directoryPath);
+            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+
+            await JSONDataHandler.CreateJsonFile("WorldEvents", directoryPath, new JsonObject());
+
+            var recentlyRecorded = await JSONDataHandler.LoadJsonFile("WorldEvents", directoryPath);
+            recentlyRecorded = await JSONDataHandler.AddToJson<List<WorldEventsClass.WorldEvent>>(recentlyRecorded, "WorldEvents", new List<WorldEventsClass.WorldEvent>(), encryptionKey);
+
+            await JSONDataHandler.SaveJson(recentlyRecorded);
+        }
 
 
 

@@ -66,14 +66,16 @@ namespace XRUIOS.Barebones.Functions
         //LLet's try something a little different
         private static async Task<List<NotificationContent>> LoadAllAsync()
         {
-            var historyFile = await DataHandler.JSONDataHandler.LoadJsonFile("NotificationHistory", DataPath);
+            var directoryPath = Path.Combine(DataPath, "NotificationHistory");
+            var historyFile = await DataHandler.JSONDataHandler.LoadJsonFile("NotificationHistory", directoryPath);
             var notifications = (List<NotificationContent>?)await DataHandler.JSONDataHandler.GetVariable<List<NotificationContent>>(historyFile, "Data", encryptionKey);
             return notifications ?? new List<NotificationContent>();
         }
 
         private static async Task SaveAllAsync(List<NotificationContent> notifications)
         {
-            var historyFile = await DataHandler.JSONDataHandler.LoadJsonFile("NotificationHistory", DataPath);
+            var directoryPath = Path.Combine(DataPath, "NotificationHistory");
+            var historyFile = await DataHandler.JSONDataHandler.LoadJsonFile("NotificationHistory", directoryPath);
             var editedJson = await DataHandler.JSONDataHandler.UpdateJson<List<NotificationContent>>(historyFile, "Data", notifications, encryptionKey);
             await DataHandler.JSONDataHandler.SaveJson(editedJson);
 
@@ -113,5 +115,6 @@ namespace XRUIOS.Barebones.Functions
         {
             await SaveAllAsync(new List<NotificationContent>());
         }
+
     }
 }

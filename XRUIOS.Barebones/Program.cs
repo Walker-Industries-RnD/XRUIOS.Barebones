@@ -1,5 +1,8 @@
-﻿using System.Numerics;
+﻿using Silk.NET.OpenXR;
+using System.Collections.ObjectModel;
+using System.Numerics;
 using System.Text;
+using System.Text.Json;
 using XRUIOS.Barebones;
 using XRUIOS.Barebones.Functions;
 using XRUIOS_UserManager;
@@ -12,6 +15,7 @@ using static XRUIOS.Barebones.Functions.SystemInfoDisplayClass.SystemInfoDisplay
 using static XRUIOS.Barebones.Functions.ThemeSystem;
 using static XRUIOS.Barebones.Functions.VolumeClass;
 using static XRUIOS.Barebones.Songs;
+using static XRUIOS.Barebones.Songs.SongGetClass;
 using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.TestHarness
@@ -154,9 +158,13 @@ namespace XRUIOS.TestHarness
             Console.ForegroundColor = ConsoleColor.Yellow;
             Console.WriteLine("\n  [NERV] Commencing full system stress test. Don't screw this up.");
             Console.ResetColor();
-
             var testPhases = new List<(Func<Task> testFunc, string desc)>
+
+            //Songs, Playlists and Queues not working, GeoClass won't work on PC
+
 {
+                (TestSongs, "[SONGS] Full metadata extraction & directory scanning"),
+(TestPlaylists, "[PLAYLISTS] Creation, song management & resolution"),
     (TestAlarm,             "[ALARM] Angel intercept timers & recurring patterns"),
     (TestApps,              "[DOCK] App manifest deployment & favorite loadouts"),
     (TestWorldPoints,       "[SPATIAL] World anchor points & static object placement"),
@@ -170,7 +178,6 @@ namespace XRUIOS.TestHarness
     (TestGeoClass,          "[GEO] Exact & relative coordinate logging"),
     (TestMediaAlbumClass,   "[MEDIA] Album creation & favorite tagging"),
     (TestMediaTagger,       "[TAGGER] Creator metadata association"),
-    (TestMusicQueue,        "[QUEUE] Playback queue & currently-playing state"),
     (TestNotes,             "[JOURNAL] Thematic lore journals & category structure"),
     (TestNotifications,     "[ALERT] Notification queue & button actions"),
     (TestSoundEQ,           "[EQ] Sound profile database & default switching"),
@@ -179,7 +186,11 @@ namespace XRUIOS.TestHarness
     (TestThemes,            "[THEME] SAO-style theme engine test"),
     (TestThemes2,           "[THEME] Evangelion NERV Dark theme deployment"),
     (TestVolume,            "[VOLUME] Contextual mix presets & bridge audio routing"),
-    (TestTimer,             "[SYNC] Asynchronous EVA unit sync timers")
+    (FullYuukoTest,            "[?????] A shimmering shard of SpaceTime"),
+    (TestTimer,             "[SYNC] Asynchronous EVA unit sync timers"),
+        (TestMusicQueue,        "[QUEUE] Playback queue & currently-playing state"),
+        (TestWorldEvents,        "[EVENTS] Recording World And Events")
+
 };
 
             int phaseCount = 1;
@@ -222,6 +233,54 @@ namespace XRUIOS.TestHarness
             Console.ResetColor();
 
             Console.ReadKey(true);
+        }
+
+        static async Task FullYuukoTest()
+        {
+            string testBase = Path.Combine(DataPath, "YuukoTests");
+            Directory.CreateDirectory(testBase);
+            Console.WriteLine("=== Full Yuuko + Media Test Started ===");
+
+            // Create a sample folder
+            string sampleDir = Path.Combine(testBase, "SampleFolder");
+            Directory.CreateDirectory(sampleDir);
+            Console.WriteLine("Creating Generic Directory via Media class...");
+
+            var record = await Media.AddGenericDirectory(sampleDir, "SampleFolder");
+            string uuid = record.UUID;
+            Console.WriteLine($"Created UUID: {uuid}, Path: {record.Path}");
+
+            // 2 Get resolved directories
+            Console.WriteLine("Getting Generic Directories (resolved only)...");
+            var (resolvedDirs, _) = await Media.GetGenericDirectories();
+            foreach (var dir in resolvedDirs)
+                Console.WriteLine($"Resolved Directory: UUID={dir.UUID}, Name={dir.PathName}, Path={dir.Path}");
+
+            // 3 Update the directory
+            string updatedDir = Path.Combine(testBase, "UpdatedFolder");
+            Directory.CreateDirectory(updatedDir);
+            Console.WriteLine("Updating Generic Directory...");
+            await Media.UpdateGenericDirectory(uuid, updatedDir, "UpdatedFolder");
+            Console.WriteLine("Update complete.");
+
+            // 4 Create a file and test GetFile
+            string testFile = "testfile.txt";
+            string testFilePath = Path.Combine(updatedDir, testFile);
+            File.WriteAllText(testFilePath, "Hello Yuuko!");
+            Console.WriteLine("Testing Media.GetFile...");
+
+            var mediaInfo = await Media.GetFile(uuid, testFile);
+            Console.WriteLine($"File found: {mediaInfo.FileName}, Path: {mediaInfo.FullPath}, Size: {mediaInfo.SizeBytes} bytes");
+
+            // 5 Remove the directory
+            Console.WriteLine("Removing Generic Directory...");
+            await Media.RemoveGenericDirectory(uuid, deleteDirectory: true);
+
+            // 6 Verify deletion
+            Console.WriteLine("Directory removed. Checking if it still exists...");
+            Console.WriteLine(Directory.Exists(updatedDir) ? "Directory still exists!" : "Directory successfully deleted.");
+
+            Console.WriteLine("=== Full Yuuko + Media Test Completed ===");
         }
 
 
@@ -696,7 +755,7 @@ namespace XRUIOS.TestHarness
                 EnvironmentalReductionPercentage: 40,
                 DecibelLimitLevel: 80
             );
-
+  
             MasterVolume = 75;
 
             Console.WriteLine($"Initial MasterVolume: {MasterVolume}");
@@ -860,76 +919,100 @@ namespace XRUIOS.TestHarness
         }
         public static async Task TestMusicQueue()
         {
-            // Step 1: Resolve the system Music folder
-            string musicDir = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyMusic));
-            string musicDirUUID = "example-music-uuid"; // XRUIOS UUID placeholder
+            Console.WriteLine("Final Class To Fix - Patched Version");
 
-            var manager = new Yuuko.Bindings.DirectoryManager(Path.Combine(DataPath, "Music"));
-            await manager.LoadBindings();
-
-            var directoryData = await manager.GetOrCreateDirectory(musicDir, musicDir);
-            musicDirUUID = directoryData.Uuid; // Use the real UUID XRUIOS expects
-            string resolvedPath = directoryData.ResolvedPath;
-
-            Console.WriteLine($"Resolved Music directory UUID: {musicDirUUID}");
-            Console.WriteLine($"Resolved path: {resolvedPath}");
-
-            // Step 2: Register the folder in XRUIOS GenericBank
-            try
+            // Step 1: Resolve user's Music folder
+            string musicDir = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
+            if (string.IsNullOrEmpty(musicDir) || !Directory.Exists(musicDir))
             {
-                await Media.AddGenericDirectory(resolvedPath, "System Music");
-            }
-            catch (InvalidOperationException)
-            {
-                // Folder already registered, fine
-            }
-
-            // Step 3: Enumerate mp3 files and ensure each has an overview
-            var musicFiles = Directory.EnumerateFiles(resolvedPath, "*.mp3").ToList();
-            if (musicFiles.Count == 0)
-            {
-                Console.WriteLine("No mp3 files found in your Music folder.");
+                Console.WriteLine("CRITICAL: Could not resolve Music folder!");
+                Console.WriteLine("Windows: usually C:\\Users\\YourName\\Music");
+                Console.WriteLine("macOS/Linux: usually ~/Music");
                 return;
             }
 
-            foreach (var file in musicFiles)
+            Console.WriteLine($"Using real Music directory: {musicDir}");
+
+            // Step 2: DirectoryManager resolves folder
+            var manager = new Yuuko.Bindings.DirectoryManager(Path.Combine(DataPath, "Music"));
+            await manager.LoadBindings();
+            var (musicDirUUID, resolvedPath) = await manager.GetOrCreateDirectory(musicDir);
+            Console.WriteLine($"Resolved Music UUID: {musicDirUUID}");
+            Console.WriteLine($"Resolved XRUIOS path: {resolvedPath}");
+
+            // Step 3: Add to Media and sync UUID
+            var mediaRecord = await Media.AddGenericDirectory(resolvedPath, "System Music Folder");
+            musicDirUUID = mediaRecord.UUID; // USE the Media UUID from now on
+
+            // Step 4: Find MP3 files
+            var musicFiles = Directory.EnumerateFiles(musicDir, "*.mp3", SearchOption.TopDirectoryOnly).ToList();
+            if (musicFiles.Count == 0)
             {
-                string fileName = Path.GetFileName(file);
+                Console.WriteLine("No .mp3 files found in your Music folder. Add some songs and retry.");
+                return;
+            }
+
+            Console.WriteLine($"Found {musicFiles.Count} MP3 files. Processing metadata...");
+
+            // Step 5: Ensure files are registered in Media
+            foreach (var fullFilePath in musicFiles)
+            {
+                string fileName = Path.GetFileName(fullFilePath);
+                try
+                {
+                    var media = await Media.GetFile(musicDirUUID, fileName);
+                    Console.WriteLine($"  Already registered: {fileName} → {media.FullPath}");
+                }
+                catch (FileNotFoundException)
+                {
+                    Console.WriteLine($"  Not yet registered: {fileName}, registering now...");
+                 }
+            }
+
+            // Step 6: Create overviews (after registration)
+            foreach (var fullFilePath in musicFiles)
+            {
+                string fileName = Path.GetFileName(fullFilePath);
                 try
                 {
                     await MusicPlayerClass.GetOrCreateOverview(fileName, musicDirUUID);
+                    Console.WriteLine($"Overview ready for: {fileName}");
                 }
-                catch
+                catch (Exception ex)
                 {
-                    await SongClass.CreateSongInfo(fileName, musicDirUUID);
+                    Console.WriteLine($"Failed to create overview for {fileName}: {ex.Message}");
                 }
             }
 
-            // Step 4: Pick a random file to play
-            string randomSong = Path.GetFileName(musicFiles[new Random().Next(musicFiles.Count)]);
+            // Step 7: Play a random song
+            var random = new Random();
+            string randomSongFileName = Path.GetFileName(musicFiles[random.Next(musicFiles.Count)]);
+            await MusicPlayerClass.CurrentlyPlayingClass.SetCurrentlyPlaying(randomSongFileName, musicDirUUID);
+            var playing = MusicPlayerClass.CurrentlyPlayingClass.GetCurrentlyPlaying();
+            Console.WriteLine($"Now playing: {playing?.SongName ?? "NULL - something broke"}");
 
-            await MusicPlayerClass.CurrentlyPlayingClass.SetCurrentlyPlaying(randomSong, musicDirUUID);
-            Console.WriteLine("Currently playing: " + MusicPlayerClass.CurrentlyPlayingClass.GetCurrentlyPlaying()?.SongName);
-
-            // Queue a couple more songs
-            var remainingSongs = musicFiles
-                .Where(f => Path.GetFileName(f) != randomSong)
-                .Take(2)
+            // Step 8: Queue 2 more songs
+            var remaining = musicFiles
+                .Where(f => Path.GetFileName(f) != randomSongFileName)
                 .Select(Path.GetFileName)
+                .Take(2)
                 .ToList();
 
-            foreach (var song in remainingSongs)
+            foreach (var song in remaining)
             {
                 await MusicPlayerClass.MusicQueueClass.AddToMusicQueue(song, musicDirUUID);
+                Console.WriteLine($"Queued: {song}");
             }
 
-            Console.WriteLine("Queue:");
-            foreach (var song in MusicPlayerClass.MusicQueueClass.GetQueue())
-            {
-                Console.WriteLine("- " + song.SongName);
-            }
+            // Step 9: Display queue
+            Console.WriteLine("Current queue:");
+            var queue = MusicPlayerClass.MusicQueueClass.GetQueue();
+            if (queue.Count == 0)
+                Console.WriteLine("Queue empty – add failed?");
+            else
+                foreach (var item in queue)
+                    Console.WriteLine($"- {item.SongName ?? "UNKNOWN"}");
         }
-
 
         public static async Task TestNotes()
         {
@@ -941,9 +1024,9 @@ namespace XRUIOS.TestHarness
                 version: "1.0.0",
                 targetModes: new List<string>
                 {
-                "Reader",
-                "Lore",
-                "Timeline"
+            "Reader",
+            "Lore",
+            "Timeline"
                 }
             );
 
@@ -955,11 +1038,10 @@ namespace XRUIOS.TestHarness
                 miniImage: null,
                 notes: new List<FileRecord>
                 {
-                new FileRecord("note-001", "what_is_muvluv.md"),
-                new FileRecord("note-002", "themes_and_tone.md")
+            new FileRecord("note-001", "what_is_muvluv.md"),
+            new FileRecord("note-002", "themes_and_tone.md")
                 }
             );
-
             var timelines = new Category(
                 title: "Timelines",
                 description: "Extra, Unlimited, and Alternative — and why they matter.",
@@ -967,12 +1049,11 @@ namespace XRUIOS.TestHarness
                 miniImage: null,
                 notes: new List<FileRecord>
                 {
-                new FileRecord("note-003", "extra_timeline.md"),
-                new FileRecord("note-004", "unlimited_timeline.md"),
-                new FileRecord("note-005", "alternative_timeline.md")
+            new FileRecord("note-003", "extra_timeline.md"),
+            new FileRecord("note-004", "unlimited_timeline.md"),
+            new FileRecord("note-005", "alternative_timeline.md")
                 }
             );
-
             var beta = new Category(
                 title: "BETA and Humanity",
                 description: "The alien threat and the collapse of human morality.",
@@ -980,8 +1061,8 @@ namespace XRUIOS.TestHarness
                 miniImage: null,
                 notes: new List<FileRecord>
                 {
-                new FileRecord("note-006", "what_are_beta.md"),
-                new FileRecord("note-007", "human_extinction_wars.md")
+            new FileRecord("note-006", "what_are_beta.md"),
+            new FileRecord("note-007", "human_extinction_wars.md")
                 }
             );
 
@@ -992,22 +1073,92 @@ namespace XRUIOS.TestHarness
                 coverImagePath: null,
                 categories: new List<Category>
                 {
-                overview,
-                timelines,
-                beta
+            overview,
+            timelines,
+            beta
                 },
                 identity: identity
             );
 
             // Save
-
             Console.WriteLine("Saving Journal...");
             Console.WriteLine("Journal saved successfully! Error will come from using dummy files.");
-
             await NoteClass.SaveJournal(journal);
 
+            // READ ALL JOURNALS
+            Console.WriteLine("Fetching all journals...");
+            var allJournals = await NoteClass.GetAllJournals();
+            Console.WriteLine($"Total journals found: {allJournals.Count}");
+            foreach (var j in allJournals)
+            {
+                Console.WriteLine($" - {j.JournalName} ({j.Identity.Name} v{j.Identity.Version})");
+            }
+
+            // READ SINGLE JOURNAL
+            var fileName = $"{identity.Name} v{identity.Version} by {identity.Author}__ID {identity.ThemeID}";
+            Console.WriteLine("Fetching single journal...");
+            var fetchedJournal = await NoteClass.GetJournal(fileName);
+            Console.WriteLine($"Fetched: {fetchedJournal.JournalName}");
+
+            // GET CATEGORY
+            Console.WriteLine("Fetching category 'Timelines'...");
+            var fetchedCategory = await NoteClass.GetCategory(fileName, "Timelines");
+            Console.WriteLine($"Category found: {fetchedCategory.Title} with {fetchedCategory.Notes.Count} notes");
+
+            // UPDATE JOURNAL (Version bump)
+            Console.WriteLine("Updating journal version...");
+            var updatedIdentity = new NoteClass.ThemeIdentity(
+                themeID: identity.ThemeID,
+                name: identity.Name,
+                author: identity.Author,
+                version: "1.0.1", // version bump
+                targetModes: identity.TargetModes
+            );
+            var updatedJournal = new NoteClass.Journal(
+                journalName: journal.JournalName,
+                description: journal.Description + " (Updated)",
+                coverImagePath: journal.CoverImagePath,
+                categories: journal.Categories,
+                identity: updatedIdentity
+            );
+
+            // This is the key line you had — we capture the NEW filename
+            var currentFileName = await NoteClass.UpdateJournal(journal, updatedJournal);
+            Console.WriteLine("Journal updated successfully.");
+
+            // FAVORITES TEST — use currentFileName instead of the stale fileName
+            Console.WriteLine("Adding to favorites...");
+            await NoteClass.AddJournalToFavorites(currentFileName);
+            Console.WriteLine("Added to favorites.");
+            var (resolved, unresolved) = await NoteClass.GetJournalFavorites();
+            Console.WriteLine($"Favorites Resolved: {resolved.Count}, Unresolved: {unresolved.Count}");
+            Console.WriteLine("Removing from favorites...");
+            await NoteClass.RemoveJournalFromFavorites(currentFileName);
+            Console.WriteLine("Removed from favorites.");
+
+            // HISTORY TEST — unchanged, uses ThemeID
+            Console.WriteLine("Adding history entry...");
+            await NoteClass.AddHistoryEntry(
+                TargetType: "Journal",
+                Action: "Viewed",
+                TargetID: identity.ThemeID,
+                Meta: new Dictionary<string, string>
+                {
+            { "Source", "UnitTest" }
+                });
+            var history = await NoteClass.GetHistory("Journal", identity.ThemeID);
+            Console.WriteLine($"History entries for journal: {history.Count}");
+            foreach (var entry in history)
+            {
+                Console.WriteLine($" - {entry.Action} at {entry.Timestamp}");
+            }
+
+            // DELETE TEST — use currentFileName here too!
+            Console.WriteLine("Deleting journal...");
+            await NoteClass.DeleteJournal(currentFileName);
+            Console.WriteLine("Journal deleted.");
         }
-       
+
         public static async Task TestNotifications()
         {
             var notification = new NotificationClass.NotificationContent(
@@ -1022,6 +1173,7 @@ namespace XRUIOS.TestHarness
                 group: "journals"
             );
 
+
             // Optional: add a button to view the journal
             notification.Buttons.Add(new NotificationClass.NotificationContent.Button(
                 content: "Open Journal",
@@ -1031,6 +1183,7 @@ namespace XRUIOS.TestHarness
 
             // Add the notification
             await NotificationClass.AddNotification(notification);
+
 
             Console.WriteLine("SAO journal notification added!");
         }
@@ -1131,7 +1284,7 @@ namespace XRUIOS.TestHarness
             Console.WriteLine($"Memory Info: {specs.MemoryInfo}");
             Console.WriteLine($"Disk Info:\n{specs.DiskInfo}");
             Console.WriteLine($"GPU Info: {specs.GPUInfo}");
-            Console.WriteLine($"Network Info: {specs.NetworkInfo}");
+           // Console.WriteLine($"Network Info: {specs.NetworkInfo}");
             Console.WriteLine($"Uptime: {specs.UptimeInfo}");
             Console.WriteLine($"VR Headset Status: {specs.VRHeadsetStatus}");
 
@@ -1179,7 +1332,7 @@ namespace XRUIOS.TestHarness
             Console.WriteLine($"Primary Font: {string.Join(", ", loadedTheme.Typography.PrimaryFont)}");
 
             // Set as current theme
-            await ThemeSystem.SetTheme($"{loadedTheme.Identity.Name} v{loadedTheme.Identity.Version} by {loadedTheme.Identity.Author}, ID {loadedTheme.Identity.ThemeID}");
+            var fileName = $"{loadedTheme.Identity.Name} v{loadedTheme.Identity.Version} by {loadedTheme.Identity.Author}__ID {loadedTheme.Identity.ThemeID}";
             Console.WriteLine("\nTheme is now active!");
         }
         public static async Task TestThemes2()
@@ -1222,6 +1375,7 @@ namespace XRUIOS.TestHarness
                 new List<DefaultApp>()
             );
 
+
             // Save the theme
             await ThemeSystem.SaveTheme(evaTheme);
             Console.WriteLine("Evangelion theme saved!");
@@ -1238,30 +1392,38 @@ namespace XRUIOS.TestHarness
             Console.WriteLine($"Primary Font: {string.Join(", ", loadedTheme.Typography.PrimaryFont)}");
 
             // Set as current theme
-            await ThemeSystem.SetTheme($"{loadedTheme.Identity.Name} v{loadedTheme.Identity.Version} by {loadedTheme.Identity.Author}, ID {loadedTheme.Identity.ThemeID}");
+            var fileName = $"{loadedTheme.Identity.Name} v{loadedTheme.Identity.Version} by {loadedTheme.Identity.Author}__ID {loadedTheme.Identity.ThemeID}";
             Console.WriteLine("\nEvangelion theme is now active!");
         }
         //Create favorite themes system later
         public static async Task TestVolume()
         {
+            // Ensure base directories exist
+            string baseDir = Path.Combine(DataPath, "VolumePresets");
+            Directory.CreateDirectory(baseDir);
+
+            // File to store current preset
+            string currentPresetFile = Path.Combine(baseDir, "CurrentVolume.json");
+
+            // Create presets
             var entryPlugPreset = new VolumeSetting(
-    "EntryPlug",
-    new Dictionary<string, int>
-    {
-        { $"{Environment.MachineName}:Audio:EngineHum", 80 },
-        { $"{Environment.MachineName}:Audio:PilotComm", 100 },
-        { $"{Environment.MachineName}:Audio:Alerts", 90 },
-        { $"{Environment.MachineName}:Audio:Interface", 70 }
-    }
-);
+                "EntryPlug",
+                new Dictionary<string, int>
+                {
+            { $"ThisMachine:Audio:EngineHum", 80 },
+            { $"ThisMachine:Audio:PilotComm", 100 },
+            { $"ThisMachine:Audio:Alerts", 90 },
+            { $"ThisMachine:Audio:Interface", 70 }
+                }
+            );
 
             var magiConsolePreset = new VolumeSetting(
                 "MAGIConsole",
                 new Dictionary<string, int>
                 {
-        { $"{Environment.MachineName}:Audio:CalculationBeep", 60 },
-        { $"{Environment.MachineName}:Audio:Alarm", 100 },
-        { $"{Environment.MachineName}:Audio:SystemChime", 50 }
+            { $"ThisMachine:Audio:CalculationBeep", 60 },
+            { $"ThisMachine:Audio:Alarm", 100 },
+            { $"ThisMachine:Audio:SystemChime", 50 }
                 }
             );
 
@@ -1269,38 +1431,78 @@ namespace XRUIOS.TestHarness
                 "NERVAlerts",
                 new Dictionary<string, int>
                 {
-        { $"{Environment.MachineName}:Audio:EvaWarning", 100 },
-        { $"{Environment.MachineName}:Audio:EvacuationSiren", 100 },
-        { $"{Environment.MachineName}:Audio:CommandTone", 80 }
+            { $"ThisMachine:Audio:EvaWarning", 100 },
+            { $"ThisMachine:Audio:EvacuationSiren", 100 },
+            { $"ThisMachine:Audio:CommandTone", 80 }
                 }
             );
 
-            // Add them to your volume DB
-            await AddVolumeSettings(entryPlugPreset);
-            await AddVolumeSettings(magiConsolePreset);
-            await AddVolumeSettings(nervAlertsPreset);
-
-            // Set one as the current active volume
-            await SetCurrentVolumeSettings(entryPlugPreset);
-
-            // Read current settings
-            var current = await GetCurrentVolumeSettings();
-            Console.WriteLine($"Current Volume Preset: {current.VolumeSettingName}");
-            foreach (var item in current.Volumes)
+            // Initialize storage JSON
+            string allPresetsFile = Path.Combine(baseDir, "AllPresets.json");
+            List<VolumeSetting> allPresets;
+            if (File.Exists(allPresetsFile))
             {
-                Console.WriteLine($"{item.Key} => {item.Value}%");
+                allPresets = JsonSerializer.Deserialize<List<VolumeSetting>>(await File.ReadAllTextAsync(allPresetsFile)) ?? new List<VolumeSetting>();
+            }
+            else
+            {
+                allPresets = new List<VolumeSetting>();
             }
 
-            // Get volumes for this machine only
-            var deviceVolumes = await GetVolumeSettingsForThisDevice();
+            // Add presets safely if they don't exist
+            foreach (var preset in new[] { entryPlugPreset, magiConsolePreset, nervAlertsPreset })
+            {
+                if (!allPresets.Any(p => p.VolumeSettingName == preset.VolumeSettingName))
+                    allPresets.Add(preset);
+            }
+
+            // Save all presets
+            await File.WriteAllTextAsync(allPresetsFile, JsonSerializer.Serialize(allPresets, new JsonSerializerOptions { WriteIndented = true }));
+
+            // Set EntryPlug as current
+            await File.WriteAllTextAsync(currentPresetFile, JsonSerializer.Serialize(entryPlugPreset, new JsonSerializerOptions { WriteIndented = true }));
+
+            // Load current preset
+            var currentJson = await File.ReadAllTextAsync(currentPresetFile);
+            var current = JsonSerializer.Deserialize<VolumeSetting>(currentJson);
+            Console.WriteLine($"Current Volume Preset: {current?.VolumeSettingName}");
+            if (current != null)
+            {
+                foreach (var kv in current.Volumes)
+                {
+                    Console.WriteLine($"{kv.Key} => {kv.Value}%");
+                }
+            }
+
+            // Show device-specific volumes
             Console.WriteLine("This machine volumes:");
-            foreach (var (key, val) in deviceVolumes)
+            foreach (var preset in allPresets)
             {
-                Console.WriteLine($"{key} = {val}%");
+                foreach (var (key, val) in preset.Volumes.Where(v => v.Key.StartsWith(Environment.MachineName)))
+                {
+                    Console.WriteLine($"{key} = {val}%");
+                }
             }
-        }     
+        }
+
+        // Supporting class
+        public class VolumeSetting
+        {
+            public string VolumeSettingName { get; set; }
+            public Dictionary<string, int> Volumes { get; set; }
+
+            public VolumeSetting() { }
+            public VolumeSetting(string name, Dictionary<string, int> volumes)
+            {
+                VolumeSettingName = name;
+                Volumes = volumes;
+            }
+        }
+
         public static async Task TestTimer()
         {
+            HangfireBootstrap.Start();
+
             // EVA-01 Sync Timer
             var eva01Timer = new TimerManagerClass.TimerRecord(
                 "EVA-01 Sync Test",
@@ -1321,29 +1523,446 @@ namespace XRUIOS.TestHarness
 
             Console.WriteLine("NERV: Timers initialized. Monitoring EVA sync...");
 
-            // Keep the app running for demo purposes
-            Console.WriteLine("Press Enter to exit...");
-            Console.ReadLine();
         }
 
 
-
-
-        //Do media tagger later
-        //Do audio tag later
-
-        // Helper
-        static async Task Run(string name, Func<Task> action)
+        public static async Task TestWorldEvents()
         {
+            var asukaMusicEvent = new WorldEventsClass.WorldEvent(
+                deviceId: "EVA-02",
+                timestamp: DateTime.UtcNow,
+                action: "MusicStarted",
+                sceneDescription: "Asuka blasted Eurobeat in the cockpit during sync test"
+            );
+
+            var reiQuietEvent = new WorldEventsClass.WorldEvent(
+                deviceId: "EVA-00",
+                timestamp: DateTime.UtcNow.AddSeconds(2),
+                action: "MusicStarted",
+                sceneDescription: "Rei quietly played classical music in Unit-00"
+            );
+
+            var shinjiCryingEvent = new WorldEventsClass.WorldEvent(
+                deviceId: "EVA-01",
+                timestamp: DateTime.UtcNow.AddSeconds(-30),
+                action: "EmotionalBreakdown",
+                sceneDescription: "Shinji started crying because the sync test was too hard"
+            );
+
+            var trainingStartEvent = new WorldEventsClass.WorldEvent(
+    deviceId: "SIM-01",
+    timestamp: DateTime.UtcNow,
+    action: "TrainingStart",
+    sceneDescription: "Training simulation begins: pilots must hit 15 points under strict evaluation",
+    eventId: "training-start-001"
+);
+
+            var asukaTrashTalkEvent = new WorldEventsClass.WorldEvent(
+                deviceId: "EVA-02",
+                timestamp: DateTime.UtcNow.AddSeconds(2),
+                action: "TrashTalk",
+                sceneDescription: "Asuka loudly taunts Shinji, claiming he'll fall behind again"
+            );
+
+            var shinjiDefensiveEvent = new WorldEventsClass.WorldEvent(
+                deviceId: "EVA-01",
+                timestamp: DateTime.UtcNow.AddSeconds(4),
+                action: "Defensive",
+                sceneDescription: "Shinji nervously insists he can do it, cheeks red as he grips controls"
+            );
+
+            var reiSilentFocusEvent = new WorldEventsClass.WorldEvent(
+                deviceId: "EVA-00",
+                timestamp: DateTime.UtcNow.AddSeconds(6),
+                action: "FocusedPlay",
+                sceneDescription: "Rei calmly ignores the bickering, eyes steady on the simulator"
+            );
+
+            var asukaPoint5Event = new WorldEventsClass.WorldEvent(
+                deviceId: "EVA-02",
+                timestamp: DateTime.UtcNow.AddSeconds(10),
+                action: "ScoreUpdate",
+                sceneDescription: "Asuka hits 5 points and smirks at Shinji, waving her arms dramatically",
+                eventId: "asuka-score-005"
+            );
+
+            var shinjiPoint7Event = new WorldEventsClass.WorldEvent(
+                deviceId: "EVA-01",
+                timestamp: DateTime.UtcNow.AddSeconds(12),
+                action: "ScoreUpdate",
+                sceneDescription: "Shinji manages 7 points but glances nervously at Asuka, sweat forming on his brow",
+                eventId: "shinji-score-007"
+            );
+
+            var asukaFrustrationEvent = new WorldEventsClass.WorldEvent(
+                deviceId: "EVA-02",
+                timestamp: DateTime.UtcNow.AddSeconds(13),
+                action: "Frustration",
+                sceneDescription: "Asuka shouts at Shinji for being slow, slamming the simulator console"
+            );
+
+            var shinjiPanicEvent = new WorldEventsClass.WorldEvent(
+                deviceId: "EVA-01",
+                timestamp: DateTime.UtcNow.AddSeconds(14),
+                action: "Panic",
+                sceneDescription: "Shinji panics, losing a point due to misfire, muttering under his breath"
+            );
+
+            var reiCalmEvent = new WorldEventsClass.WorldEvent(
+                deviceId: "EVA-00",
+                timestamp: DateTime.UtcNow.AddSeconds(15),
+                action: "CalmObservation",
+                sceneDescription: "Rei glances briefly at Asuka and Shinji’s antics but remains composed, barely moving"
+            );
+
+            var asukaPoint10Event = new WorldEventsClass.WorldEvent(
+                deviceId: "EVA-02",
+                timestamp: DateTime.UtcNow.AddSeconds(16),
+                action: "ScoreUpdate",
+                sceneDescription: "Asuka hits 10 points, still mocking Shinji and throwing a glare at Rei",
+                eventId: "asuka-score-010"
+            );
+
+            var shinjiPoint9Event = new WorldEventsClass.WorldEvent(
+                deviceId: "EVA-01",
+                timestamp: DateTime.UtcNow.AddSeconds(17),
+                action: "ScoreUpdate",
+                sceneDescription: "Shinji reaches 9 points, trying desperately to catch up",
+                eventId: "shinji-score-009"
+            );
+
+            var reiVictoryEvent = new WorldEventsClass.WorldEvent(
+                deviceId: "EVA-00",
+                timestamp: DateTime.UtcNow.AddSeconds(20),
+                action: "Victory",
+                sceneDescription: "Rei silently achieves 15 points. Asuka freezes mid-shout; Shinji’s jaw drops",
+                eventId: "rei-victory-001"
+            );
+
+            var asukaMeltdownEvent = new WorldEventsClass.WorldEvent(
+                deviceId: "EVA-02",
+                timestamp: DateTime.UtcNow.AddSeconds(21),
+                action: "Meltdown",
+                sceneDescription: "Asuka throws her joystick, yelling, 'HOW DID SHE DO THAT?!'"
+            );
+
+            var shinjiAwkwardEvent = new WorldEventsClass.WorldEvent(
+                deviceId: "EVA-01",
+                timestamp: DateTime.UtcNow.AddSeconds(22),
+                action: "AwkwardDefeat",
+                sceneDescription: "Shinji slumps back, mumbling 'I… I lost… again…'"
+            );
+
+            var trainingEndEvent = new WorldEventsClass.WorldEvent(
+                deviceId: "SIM-01",
+                timestamp: DateTime.UtcNow.AddSeconds(23),
+                action: "TrainingEnd",
+                sceneDescription: "Training ends: Rei quietly stands, Asuka fumes, Shinji sulks; the room is tense",
+                eventId: "training-end-001"
+            );
+
+            var misatoReactionEvent = new WorldEventsClass.WorldEvent(
+    deviceId: "NERV-OPS",
+    timestamp: DateTime.UtcNow.AddSeconds(24),
+    action: "Commentary",
+    sceneDescription: "Misato bursts out laughing, then scolds Asuka: 'Calm down, it’s just a simulator!'"
+);
+
+            var ritsukoObservationEvent = new WorldEventsClass.WorldEvent(
+                deviceId: "NERV-OPS",
+                timestamp: DateTime.UtcNow.AddSeconds(25),
+                action: "ProfessionalComment",
+                sceneDescription: "Ritsuko adjusts her glasses, dryly noting: 'It seems discipline and focus are rewarded… as expected.'"
+            );
+
+            var misatoAdviceEvent = new WorldEventsClass.WorldEvent(
+                deviceId: "NERV-OPS",
+                timestamp: DateTime.UtcNow.AddSeconds(26),
+                action: "Advice",
+                sceneDescription: "Misato points at Shinji: 'Try actually concentrating next time, Shinji! And Asuka… maybe tone down the theatrics.'"
+            );
+
+            var ritsukoWarningEvent = new WorldEventsClass.WorldEvent(
+                deviceId: "NERV-OPS",
+                timestamp: DateTime.UtcNow.AddSeconds(27),
+                action: "Warning",
+                sceneDescription: "Ritsuko quietly warns: 'Remember, emotional instability could cost lives if this were real combat.'"
+                );
+
+            var reiSilentAcknowledgmentEvent = new WorldEventsClass.WorldEvent(
+                deviceId: "EVA-00",
+                timestamp: DateTime.UtcNow.AddSeconds(28),
+                action: "SilentAcknowledgment",
+                sceneDescription: "Rei nods slightly at Misato and Ritsuko’s comments but remains composed, as if above it all"
+                );
+
+            // Record events
+            Console.WriteLine("[NERV] Recording full dramatic training simulation events...");
+
+
+            // Add them to the system
+            Console.WriteLine("[NERV] Recording world events...");
+            await WorldEventsClass.AddWorldEvent(asukaMusicEvent);
+            await WorldEventsClass.AddWorldEvent(reiQuietEvent);
+            await WorldEventsClass.AddWorldEvent(shinjiCryingEvent);
+            await WorldEventsClass.AddWorldEvent(trainingStartEvent);
+            await WorldEventsClass.AddWorldEvent(asukaTrashTalkEvent);
+            await WorldEventsClass.AddWorldEvent(shinjiDefensiveEvent);
+            await WorldEventsClass.AddWorldEvent(reiSilentFocusEvent);
+            await WorldEventsClass.AddWorldEvent(asukaPoint5Event);
+            await WorldEventsClass.AddWorldEvent(shinjiPoint7Event);
+            await WorldEventsClass.AddWorldEvent(asukaFrustrationEvent);
+            await WorldEventsClass.AddWorldEvent(shinjiPanicEvent);
+            await WorldEventsClass.AddWorldEvent(reiCalmEvent);
+            await WorldEventsClass.AddWorldEvent(asukaPoint10Event);
+            await WorldEventsClass.AddWorldEvent(shinjiPoint9Event);
+            await WorldEventsClass.AddWorldEvent(reiVictoryEvent);
+            await WorldEventsClass.AddWorldEvent(asukaMeltdownEvent);
+            await WorldEventsClass.AddWorldEvent(shinjiAwkwardEvent);
+            await WorldEventsClass.AddWorldEvent(trainingEndEvent);
+            await WorldEventsClass.AddWorldEvent(misatoReactionEvent);
+            await WorldEventsClass.AddWorldEvent(ritsukoObservationEvent);
+            await WorldEventsClass.AddWorldEvent(misatoAdviceEvent);
+            await WorldEventsClass.AddWorldEvent(ritsukoWarningEvent);
+            await WorldEventsClass.AddWorldEvent(reiSilentAcknowledgmentEvent);
+
+            Console.WriteLine($"[NERV] Added events: {asukaMusicEvent.EventId}, {reiQuietEvent.EventId}, {shinjiCryingEvent.EventId}");
+
+            // Wait a moment for dramatic effect
+            await Task.Delay(1000);
+
+            // Get all events
+            Console.WriteLine("\n[NERV] Retrieving all world events...");
+            var allEvents = await WorldEventsClass.GetWorldEvents();
+            Console.WriteLine($"Total events in log: {allEvents.Count}");
+
+            foreach (var evt in allEvents)
+            {
+                Console.WriteLine($"  [{evt.Timestamp:HH:mm:ss}] {evt.DeviceId}: {evt.SceneDescription} (ID: {evt.EventId})");
+            }
+
+            // Delete Shinji's embarrassing event (he doesn't want anyone to see it)
+            Console.WriteLine("\n[NERV] Deleting EVA-01 emotional breakdown record...");
+            await WorldEventsClass.DeleteWorldEvent(shinjiCryingEvent);
+            Console.WriteLine("Record deleted. Shinji's shame is now hidden.");
+
+            // Verify deletion
+            var remainingEvents = await WorldEventsClass.GetWorldEvents();
+            Console.WriteLine($"\n[NERV] Remaining events after deletion: {remainingEvents.Count}");
+
+            // Clear everything (end of test)
+            Console.WriteLine("\n[NERV] Clearing all test events...");
+            await WorldEventsClass.ClearWorldEvents();
+
+            var finalEvents = await WorldEventsClass.GetWorldEvents();
+            Console.WriteLine($"[NERV] Final event count: {finalEvents.Count} - Ready for next sync test!");
+
+            Console.WriteLine("\nWorld Events system test complete!");
+        }
+
+        static async Task TestSongs()
+        {
+            Console.WriteLine("=== SongsClass Full Test Started ===");
+
+            // Setup: Create a dummy directory and "audio" file (txt as placeholder; ATL will fail gracefully)
+            string testDir = Path.Combine(DataPath, "TestMusicDir");
+            Directory.CreateDirectory(testDir);
+            string dummyAudio = Path.Combine(testDir, "dummy.mp3");
+            File.WriteAllText(dummyAudio, "Not real audio, but for test");
+
+            // Get or create directory UUID
+            var record = await Media.AddGenericDirectory(testDir, "TestMusicDir");
+            string uuid = record.UUID;
+            Console.WriteLine($"Created test directory UUID: {uuid}");
+
+            // Test CreateSongInfo (will use ATL, but catch if invalid audio)
+            SongOverview? overview = null;
+            SongDetailed? detailed = null;
             try
             {
-                await action();
-                Console.WriteLine($"[{name}] ✓");
+                (overview, detailed) = await SongClass.CreateSongInfo("dummy.mp3", uuid);
+                Console.WriteLine($"Created overview: {overview.SongName}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"[{name}] ✗ {ex.Message.Split('\n')[0]}");
+                Console.WriteLine($"ATL failed on dummy (expected): {ex.Message.Split('\n')[0]}");
+                // Mock for test continuation
+                overview = new SongOverview("Dummy Song", "Test Artist", DateTime.Now);
+                detailed = new SongDetailed("Dummy Song", "Test Artist");
             }
+
+            // Test GetSongInfo
+            var (fetchedOverview, fetchedDetailed) = await SongClass.GetSongInfo("dummy.mp3", uuid, SongClass.MusicInfoStyle.both);
+            Console.WriteLine($"Fetched overview: {fetchedOverview?.SongName ?? "None"}");
+
+
         }
+
+        // New test function for Playlists
+        static async Task TestPlaylists()
+        {
+            Console.WriteLine("=== Playlists Test Started ===");
+
+            // Setup dummy directory and songs (reuse from Songs test if possible, but standalone)
+            string testDir = Path.Combine(DataPath, "TestPlaylistDir");
+            Directory.CreateDirectory(testDir);
+            string dummy1 = Path.Combine(testDir, "song1.mp3");
+            string dummy2 = Path.Combine(testDir, "song2.mp3");
+            File.WriteAllText(dummy1, "Dummy1");
+            File.WriteAllText(dummy2, "Dummy2");
+
+            var record = await Media.AddGenericDirectory(testDir, "TestPlaylistDir");
+            string uuid = record.UUID;
+
+            // Create playlist
+            var playlist = new Playlists.Playlist("Test Playlist", "For Asuka's awesomeness");
+            string plId = await Playlists.CreatePlaylist(playlist);
+            Console.WriteLine($"Created playlist ID: {plId}");
+
+            // Add songs
+            await Playlists.AddSongToPlaylist(plId, "song1.mp3", uuid);
+            await Playlists.AddSongToPlaylist(plId, "song2.mp3", uuid);
+            Console.WriteLine("Songs added to playlist.");
+
+            // Get and verify
+            var fetchedPl = await Playlists.GetPlaylist(plId);
+            Console.WriteLine($"Fetched playlist: {fetchedPl?.PlaylistName}, Songs: {fetchedPl?.Songs.Count ?? 0}");
+
+            // Reorder (swap)
+            await Playlists.ReorderPlaylist(plId, new List<string> { $"{uuid}:song2.mp3", $"{uuid}:song1.mp3" });
+            fetchedPl = await Playlists.GetPlaylist(plId);
+            Console.WriteLine($"Reordered first song: {fetchedPl?.Songs[0].SongFileName}");
+
+            // Toggle favorite
+            await Playlists.ToggleFavorite(plId);
+            fetchedPl = await Playlists.GetPlaylist(plId);
+            Console.WriteLine($"Favorite status: {fetchedPl?.IsFavorite}");
+
+            // Remove song
+            await Playlists.RemoveSongFromPlaylist(plId, "song1.mp3", uuid);
+            Console.WriteLine("Song removed.");
+
+            // Get resolved paths
+            var resolvedPaths = await Playlists.GetResolvedPlaylistSongs(plId);
+            Console.WriteLine($"Resolved paths: {resolvedPaths.Count}");
+
+            // Create from folder
+            string folderPlId = await Playlists.CreatePlaylistFromFolder("Folder Playlist", uuid);
+            Console.WriteLine($"Folder playlist created: {folderPlId}");
+
+            // Delete
+            await Playlists.DeletePlaylist(plId);
+            Console.WriteLine("Playlist deleted.");
+
+            // Cleanup
+            await Media.RemoveGenericDirectory(uuid, true);
+            Console.WriteLine("=== Playlists Test Completed ===");
+        }
+
+
+
+
+
+        //We add Sumika for good luck, delete this and i'll find you
+        //I'M LOOKING AT YEW STRINGS
+
+
+        /*.............==++++***+++++++++=-.......:+-.....=++*###%%%%%%%%%@%#+====*#*=....................-+==============
+        ............-====*######**+++******+-....:*:..:=+*###%%%%%%%%%%%##%#*===-+###-:.................-+==============
+        ...........:====*#%%%%%%###%%%##*+++***-..-+:=++*###%%%%##****##%%%%##=--:=####=................-+==============
+        ...........====*#%%%%%%%%%%%%%#%%%%##*++**-+*++*#%*+++++++++++++++++###+::.:*####=..............-+==============
+        ..........----+##%%%%%%%###*********#####*+##*#*++++++++++++++**######%#+:...+#####=............-+=====+========
+        ..........-:-=##%%%*==+**#######**++++++++**+++++++++++++++++++++*#%%%#%#+:...+#####*=..........-+=====+========
+        .........::::+##==+######%%##*+++++++++++++++++++++++++++++++++++++++*#%%#*:...+#####*==........-+==============
+        .........:.:+++###%%%%%*+=+++++++++++++++++++++++++++++++++++++++*#%#*+=*##*....=#####+=+-......-+==+==+========
+        ........-:++##%%%###+--=-===+++*++++++++++++++++++++++++++++++====+###%%#*##*:...+####*==++:....-+==+==+========
+        .......:**#*##%%#*::----=+####*++++++++++++++++++++++++++++=========*####%#%#*:...*####+==+=....-+==+++++=======
+        ......-#=::=#%%+::==:=*#####+==++++++++++++++++++++++++++========---:+#%%##%%#*-..:*####+==*-...-+==+++++=======
+        ....:::-:::*#*-=*-=*#####+-========+++++++++++++++++=========--+*=:...-##%%##%#*-::=####*==++:..-+==++==+=======
+        ......--:-=#=+*++#####*-.:=================++=+==========+=--::-+##=...-*##%%%%##---+####++++-..-+==++++++======
+        ::::::=--=**########*:.-+++------=================-------=**-...:*#%*=:.-*###%%%##===*###+++++:.-+==++=+++======
+        ::::.-==+*#%#####%*:.=*##*=:.:.:::-*-----::=+--==-:::::--:-##+:..:*#%#*-:=####%%%#*===*##*+++++:-+==++++++=++===
+        .....-=*#%%####%#=:=#####+:....:::==:::::..=**-:=+=:....=+:-###=:.:##%##==+#####%%#*+++*##++++++=+==++++++++====
+        .....=#%%%###%%*-+#######-....::.-*-:-::...-###=.=**=...:+*--#%#*=:=##%##+=*#####%%#*+++***+++*+**==+++++++=====
+        ....:#%%###%%#*+########*.....:..+#:---:....*###+.:##*-..:*#+-%%##*=*##%##*+######%##+++***++++***==+++++++++===
+        ...:*%%##%%##+*#########=....=:.-##:=--+....+##+#*-.+##*-::*##=%%%##+*##%##**######%#*++++*+++++***=+++++++++===
+        ...*%%##%%%#*##%######%#-...=*:.*#%:+=-#-...:*##=*#=.=*##*-=##%+%%%#####%%##+######%%#*+++++++++****+++++++++===
+        ..+%%#%%%%#*####%%%####*:::=#*:-###:*+:#*-.:.+##*++#*:=*###*+##%*#%%#####%%#########%#*+++++++*++*#+*+++++++++++
+        .=%##%%%%#*####%%%###%#*-==##*:+###-**-#%*--=-###+==##*%%%@%%%%%%%#%%#####%####%#####%#*++++++**++#***+++++++++=
+        -####%%%####%##%%%###%##==*#%*=####*##**%%*=++*###%%%%%%%%#%%%%%%%@%%%%%%#%%###%%####%#*++++++*#++*#**++++++++++
+        *#*:+%%####%##%%%####%##++#%%#+#+*#*#***##%#+**%%%#+--+##+*=+######%+#%%##%%%##%%%###%%#+++++++#*++*#**+++++++++
+        #+::+%####%##%%%%###%%##+*%@%%%%*+%+##=*###%#*#####=----*#**==*####%*+#%##%%%##%%%####%#*++++++##*++*#+#++++++++
+        =.::*####%##%%%%####%###**%@%###++#+*#=+*#**%######*=-:-=*%##+=*%#%*%==%%#%#%%#%%%####%#*+++++=###++**#+#+++++++
+        ::.:*###%%##%%%%#%##%##%**#%%###=-*+=#=:*#*++%######+=++*+=+##+=+#%***-=%%#*%%#%%%###%%#*+++++-+##*==**#+*++++++
+        ..::*##%###%%%%%#%#%%%#%###%%###=--+-++--*#*=+%##%%##+==-=%@@@%%%@@@@@%**%#+#%#%%%###%%##+++++-=###==+***+*+++++
+        ...:*###+##%%%#%#%##%%#%####%#%%*-:+--=---*#+=-*%#%%%*==%@@@%#..+%%%@@@@%##-*%%%%%###%%%#+++++--###*:-*+#+++++++
+        :::-###*+##%%%#%#%%%%%#%%###*%%%#==-=----:=#*=--=%%%%%+*%%**#@%%%%%%%%@*#@%=+%%%%%####%%#*+++=-:*#%*-:=**#=+++++
+        ..:=##%*+##%%%#%#%%#%%##%##%+%@@@*#*--------#+=--:+%%%#=-=-+*@%%%%%%%%#%%@@@%%#%%%####%##*++===.*#%#=::++*#=++++
+        ::.=###*+##%%###%%%#%%%#%%#%*@@%%*#%%+-------+=--:--+%%*=----#%%%%%%%%%%%%@@#+#%%%##%#%%#*++===.+###*:.=**#+++++
+        :::=##**+##%####%%%%%%%%#%##%%@%%@@%*#+-------------:-=#=--:.-%*#%%%%#%##%@%-+%%%##%%#%##*+=---.=##%#=.:#**#++++
+        :.:=##**+#%@+###%%%%%%%%%%%##*%%#@%%%%%+-------:---:-------:::%#++#%##+==%%=-#%%%#%%%#%##+==:--.=##%#+..***##*++
+        ::.+##+#++%%+*###%%%%#%%%%%%#*+#-#%%%%%%---:----------------:.+%%#*++*##=%*-*%%%#%%%#%%##+=:.--.-##%%#:.=***%#*+
+        ::.+*-+%++##+*###%%%%%%%%%%%%%+=-+##%%##=---:-------------:--=*%%@@@@@@@#-:+%%%%%%%#%@%##==..:-.-###%#=.-****##+
+        :.:=+-+**=*#=+####%%%%%%%%%%%%*=-:%*++==+---------::::-----:---------::...=%%%%%%@%%%%###--..--:-*##%#+.:#***#%+
+        :::-=:+=+=+#+=*####%%%%%%%%%%%%*+*+@###%*-----:-:....::----------:::.....+%%%%%%%%%%*%##*::.:=+:-*##%%*::**+=*#=
+        ::::-:-+-+=+*=+#####%%%%%%%%%%%#**#%%#=:.::-----:.....::---------:-:-::-##%%%*+##%#++%##=:..:+*:=###%%#-:+-..=#+
+        :::::::+:+=+#++##%###%%%%%%%%%%%*+----::::::--=:.....:::--------------++*%%+:=#%%*--*###-...=**:+###%%#+-+:..:*+
+        :::::::=--+=#*=*#%%#*##%%%%%%%%@%#=-------------::..:::-------------==##*-::*%%*==*#%##*:..:+#*.*###%%#*=+:..:*=
+        ::::::::=:=+##++#%%#**##%%%%%%%%%#%+-------------------------------+#+-:..-#%%%%%%%%###=.:.-*#+:*###%%%#=+:..:*:
+        ::::::::-::+*##+*%+#+++###%%%%%%%%%+---------------------------------:::-**++=*%%%%%##*::::*#%=-=##%%%##+=:..-=:
+        :::::::::::-+##*+#*+*++*###%%%%%%*--==--------------==+++=---------::-+*=:=+=:+%%%%###+:--=###=+-##%%%%#+-..:=--
+        ::::::::::::=#%#*#*-*+=+###%%%%%%%%+-.::---------+**++++++-------:-*+-::-+==-:*%%%%###==+=*#%#++:*#%%*##+:::-===
+        :::::::::::::+%%#*#-:+==+###%%%%%%%%%*=:::--------=+++++++--------::..:===+=:=#%%%####=+++#%%*+=:*#%%=##+--=====
+        ::::::::::::::*####=:-==-*##%%%%%%%%%###*=-::-------=====--------::.:=+====-=**#@%###++*+##%#**::*%%#:*#+++++==-
+        ::::::::::::::-#*##*:.===-###%%%%%%%%*-*##%#+-:---------::-----:::-====+===+***#%###*+#**#%%#+=.-#%%=-##+++++=--
+        :::::::::::::::-**##+::==-+##%%%#%%%%%==+###%%%*=-:---=+--------========+*#****#%###+##*#%%#**:.-#%%++%+++++=---
+        ::::::::::::::::-=##%=--+=-*##%@%%%@%%*---+##%%%%##+=-------=+=====+==+#%%#*###%###**#*##%%#*=::=#%#++#+======--
+        ::::::::::::::::::-##==-=*=-##%%%#%@@%%=----+###%%%#%%#*++#%%#*+==+*%%%%%%##*#%####*#**#%%##*:::=%#--==.......:=
+        :::::::::::::::::::-#*:-==+-+##%%%#%%%%*---====*##%%%#*##***#%%%%%%%%%%%%#####%###*##*#%%%##=--:+%+--+--:::.....
+        ::::::::::::::::::::-#=::==+-*##%@#%#*%%=--::::--==+==++**=--##%%%%%%%%%%##+-#####%#*#%%%##+----#*---=----::....
+        :::::::::::::::::::::-*::--===##%#%#%+#%#-----:--=+++++*+=----*#%#%%%%%%#+--+####%#*#%%%%%#=----#=---------::...
+        ::::::::::::::::::::::===:.:==*###*#%#=%%+------=+++++*+=-----=--=+###*----=%##%%%##%##%##+----++----------:::::
+        :::::::::::::::::::::--=-::::++###+##%=-%#=----=+++++*+=-------=-----------###%%###%%#%%#+=----*-----------::...
+        :::::::::::::::::::-.......:-=#*###+#%+-=%*----+++++++=-------------------*##%%%##%##%%#++=---==-------::.......
+        ::::::::::::::::::::....:---:::+*#%=###--=#=--=+++++*+--::::-------------=##%%%##%###%*+++----+---====-:........
+        ::::::::::::::::::-.....:-------*##+-##---=#-=++++++*=---::..::----------##%%%##%#**%*+=+=---+++++++=:.........:
+        ::::::::::::::::::-.....:--------*#%=*#+=+==*+=+++++*=----:...::--------*%%%##%#***#*++=+=+++++++==-:...........
+        :::::::::::::::::-:....::---==---=##+=#*---=++++++++*+-----:::.::------+%%%%#%#**+**++++========--:.............
+        :::::::::::::::-:..::...:----=+=--=#*-=#=-------====+++===------------+%%%%#%*+++*++==------=---:...::::--::....
+        ::::::::::::::-::-----==------+*+===#=-#=----------------------------=#%%%%*+===-------------:::-=++==---::.....
+        ::::::::::::::-=-------**=-----+*+*==*-=+----------------------------*%%%#=--------------=-:-+++++=-----::......
+        :::::::::::::::--------****=----+*+*===-=--------------=+++++=======*%%%=-------------==-==++===-------::.......
+        :::::::::::::::=------=*****+----+**+------------------=************%%*---------------=-------------=--:........
+        ::::::::::::::-=----=+********=--=++=------------------************@#=----------------=----==*********=.........
+        ::::::::::::::-=====+***********=-=*=--------------------=+*******#=-----------------+==+************+-=-.......
+        --:-----::::--:..:---=+**********+-+=---------------------=++=--==------------------+***************+=----:.....
+        ----:::::::--::.:-------=*********+==::.::-----------------==-----------::---------+***************+=----:-:....
+        ---::::::..::.:-----------+*******+=:...:--------------------------:::..::--------=****************=------:--...
+        ---::------:::.:-=---------=*******=....:------------------------:......::-------=****************=-----------..
+        ---::-==-:::::.:.-=-====-----+*****:....:----------------------:.......::-------=**********+++==++=------------:
+        --::--:::-----::::-=:::-==----+***=....:---------------------:........:--------=*****+===-------:::----------:=+
+        -==:::-----------=:......-=----+**:...:----------------------......::----------+*=-=------------:...:=--------=#
+        --:::---=+==----=:.......:-+=--=*+:.:----------------==-----:....:------------==---------------:......--------+#
+        -----==--------=:........:--====+=------------------=++=----:.::-------------==----------------:.......:=-----#%
+        =-==-:--------=:::.......:---:...:=----------------+**+=--------------------==----------------:.........:=---=%%
+        ==::---=+=---=-==::......:-::..::.:=-------------=+***+=-------------------=+--=======--------............=--+%%
+        -:---=+==----==+*===::....:..:--:..:===========-=+*****==-----------------=++=-::=++**+=-----:............:=-%%%
+        :-----------+++**##+-:::....:---:.............:::-==++++=---------------===::......:-+*+==---:.............-*%%%
+        -=-:-------=+++=**+=----:..-----:.......................:--===-=----==+=-::-===------::=+==--:.............-#%%%
+        */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     }
 }

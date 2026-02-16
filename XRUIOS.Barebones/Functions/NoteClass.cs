@@ -1,6 +1,8 @@
-﻿using Pariah_Cybersecurity;
+﻿using Microsoft.Maui.Storage;
+using Pariah_Cybersecurity;
 using System.Text.Json.Nodes;
 using static Pariah_Cybersecurity.DataHandler;
+using static Pariah_Cybersecurity.DataHandler.JSONDataHandler;
 using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones.Functions
@@ -129,7 +131,7 @@ namespace XRUIOS.Barebones.Functions
 
             Directory.CreateDirectory(directoryPath);
 
-            var fileName = $"{journal.Identity.Name} v{journal.Identity.Version} by {journal.Identity.Author}, ID {journal.Identity.ThemeID}";
+            var fileName = $"{journal.Identity.Name} v{journal.Identity.Version} by {journal.Identity.Author}__ID {journal.Identity.ThemeID}";
 
             var filePath = Path.Combine(DataPath, "Journals", fileName);
 
@@ -140,7 +142,7 @@ namespace XRUIOS.Barebones.Functions
 
             await JSONDataHandler.CreateJsonFile(fileName, directoryPath, new JsonObject());
 
-            var json = await JSONDataHandler.LoadJsonFile(directoryPath, fileName);
+            var json = await JSONDataHandler.LoadJsonFile(fileName, directoryPath);
             json = await JSONDataHandler.AddToJson<Journal>(json, "Data", journal, encryptionKey);
             await JSONDataHandler.SaveJson(json);
         }
@@ -156,7 +158,7 @@ namespace XRUIOS.Barebones.Functions
 
             foreach (var item in themePaths)
             {
-                var json = await JSONDataHandler.LoadJsonFile(directoryPath, (Path.GetFileNameWithoutExtension(item)));
+                var json = await JSONDataHandler.LoadJsonFile((Path.GetFileNameWithoutExtension(item)), directoryPath);
 
                 var themeFile = (Journal)await JSONDataHandler.GetVariable<Journal>(json, "Data", encryptionKey);
 
@@ -172,7 +174,7 @@ namespace XRUIOS.Barebones.Functions
 
             var directoryPath = Path.Combine(DataPath, "Journals");
 
-            var json = await JSONDataHandler.LoadJsonFile(directoryPath, FileName);
+            var json = await JSONDataHandler.LoadJsonFile(FileName, directoryPath);
 
             var journalFile = (Journal)await JSONDataHandler.GetVariable<Journal>(json, "Data", encryptionKey);
 
@@ -198,66 +200,124 @@ namespace XRUIOS.Barebones.Functions
         //U
 
         //Remember to put Identity.Version up
-        public static async Task UpdateJournal(Journal journal, Journal newJournal)
+        public static async Task<string> UpdateJournal(Journal journal, Journal newJournal)
         {
             var directoryPath = Path.Combine(DataPath, "Journals");
-            var fileName = $"{journal.Identity.Name} v{journal.Identity.Version} by {journal.Identity.Author}, ID {journal.Identity.ThemeID}";
 
-            var filePath = Path.Combine(DataPath, "Journals", fileName);
+            var oldFileName = $"{journal.Identity.Name} v{journal.Identity.Version} by {journal.Identity.Author}__ID {journal.Identity.ThemeID}";
+            var newFileName = $"{newJournal.Identity.Name} v{newJournal.Identity.Version} by {newJournal.Identity.Author}__ID {newJournal.Identity.ThemeID}";
 
-            if (!File.Exists(filePath))
+            var oldFilePath = Path.Combine(directoryPath, oldFileName + ".json");    // ← add .json !!
+            var newFilePath = Path.Combine(directoryPath, newFileName + ".json");
+
+            // 1. Verify old file actually exists
+            if (!File.Exists(oldFilePath))
+                throw new FileNotFoundException($"Cannot update: original journal file not found at {oldFilePath}");
+
+            PariahJSON json;
+
+            // 2. Load original
+            try
             {
-                throw new InvalidOperationException("This journal does not exist.");
+                json = await JSONDataHandler.LoadJsonFile(oldFileName, directoryPath);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed to load original journal {oldFileName}", ex);
             }
 
-            var json = await JSONDataHandler.LoadJsonFile(directoryPath, fileName);
+            bool renamed = false;
+
+            // 3. Rename only if necessary
+            if (oldFileName != newFileName)
+            {
+                try
+                {
+                    File.Move(oldFilePath, newFilePath, overwrite: false);
+                    renamed = true;
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception($"Failed to rename journal from {oldFileName} → {newFileName}", ex);
+                }
+            }
+
+            // 4. Now load whatever file we should be working with
+            string targetFileName = renamed ? newFileName : oldFileName;
+            json = await JSONDataHandler.LoadJsonFile(targetFileName, directoryPath);
+
+            // 5. Update content
             json = await JSONDataHandler.UpdateJson<Journal>(json, "Data", newJournal, encryptionKey);
             await JSONDataHandler.SaveJson(json);
+
+
+            return newFileName;
         }
 
+
         //D
-        public static async Task DeleteJournal(string FileName)
+        public static async Task DeleteJournal(string fileName)
         {
             var directoryPath = Path.Combine(DataPath, "Journals");
-            var filePath = Path.Combine(DataPath, "Journals", FileName);
+            var filePath = Path.Combine(directoryPath, fileName + ".json"); 
 
             if (!File.Exists(filePath))
-                throw new InvalidOperationException("Journal does not exist.");
+                throw new InvalidOperationException($"Journal file not found: {filePath}");
+
+            try
+            {
+                File.Delete(filePath);
+            }
+
+            catch (Exception ex)
+            {
+                throw new Exception($"Failed to delete journal {fileName}: {ex.Message}", ex);
+            }
         }
 
 
         //Favorites
 
         // C
-        public static async Task AddJournalToFavorites(string JournalId)
+        public static async Task AddJournalToFavorites(string journalId)
         {
-            var directoryPath = Path.Combine(DataPath, "Journals");
-            var folder = directoryPath;
+            var dir = Path.Combine(DataPath, "Journals");
 
-            var foundFile = Directory.EnumerateFiles(folder, JournalId + ".*").FirstOrDefault();
-            if (foundFile == null)
-                throw new FileNotFoundException("Journal does not exist.");
+            // Verify journal exists
+            var matchingFile = Directory.EnumerateFiles(dir, journalId + ".*").FirstOrDefault();
+            if (matchingFile == null)
+                throw new FileNotFoundException($"Journal not found: {journalId}");
 
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
-            await manager.LoadBindings();
+            const string FavoritesFileName = "JournalFavorites";
+            var favFilePath = Path.Combine(dir, FavoritesFileName + ".json");
 
-            var favoritesFile =
-                await DataHandler.JSONDataHandler.LoadJsonFile("JournalFavorites", directoryPath);
+            PariahJSON favJson;
 
-            var favorites =
-                (List<string>)await DataHandler.JSONDataHandler.GetVariable<List<string>>(
-                    favoritesFile, "Data", encryptionKey);
+            if (!File.Exists(favFilePath))
+            {
+                // First time ever → create empty favorites file
+                await JSONDataHandler.CreateJsonFile(FavoritesFileName, dir, new JsonObject());
 
-            if (favorites.Contains(JournalId))
-                throw new InvalidOperationException("Journal already favorited.");
+                // Immediately initialize the "Data" key with empty list
+                favJson = await JSONDataHandler.LoadJsonFile(FavoritesFileName, dir);
+                favJson = await JSONDataHandler.AddToJson<List<string>>(favJson, "Data", new List<string>(), encryptionKey);
+                await JSONDataHandler.SaveJson(favJson);
+            }
+            else
+            {
+                favJson = await JSONDataHandler.LoadJsonFile(FavoritesFileName, dir);
+            }
 
-            favorites.Add(JournalId);
+            var favorites = await JSONDataHandler.GetVariable<List<string>>(favJson, "Data", encryptionKey)
+                as List<string> ?? new List<string>();
 
-            var editedJSON =
-                await DataHandler.JSONDataHandler.UpdateJson<List<string>>(
-                    favoritesFile, "Data", favorites, encryptionKey);
+            if (favorites.Contains(journalId))
+                throw new InvalidOperationException("Already favorited.");
 
-            await DataHandler.JSONDataHandler.SaveJson(editedJSON);
+            favorites.Add(journalId);
+
+            var updatedJson = await JSONDataHandler.UpdateJson<List<string>>(favJson, "Data", favorites, encryptionKey);
+            await JSONDataHandler.SaveJson(updatedJson);
         }
 
 
@@ -333,6 +393,8 @@ namespace XRUIOS.Barebones.Functions
             public DateTime Timestamp;     // UTC
             public Dictionary<string, string>? Meta;
 
+            public HistoryEntry() { }
+
             public HistoryEntry(
                 string action,
                 string targetType,
@@ -358,24 +420,29 @@ namespace XRUIOS.Barebones.Functions
             var directoryPath = Path.Combine(DataPath, "Journals");
             Directory.CreateDirectory(directoryPath);
 
-            var historyFile =
-                await JSONDataHandler.LoadJsonFile("History", directoryPath);
+            const string HistoryFileName = "History";
+            var historyPath = Path.Combine(directoryPath, HistoryFileName + ".json");
 
-            var entries =
-                (List<HistoryEntry>)await JSONDataHandler.GetVariable<List<HistoryEntry>>(
-                    historyFile, "Data", encryptionKey);
+            PariahJSON historyJson;
 
-            entries.Add(new HistoryEntry(
-                Action,
-                TargetType,
-                TargetID,
-                DateTime.UtcNow,
-                Meta));
+            if (!File.Exists(historyPath))
+            {
+                await JSONDataHandler.CreateJsonFile(HistoryFileName, directoryPath, new JsonObject());
+                historyJson = await JSONDataHandler.LoadJsonFile(HistoryFileName, directoryPath);
+                historyJson = await JSONDataHandler.AddToJson<List<HistoryEntry>>(historyJson, "Data", new List<HistoryEntry>(), encryptionKey);
+                await JSONDataHandler.SaveJson(historyJson);
+            }
+            else
+            {
+                historyJson = await JSONDataHandler.LoadJsonFile(HistoryFileName, directoryPath);
+            }
 
-            var editedJSON =
-                await JSONDataHandler.UpdateJson<List<HistoryEntry>>(
-                    historyFile, "Data", entries, encryptionKey);
+            var entries = await JSONDataHandler.GetVariable<List<HistoryEntry>>(historyJson, "Data", encryptionKey)
+                as List<HistoryEntry> ?? new List<HistoryEntry>();
 
+            entries.Add(new HistoryEntry(Action, TargetType, TargetID, DateTime.UtcNow, Meta));
+
+            var editedJSON = await JSONDataHandler.UpdateJson<List<HistoryEntry>>(historyJson, "Data", entries, encryptionKey);
             await JSONDataHandler.SaveJson(editedJSON);
         }
 

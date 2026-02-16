@@ -283,6 +283,53 @@ namespace XRUIOS.Barebones
 
         }
 
+        //WIP
+        private static async Task SaveVirtualLocationHistory(LocationPoint newLocation)
+        {
+            var directoryPath = Path.Combine(DataPath, "Coords");
+
+            var json = await JSONDataHandler.LoadJsonFile("VirtualLocationData", directoryPath);
+
+            var locationHistory = (List<LocationPoint>)await JSONDataHandler.GetVariable<List<LocationPoint>>(json, "Data", encryptionKey);
+
+            if (locationHistory.Count >= 40)
+            {
+                locationHistory.RemoveAt(39);
+            }
+
+            locationHistory.Add(newLocation);
+            json = await JSONDataHandler.UpdateJson<List<LocationPoint>>(json, "Data", locationHistory, encryptionKey);
+            await JSONDataHandler.SaveJson(json);
+
+
+            await JSONDataHandler.SaveJson(json);
+
+        }
+
+        public static async Task<List<LocationPoint>> GetVirtualRelativeLocations()
+        {
+            var directoryPath = Path.Combine(DataPath, "Coords");
+
+            var json = await JSONDataHandler.LoadJsonFile("VirtualLocationData", directoryPath);
+
+            var locationHistory = (List<LocationPoint>)await JSONDataHandler.GetVariable<List<LocationPoint>>(json, "Data", encryptionKey);
+
+            return locationHistory;
+        }
+
+        public static async Task ClearVirtualLocationHistory(LocationPoint newLocation)
+        {
+            var directoryPath = Path.Combine(DataPath, "Coords");
+
+            var json = await JSONDataHandler.LoadJsonFile("VirtualLocationData", directoryPath);
+
+            json = await JSONDataHandler.UpdateJson<List<LocationPoint>>(json, "Data", new List<LocationPoint>(), encryptionKey);
+
+            await JSONDataHandler.SaveJson(json);
+
+        }
+
+
 
 
     }

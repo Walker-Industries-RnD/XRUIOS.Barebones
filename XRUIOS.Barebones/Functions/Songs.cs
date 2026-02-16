@@ -486,7 +486,7 @@ namespace XRUIOS.Barebones
 
                 //Does the audio source file exist?
 
-                var audioSourceUrl = Path.Combine(DataPath, idDirectoryPath, audioFile);
+                var audioSourceUrl = Path.Combine(idDirectoryPath, audioFile);
 
                 if (!File.Exists(audioSourceUrl))
                 {
@@ -664,12 +664,12 @@ namespace XRUIOS.Barebones
 
 
                 var overviewFile = DataHandler.JSONDataHandler.CreateJsonFile($"{audioFile}+.yuukoMusicOverview", idDirectoryPath, new JsonObject());
-                var overviewFileLoaded = await JSONDataHandler.LoadJsonFile(idDirectoryPath, audioFile);
+                var overviewFileLoaded = await JSONDataHandler.LoadJsonFile(idDirectoryPath, $"{audioFile}+.yuukoMusicOverview");
                 overviewFileLoaded = await JSONDataHandler.AddToJson<byte[]>(overviewFileLoaded, "Data", overviewData, encryptionKey);
                 await JSONDataHandler.SaveJson(overviewFileLoaded);
 
-                var detailedFile = DataHandler.JSONDataHandler.CreateJsonFile($"{audioFile}+.yuukoMusicdetailed", idDirectoryPath, new JsonObject());
-                var detailedFileLoaded = await JSONDataHandler.LoadJsonFile(idDirectoryPath, audioFile);
+                var detailedFile = DataHandler.JSONDataHandler.CreateJsonFile($"{audioFile}+.yuukoMusicDetailed", idDirectoryPath, new JsonObject());
+                var detailedFileLoaded = await JSONDataHandler.LoadJsonFile(idDirectoryPath, $"{audioFile}+.yuukoMusicDetailed");
                 detailedFileLoaded = await JSONDataHandler.AddToJson<byte[]>(detailedFileLoaded, "Data", detailedData, encryptionKey);
                 await JSONDataHandler.SaveJson(detailedFileLoaded);
 
@@ -702,7 +702,7 @@ namespace XRUIOS.Barebones
 
                 //Does the audio source file exist?
 
-                var audioSourceUrl = Path.Combine(DataPath, idDirectoryPath, audioFile);
+                var audioSourceUrl = Path.Combine(idDirectoryPath, audioFile);
 
                 if (!File.Exists(audioSourceUrl))
                 {
@@ -726,25 +726,25 @@ namespace XRUIOS.Barebones
                 switch (getData)
                 {
                     case MusicInfoStyle.overview:
-                        var overviewFileLoaded = await JSONDataHandler.LoadJsonFile(idDirectoryPath, audioFile);
+                        var overviewFileLoaded = await JSONDataHandler.LoadJsonFile(idDirectoryPath, $"{audioFile}+.yuukoMusicOverview");
                         var overviewBytes = (byte[])await JSONDataHandler.GetVariable<byte[]>(overviewFileLoaded, "Data", encryptionKey);
                         var overview = await BinaryConverter.NCByteArrayToObjectAsync<SongOverview>(overviewBytes);
                         songOverview = overview;
                         break;
 
                     case MusicInfoStyle.detailed:
-                        var detailedFileLoaded = await JSONDataHandler.LoadJsonFile(idDirectoryPath, audioFile);
+                        var detailedFileLoaded = await JSONDataHandler.LoadJsonFile(idDirectoryPath, $"{audioFile}+.yuukoMusicDetailed");
                         var detailedBytes = (byte[])await JSONDataHandler.GetVariable<byte[]>(detailedFileLoaded, "Data", encryptionKey);
                         var detailed = await BinaryConverter.NCByteArrayToObjectAsync<SongDetailed>(detailedBytes);
                         songDetailed = detailed;
                         break;
                     case MusicInfoStyle.both:
-                        var overviewFileLoaded2 = await JSONDataHandler.LoadJsonFile(idDirectoryPath, audioFile);
-                        var overviewBytes2 = (byte[])await JSONDataHandler.GetVariable<byte[]>(overviewFileLoaded, "Data", encryptionKey);
+                        var overviewFileLoaded2 = await JSONDataHandler.LoadJsonFile(idDirectoryPath, $"{audioFile}+.yuukoMusicOverview");
+                        var overviewBytes2 = (byte[])await JSONDataHandler.GetVariable<byte[]>(overviewFileLoaded2, "Data", encryptionKey);
                         var overview2 = await BinaryConverter.NCByteArrayToObjectAsync<SongOverview>(overviewBytes2);
                         songOverview = overview2;
-                        var detailedFileLoaded2 = await JSONDataHandler.LoadJsonFile(idDirectoryPath, audioFile);
-                        var detailedBytes2 = (byte[])await JSONDataHandler.GetVariable<byte[]>(detailedFileLoaded, "Data", encryptionKey);
+                        var detailedFileLoaded2 = await JSONDataHandler.LoadJsonFile(idDirectoryPath, $"{audioFile}+.yuukoMusicDetailed");
+                        var detailedBytes2 = (byte[])await JSONDataHandler.GetVariable<byte[]>(detailedFileLoaded2, "Data", encryptionKey);
                         var detailed2 = await BinaryConverter.NCByteArrayToObjectAsync<SongDetailed>(detailedBytes2);
                         songDetailed = detailed2;
                         break;
@@ -1262,7 +1262,7 @@ namespace XRUIOS.Barebones
                 {
                     //Does the audio source file exist? (If no, just skip)
 
-                    var audioSourceUrl = Path.Combine(DataPath, idDirectoryPath, audioFile);
+                    var audioSourceUrl = Path.Combine(idDirectoryPath, audioFile);
 
                     if (!File.Exists(audioSourceUrl))
                     {
@@ -1935,24 +1935,369 @@ namespace XRUIOS.Barebones
 
         }
 
-        public class Playlists()
+        public class Playlists
         {
-
-            //We simply use ATLDOTNET for this and metadata for songs, i'm too lazy to do it any other way
-
-            //C
+            private const int MaxPlaylists = 100;
+            private const int MaxSongsPerPlaylist = 1000;
 
 
+            // PLAYLIST RECORD - Follows your pattern!
 
-            //R
+            public record Playlist
+            {
+                public string PlaylistId { get; init; }
+                public string PlaylistName { get; set; }
+                public string? Description { get; set; }
+                public DateTime CreatedAt { get; init; }
+                public DateTime? LastModified { get; set; }
+                public List<PlaylistEntry> Songs { get; set; }
+                public string? CoverImagePath { get; set; }
+                public bool IsFavorite { get; set; }
+                public int PlayCount { get; set; }
+                public TimeSpan? TotalDuration { get; set; }
+
+                // Parameterless constructor for serialization
+                public Playlist()
+                {
+                    PlaylistId = Guid.NewGuid().ToString();
+                    PlaylistName = string.Empty;
+                    Songs = new List<PlaylistEntry>();
+                    CreatedAt = DateTime.UtcNow;
+                }
+
+                // Main constructor
+                public Playlist(
+                    string playlistName,
+                    string? description = null,
+                    string? coverImagePath = null,
+                    List<PlaylistEntry>? songs = null,
+                    string? playlistId = null)
+                {
+                    PlaylistId = playlistId ?? Guid.NewGuid().ToString();
+                    PlaylistName = playlistName;
+                    Description = description;
+                    CoverImagePath = coverImagePath;
+                    Songs = songs ?? new List<PlaylistEntry>();
+                    CreatedAt = DateTime.UtcNow;
+                    LastModified = DateTime.UtcNow;
+                    IsFavorite = false;
+                    PlayCount = 0;
+                }
+            }
+
+            public record PlaylistEntry
+            {
+                public string SongFileName { get; init; }      // e.g., "song.mp3"
+                public string DirectoryUUID { get; init; }      // Points to the directory
+                public DateTime AddedAt { get; init; }
+                public int TrackNumber { get; set; }            // Position in playlist
+                public string? SongOverview { get; set; }       // Cached song name for quick display
+
+                public PlaylistEntry() { }
+
+                public PlaylistEntry(string songFileName, string directoryUUID, int trackNumber)
+                {
+                    SongFileName = songFileName;
+                    DirectoryUUID = directoryUUID;
+                    AddedAt = DateTime.UtcNow;
+                    TrackNumber = trackNumber;
+                }
+            }
 
 
-            //U
+            // CREATE - Add a new playlist (like RecentlyRecorded pattern)
+
+            public static async Task<string> CreatePlaylist(Playlist newPlaylist)
+            {
+                var directoryPath = Path.Combine(DataPath, "Music", "Playlists");
+                Directory.CreateDirectory(directoryPath);
+
+                var playlistsFile = await JSONDataHandler.LoadJsonFile("Playlists", directoryPath);
+                var playlists = (List<Playlist>)await JSONDataHandler.GetVariable<List<Playlist>>(
+                    playlistsFile, "Playlists", encryptionKey);
+
+                // Check if playlist with same ID already exists
+                if (playlists.Any(p => p.PlaylistId == newPlaylist.PlaylistId))
+                    throw new InvalidOperationException($"Playlist with ID {newPlaylist.PlaylistId} already exists!");
+
+                // Enforce max playlists
+                if (playlists.Count >= MaxPlaylists)
+                    playlists.RemoveAt(0);
+
+                playlists.Add(newPlaylist);
+
+                var updatedJSON = await JSONDataHandler.UpdateJson<List<Playlist>>(
+                    playlistsFile, "Playlists", playlists, encryptionKey);
+                await JSONDataHandler.SaveJson(updatedJSON);
+
+                return newPlaylist.PlaylistId;
+            }
 
 
-            //D
+            // READ - Get all playlists
+
+            public static async Task<List<Playlist>> GetAllPlaylists()
+            {
+                var directoryPath = Path.Combine(DataPath, "Music", "Playlists");
+                var playlistsFile = await JSONDataHandler.LoadJsonFile("Playlists", directoryPath);
+                var playlists = (List<Playlist>)await JSONDataHandler.GetVariable<List<Playlist>>(
+                    playlistsFile, "Playlists", encryptionKey);
+
+                return playlists.OrderByDescending(p => p.LastModified).ToList();
+            }
 
 
+            // READ - Get specific playlist
+
+            public static async Task<Playlist?> GetPlaylist(string playlistId)
+            {
+                var playlists = await GetAllPlaylists();
+                return playlists.FirstOrDefault(p => p.PlaylistId == playlistId);
+            }
+
+
+            // UPDATE - Update playlist metadata
+
+            public static async Task UpdatePlaylist(Playlist updatedPlaylist)
+            {
+                var directoryPath = Path.Combine(DataPath, "Music", "Playlists");
+                var playlistsFile = await JSONDataHandler.LoadJsonFile("Playlists", directoryPath);
+                var playlists = (List<Playlist>)await JSONDataHandler.GetVariable<List<Playlist>>(
+                    playlistsFile, "Playlists", encryptionKey);
+
+                var index = playlists.FindIndex(p => p.PlaylistId == updatedPlaylist.PlaylistId);
+                if (index == -1)
+                    throw new InvalidOperationException($"Playlist {updatedPlaylist.PlaylistId} not found!");
+
+                updatedPlaylist.LastModified = DateTime.UtcNow;
+                playlists[index] = updatedPlaylist;
+
+                var updatedJSON = await JSONDataHandler.UpdateJson<List<Playlist>>(
+                    playlistsFile, "Playlists", playlists, encryptionKey);
+                await JSONDataHandler.SaveJson(updatedJSON);
+            }
+
+
+            // DELETE - Remove playlist
+
+            public static async Task DeletePlaylist(string playlistId)
+            {
+                var directoryPath = Path.Combine(DataPath, "Music", "Playlists");
+                var playlistsFile = await JSONDataHandler.LoadJsonFile("Playlists", directoryPath);
+                var playlists = (List<Playlist>)await JSONDataHandler.GetVariable<List<Playlist>>(
+                    playlistsFile, "Playlists", encryptionKey);
+
+                var removed = playlists.RemoveAll(p => p.PlaylistId == playlistId);
+                if (removed == 0)
+                    throw new InvalidOperationException($"Playlist {playlistId} not found!");
+
+                var updatedJSON = await JSONDataHandler.UpdateJson<List<Playlist>>(
+                    playlistsFile, "Playlists", playlists, encryptionKey);
+                await JSONDataHandler.SaveJson(updatedJSON);
+            }
+
+
+            // SONG MANAGEMENT - Add song to playlist
+
+            public static async Task AddSongToPlaylist(string playlistId, string songFileName, string directoryUUID)
+            {
+                var playlist = await GetPlaylist(playlistId);
+                if (playlist == null)
+                    throw new InvalidOperationException($"Playlist {playlistId} not found!");
+
+                // Check if song already exists
+                if (playlist.Songs.Any(s => s.SongFileName == songFileName && s.DirectoryUUID == directoryUUID))
+                    throw new InvalidOperationException("Song already in playlist!");
+
+                // Enforce max songs
+                if (playlist.Songs.Count >= MaxSongsPerPlaylist)
+                    throw new InvalidOperationException("Playlist is full!");
+
+                // Get song overview for caching
+                string? songName = null;
+                try
+                {
+                    var (overview, _) = await SongClass.GetSongInfo(songFileName, directoryUUID, SongClass.MusicInfoStyle.overview);
+                    songName = overview?.SongName;
+                }
+                catch { /* Use filename if metadata fails */ }
+
+                var entry = new PlaylistEntry(songFileName, directoryUUID, playlist.Songs.Count + 1)
+                {
+                    SongOverview = songName ?? songFileName
+                };
+
+                playlist.Songs.Add(entry);
+                await UpdatePlaylist(playlist);
+
+                // Update total duration
+                await RecalculatePlaylistDuration(playlistId);
+            }
+
+
+            // SONG MANAGEMENT - Remove song from playlist
+
+            public static async Task RemoveSongFromPlaylist(string playlistId, string songFileName, string directoryUUID)
+            {
+                var playlist = await GetPlaylist(playlistId);
+                if (playlist == null)
+                    throw new InvalidOperationException($"Playlist {playlistId} not found!");
+
+                var removed = playlist.Songs.RemoveAll(s =>
+                    s.SongFileName == songFileName && s.DirectoryUUID == directoryUUID);
+
+                if (removed == 0)
+                    throw new InvalidOperationException("Song not found in playlist!");
+
+                // Renumber remaining tracks
+                for (int i = 0; i < playlist.Songs.Count; i++)
+                {
+                    playlist.Songs[i].TrackNumber = i + 1;
+                }
+
+                await UpdatePlaylist(playlist);
+                await RecalculatePlaylistDuration(playlistId);
+            }
+
+
+            // SONG MANAGEMENT - Reorder playlist
+
+            public static async Task ReorderPlaylist(string playlistId, List<string> songOrder)
+            {
+                var playlist = await GetPlaylist(playlistId);
+                if (playlist == null)
+                    throw new InvalidOperationException($"Playlist {playlistId} not found!");
+
+                if (songOrder.Count != playlist.Songs.Count)
+                    throw new InvalidOperationException("Song count mismatch!");
+
+                var newOrder = new List<PlaylistEntry>();
+                for (int i = 0; i < songOrder.Count; i++)
+                {
+                    var song = playlist.Songs.FirstOrDefault(s =>
+                        $"{s.DirectoryUUID}:{s.SongFileName}" == songOrder[i]);
+                    if (song == null)
+                        throw new InvalidOperationException($"Song {songOrder[i]} not found!");
+
+                    newOrder.Add(song with { TrackNumber = i + 1 });
+                }
+
+                playlist.Songs = newOrder;
+                await UpdatePlaylist(playlist);
+            }
+
+
+            // UTILITY - Recalculate total duration
+
+            private static async Task RecalculatePlaylistDuration(string playlistId)
+            {
+                var playlist = await GetPlaylist(playlistId);
+                if (playlist == null) return;
+
+                TimeSpan total = TimeSpan.Zero;
+                foreach (var song in playlist.Songs)
+                {
+                    try
+                    {
+                        var (overview, _) = await SongClass.GetSongInfo(
+                            song.SongFileName,
+                            song.DirectoryUUID,
+                            SongClass.MusicInfoStyle.overview);
+
+                        if (overview?.Duration.HasValue == true)
+                            total = total.Add(overview.Duration.Value);
+                    }
+                    catch { /* Skip songs with no duration */ }
+                }
+
+                playlist.TotalDuration = total;
+                await UpdatePlaylist(playlist);
+            }
+
+
+            // FAVORITES - Mark playlist as favorite
+
+            public static async Task ToggleFavorite(string playlistId)
+            {
+                var playlist = await GetPlaylist(playlistId);
+                if (playlist == null)
+                    throw new InvalidOperationException($"Playlist {playlistId} not found!");
+
+                playlist.IsFavorite = !playlist.IsFavorite;
+                await UpdatePlaylist(playlist);
+            }
+
+
+            // GET RESOLVED SONG PATHS (for playback)
+
+            public static async Task<List<string>> GetResolvedPlaylistSongs(string playlistId)
+            {
+                var playlist = await GetPlaylist(playlistId);
+                if (playlist == null)
+                    throw new InvalidOperationException($"Playlist {playlistId} not found!");
+
+                var directoryPath = Path.Combine(DataPath, "Music");
+                var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+                await manager.LoadBindings();
+
+                var resolvedPaths = new List<string>();
+
+                foreach (var song in playlist.Songs)
+                {
+                    var dirPath = await manager.GetDirectoryById(song.DirectoryUUID);
+                    if (dirPath != null)
+                    {
+                        var fullPath = Path.Combine(dirPath, song.SongFileName);
+                        if (File.Exists(fullPath))
+                            resolvedPaths.Add(fullPath);
+                    }
+                }
+
+                return resolvedPaths;
+            }
+
+
+            // CREATE FROM FOLDER - Import all songs from a directory
+
+            public static async Task<string> CreatePlaylistFromFolder(
+                string playlistName,
+                string directoryUUID,
+                string? description = null)
+            {
+                var (resolved, _) = await SongGetClass.GetSongsInDirectoryAsync(directoryUUID);
+
+                var playlist = new Playlist(playlistName, description);
+
+                foreach (var songPath in resolved)
+                {
+                    var fileName = Path.GetFileName(songPath);
+                    await AddSongToPlaylist(playlist.PlaylistId, fileName, directoryUUID);
+                }
+
+                return playlist.PlaylistId;
+            }
+
+
+            // CREATE FROM FAVORITES - Playlist of all favorites
+
+            public static async Task<string> CreatePlaylistFromFavorites(string playlistName)
+            {
+                var (resolved, _) = await SongFavoritesClass.GetFavorites();
+
+                var playlist = new Playlist(playlistName, "Auto-generated from favorites");
+
+                foreach (var songPath in resolved)
+                {
+                    // Parse path back to UUID and filename
+                    // This assumes the path structure: .../UUID/filename
+                    var directoryUUID = Path.GetFileName(Path.GetDirectoryName(songPath)) ?? string.Empty;
+                    var fileName = Path.GetFileName(songPath);
+
+                    await AddSongToPlaylist(playlist.PlaylistId, fileName, directoryUUID);
+                }
+
+                return playlist.PlaylistId;
+            }
         }
 
 

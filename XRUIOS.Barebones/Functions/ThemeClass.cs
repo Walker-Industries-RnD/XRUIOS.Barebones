@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Nodes;
+﻿using Microsoft.Maui.Storage;
+using System.Text.Json.Nodes;
 using static Pariah_Cybersecurity.DataHandler;
 using static XRUIOS.Barebones.XRUIOS;
 
@@ -294,7 +295,7 @@ namespace XRUIOS.Barebones.Functions
         public static async Task SaveTheme(XRUIOSTheme theme)
         {
             var directoryPath = Path.Combine(DataPath, "Themes");
-            var fileName = $"{theme.Identity.Name} v{theme.Identity.Version} by {theme.Identity.Author}, ID {theme.Identity.ThemeID}";
+            var fileName = $"{theme.Identity.Name} v{theme.Identity.Version} by {theme.Identity.Author}__ID {theme.Identity.ThemeID}";
 
             var filePath = Path.Combine(DataPath, "Themes", fileName);
 
@@ -305,7 +306,7 @@ namespace XRUIOS.Barebones.Functions
 
             await JSONDataHandler.CreateJsonFile(fileName, directoryPath, new JsonObject());
 
-            var json = await JSONDataHandler.LoadJsonFile(directoryPath, fileName);
+            var json = await JSONDataHandler.LoadJsonFile(fileName, directoryPath);
             json = await JSONDataHandler.AddToJson<XRUIOSTheme>(json, "Data", theme, encryptionKey);
             await JSONDataHandler.SaveJson(json);
         }
@@ -321,7 +322,7 @@ namespace XRUIOS.Barebones.Functions
 
             foreach (var item in themePaths)
             {
-                var json = await JSONDataHandler.LoadJsonFile(directoryPath, (Path.GetFileNameWithoutExtension(item)));
+                var json = await JSONDataHandler.LoadJsonFile((Path.GetFileNameWithoutExtension(item)), directoryPath);
 
                 var themeFile = (XRUIOSTheme)await JSONDataHandler.GetVariable<XRUIOSTheme>(json, "Data", encryptionKey);
 
@@ -337,7 +338,7 @@ namespace XRUIOS.Barebones.Functions
 
             var directoryPath = Path.Combine(DataPath, "Themes");
 
-            var json = await JSONDataHandler.LoadJsonFile(directoryPath, FileName);
+            var json = await JSONDataHandler.LoadJsonFile(FileName, directoryPath);
 
             var themeFile = (XRUIOSTheme)await JSONDataHandler.GetVariable<XRUIOSTheme>(json, "Data", encryptionKey);
 
@@ -355,7 +356,7 @@ namespace XRUIOS.Barebones.Functions
         public static async Task UpdateTheme(XRUIOSTheme theme, XRUIOSTheme newTheme)
         {
             var directoryPath = Path.Combine(DataPath, "Themes");
-            var fileName = $"{theme.Identity.Name} v{theme.Identity.Version} by {theme.Identity.Author}, ID {theme.Identity.ThemeID}";
+            var fileName = $"{theme.Identity.Name} v{theme.Identity.Version} by {theme.Identity.Author}__ID {theme.Identity.ThemeID}";
 
             var filePath = Path.Combine(DataPath, "Themes", fileName);
 
@@ -364,7 +365,7 @@ namespace XRUIOS.Barebones.Functions
                 throw new InvalidOperationException("This theme does not exist.");
             }
 
-            var json = await JSONDataHandler.LoadJsonFile(directoryPath, fileName);
+            var json = await JSONDataHandler.LoadJsonFile(fileName, directoryPath);
             json = await JSONDataHandler.UpdateJson<XRUIOSTheme>(json, "Data", newTheme, encryptionKey);
             await JSONDataHandler.SaveJson(json);
         }

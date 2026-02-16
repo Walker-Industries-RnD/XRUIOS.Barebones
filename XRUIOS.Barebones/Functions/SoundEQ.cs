@@ -57,8 +57,9 @@ namespace XRUIOS.Barebones
             var directoryPath = Path.Combine(DataPath, "EQDB");
 
             //Get the JSON File holding the MusicDirectory object for the user
-            var FileWithSoundEQDB = await JSONDataHandler.LoadJsonFile(directoryPath, "EQDB");
-            var loaded = (List<SoundEQ>)await JSONDataHandler.GetVariable<List<SoundEQ>>(FileWithSoundEQDB, "EQDBData", encryptionKey);
+            var FileWithSoundEQDB = await JSONDataHandler.LoadJsonFile("EQDBData", directoryPath);
+            var loaded = (List<SoundEQ>)await JSONDataHandler.GetVariable<List<SoundEQ>>(FileWithSoundEQDB, "Data", encryptionKey);
+
 
             if (loaded.Any(d => d.GetHashCode() == EQDBData.GetHashCode()))
             {
@@ -72,7 +73,7 @@ namespace XRUIOS.Barebones
 
             loaded.Add(EQDBData);
 
-            var updatedJSON = await JSONDataHandler.UpdateJson<List<SoundEQ>>(FileWithSoundEQDB, "EQDBData", loaded, encryptionKey);
+            var updatedJSON = await JSONDataHandler.UpdateJson<List<SoundEQ>>(FileWithSoundEQDB, "Data", loaded, encryptionKey);
 
             await JSONDataHandler.SaveJson(updatedJSON);
 
@@ -84,8 +85,8 @@ namespace XRUIOS.Barebones
             var directoryPath = Path.Combine(DataPath, "EQDB");
 
             //Get the JSON File holding the MusicDirectory object for the user
-            var FileWithSoundEQDB = await JSONDataHandler.LoadJsonFile(directoryPath, "EQDB");
-            var loaded = (List<SoundEQ>)await JSONDataHandler.GetVariable<List<SoundEQ>>(FileWithSoundEQDB, "EQDBData", encryptionKey);
+            var FileWithSoundEQDB = await JSONDataHandler.LoadJsonFile("EQDBData", directoryPath);
+            var loaded = (List<SoundEQ>)await JSONDataHandler.GetVariable<List<SoundEQ>>(FileWithSoundEQDB, "Data", encryptionKey);
 
             return loaded;
         }
@@ -96,8 +97,8 @@ namespace XRUIOS.Barebones
             var directoryPath = Path.Combine(DataPath, "EQDB");
 
             //Get the JSON File holding the MusicDirectory object for the user
-            var FileWithSoundEQDB = await JSONDataHandler.LoadJsonFile(directoryPath, "EQDB");
-            var loaded = (List<SoundEQ>)await JSONDataHandler.GetVariable<List<SoundEQ>>(FileWithSoundEQDB, "EQDBData", encryptionKey);
+            var FileWithSoundEQDB = await JSONDataHandler.LoadJsonFile("EQDBData", directoryPath);
+            var loaded = (List<SoundEQ>)await JSONDataHandler.GetVariable<List<SoundEQ>>(FileWithSoundEQDB, "Data", encryptionKey);
             var returnVal = loaded.FirstOrDefault(d => d.EQName == eqDBName);
 
             return returnVal;
@@ -109,25 +110,24 @@ namespace XRUIOS.Barebones
         {
             var directoryPath = Path.Combine(DataPath, "EQDB");
 
-            //Get the JSON File holding the MusicDirectory object for the user
-            var FileWithSoundEQDB = await JSONDataHandler.LoadJsonFile(directoryPath, "EQDB");
-            var loaded = (List<SoundEQ>)await JSONDataHandler.GetVariable<List<SoundEQ>>(FileWithSoundEQDB, "EQDBData", encryptionKey);
+            var file = await JSONDataHandler.LoadJsonFile("EQDBData", directoryPath);
+            var loaded = (List<SoundEQ>)await JSONDataHandler
+                .GetVariable<List<SoundEQ>>(file, "Data", encryptionKey);
 
-            if (!loaded.Any(d => d.EQName == originalData.EQName))
-            {
+            var existing = loaded.FirstOrDefault(d => d.EQName == originalData.EQName);
+
+            if (existing == null)
                 throw new InvalidOperationException("This does not exist as a saved, stored item.");
-            }
 
-            var dataToRemove = loaded.First(d => d.GetHashCode() == originalData.GetHashCode());
-            {
-                loaded.Remove(dataToRemove);
-                loaded.Add(newData);
-            }
+            loaded.Remove(existing);
+            loaded.Add(newData);
 
-            var updatedJSON = await JSONDataHandler.UpdateJson<List<SoundEQ>>(FileWithSoundEQDB, "EQDBData", loaded, encryptionKey);
+            var updatedJSON = await JSONDataHandler
+                .UpdateJson<List<SoundEQ>>(file, "Data", loaded, encryptionKey);
 
-            await JSONDataHandler.SaveJson(FileWithSoundEQDB);
+            await JSONDataHandler.SaveJson(updatedJSON);
         }
+
 
 
         //D
@@ -136,8 +136,8 @@ namespace XRUIOS.Barebones
             var directoryPath = Path.Combine(DataPath, "EQDB");
 
             //Get the JSON File holding the MusicDirectory object for the user
-            var FileWithSoundEQDB = await JSONDataHandler.LoadJsonFile(directoryPath, "EQDB");
-            var loaded = (List<SoundEQ>)await JSONDataHandler.GetVariable<List<SoundEQ>>(FileWithSoundEQDB, "EQDBData", encryptionKey);
+            var FileWithSoundEQDB = await JSONDataHandler.LoadJsonFile("EQDBData", directoryPath);
+            var loaded = (List<SoundEQ>)await JSONDataHandler.GetVariable<List<SoundEQ>>(FileWithSoundEQDB, "Data", encryptionKey);
 
             if (!loaded.Any(d => d.GetHashCode() == deletedData.GetHashCode()))
             {
@@ -149,7 +149,7 @@ namespace XRUIOS.Barebones
                 loaded.Remove(dataToRemove);
             }
 
-            var updatedJSON = await JSONDataHandler.UpdateJson<List<SoundEQ>>(FileWithSoundEQDB, "EQDBData", loaded, encryptionKey);
+            var updatedJSON = await JSONDataHandler.UpdateJson<List<SoundEQ>>(FileWithSoundEQDB, "Data", loaded, encryptionKey);
 
             await JSONDataHandler.SaveJson(FileWithSoundEQDB);
         }
@@ -159,11 +159,11 @@ namespace XRUIOS.Barebones
             var directoryPath = Path.Combine(DataPath, "EQDB");
 
             //Get the JSON File holding the MusicDirectory object for the user
-            var FileWithSoundEQDB = await JSONDataHandler.LoadJsonFile(directoryPath, "EQDB");
-            var loaded = (List<SoundEQ>)await JSONDataHandler.GetVariable<List<SoundEQ>>(FileWithSoundEQDB, "EQDBData", encryptionKey);
+            var FileWithSoundEQDB = await JSONDataHandler.LoadJsonFile("EQDBData", directoryPath);
+            var loaded = (List<SoundEQ>)await JSONDataHandler.GetVariable<List<SoundEQ>>(FileWithSoundEQDB, "Data", encryptionKey);
 
             loaded.Clear();
-            var updatedJSON = await JSONDataHandler.UpdateJson<List<SoundEQ>>(FileWithSoundEQDB, "EQDBData", loaded, encryptionKey);
+            var updatedJSON = await JSONDataHandler.UpdateJson<List<SoundEQ>>(FileWithSoundEQDB, "Data", loaded, encryptionKey);
 
             await JSONDataHandler.SaveJson(FileWithSoundEQDB);
         }
@@ -179,7 +179,7 @@ namespace XRUIOS.Barebones
             var directoryPath = Path.Combine(DataPath, "EQDB");
 
             //Get the JSON File holding the MusicDirectory object for the user
-            var FileWithSoundEQDB = await JSONDataHandler.LoadJsonFile(directoryPath, "EQDB");
+            var FileWithSoundEQDB = await JSONDataHandler.LoadJsonFile("EQDBData", directoryPath);
             var loaded = (SoundEQ)await JSONDataHandler.GetVariable<SoundEQ>(FileWithSoundEQDB, "DefaultEQDB", encryptionKey);
 
             var updatedJSON = await JSONDataHandler.UpdateJson<SoundEQ>(FileWithSoundEQDB, "DefaultEQDB", EQDBData, encryptionKey);
@@ -194,7 +194,7 @@ namespace XRUIOS.Barebones
             var directoryPath = Path.Combine(DataPath, "EQDB");
 
             //Get the JSON File holding the MusicDirectory object for the user
-            var FileWithSoundEQDB = await JSONDataHandler.LoadJsonFile(directoryPath, "EQDB");
+            var FileWithSoundEQDB = await JSONDataHandler.LoadJsonFile("EQDBData", directoryPath);
             var loaded = (SoundEQ)await JSONDataHandler.GetVariable<SoundEQ>(FileWithSoundEQDB, "DefaultEQDB", encryptionKey);
 
             return loaded;
@@ -210,7 +210,7 @@ namespace XRUIOS.Barebones
             var input = new SoundEQ(default, 100, 100, 100, 100, 100, 100, 100, fancyoptions);
 
             //Get the JSON File holding the MusicDirectory object for the user
-            var FileWithSoundEQDB = await JSONDataHandler.LoadJsonFile(directoryPath, "EQDB");
+            var FileWithSoundEQDB = await JSONDataHandler.LoadJsonFile("EQDBData", directoryPath);
             var loaded = (SoundEQ)await JSONDataHandler.GetVariable<SoundEQ>(FileWithSoundEQDB, "DefaultEQDB", encryptionKey);
 
             var updatedJSON = await JSONDataHandler.UpdateJson<SoundEQ>(FileWithSoundEQDB, "DefaultEQDB", loaded, encryptionKey);

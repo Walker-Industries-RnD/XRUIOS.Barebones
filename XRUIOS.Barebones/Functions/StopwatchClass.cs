@@ -10,8 +10,8 @@ namespace XRUIOS.Barebones
 
         public record StopwatchRecord
         {
-            public int LapCount;
-            public int SecondsElapsed;
+            public int LapCount { get; set; }
+            public int SecondsElapsed { get; set; }
 
             public StopwatchRecord() { }
 
@@ -20,8 +20,8 @@ namespace XRUIOS.Barebones
                 LapCount = lapCount;
                 SecondsElapsed = secondsElapsed;
             }
-
         }
+
 
         public static Dictionary<string, (long, List<StopwatchRecord>)> StopWatches = new Dictionary<string, (long, List<StopwatchRecord>)>();
 
