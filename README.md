@@ -13,6 +13,7 @@ Current Goals Include:
 - Making the ~~Stride3D~~ Godot runtime
 - Connecting to Project Replicant with Eclipse/Dirac Sea
 - Putting within Plagues Protocol
+- Adding a camera permission with realtime encryption
 
 </details>
 
