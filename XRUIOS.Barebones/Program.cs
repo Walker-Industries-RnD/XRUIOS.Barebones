@@ -163,8 +163,7 @@ namespace XRUIOS.TestHarness
             //Songs, Playlists and Queues not working, GeoClass won't work on PC
 
 {
-                (TestSongs, "[SONGS] Full metadata extraction & directory scanning"),
-(TestPlaylists, "[PLAYLISTS] Creation, song management & resolution"),
+(TestSongs, "[SONGS] Full metadata extraction & directory scanning [PLAYLISTS] Creation, song management & resolution"),
     (TestAlarm,             "[ALARM] Angel intercept timers & recurring patterns"),
     (TestApps,              "[DOCK] App manifest deployment & favorite loadouts"),
     (TestWorldPoints,       "[SPATIAL] World anchor points & static object placement"),
@@ -190,7 +189,6 @@ namespace XRUIOS.TestHarness
     (TestTimer,             "[SYNC] Asynchronous EVA unit sync timers"),
         (TestMusicQueue,        "[QUEUE] Playback queue & currently-playing state"),
         (TestWorldEvents,        "[EVENTS] Recording World And Events")
-
 };
 
             int phaseCount = 1;
@@ -234,55 +232,92 @@ namespace XRUIOS.TestHarness
 
             Console.ReadKey(true);
         }
-
         static async Task FullYuukoTest()
         {
-            string testBase = Path.Combine(DataPath, "YuukoTests");
-            Directory.CreateDirectory(testBase);
             Console.WriteLine("=== Full Yuuko + Media Test Started ===");
 
-            // Create a sample folder
+            string dataType = "Generic";
+            string testBase = Path.Combine(DataPath, "YuukoTests");
+            Directory.CreateDirectory(testBase);
+
+            // 1️⃣ Create sample folder
             string sampleDir = Path.Combine(testBase, "SampleFolder");
             Directory.CreateDirectory(sampleDir);
+
             Console.WriteLine("Creating Generic Directory via Media class...");
 
-            var record = await Media.AddGenericDirectory(sampleDir, "SampleFolder");
+            var record = await Yuuko.Media.AddGenericDirectory(sampleDir, "SampleFolder", dataType);
             string uuid = record.UUID;
-            Console.WriteLine($"Created UUID: {uuid}, Path: {record.Path}");
 
-            // 2 Get resolved directories
-            Console.WriteLine("Getting Generic Directories (resolved only)...");
-            var (resolvedDirs, _) = await Media.GetGenericDirectories();
+            Console.WriteLine($"Created UUID: {uuid}");
+            Console.WriteLine($"Resolved Path: {record.Path}");
+
+            // 2️⃣ Get resolved/unresolved directories
+            Console.WriteLine("\nGetting Generic Directories...");
+
+            var (resolvedDirs, unresolvedDirs) =
+                await Yuuko.Media.GetGenericDirectories(dataType);
+
             foreach (var dir in resolvedDirs)
-                Console.WriteLine($"Resolved Directory: UUID={dir.UUID}, Name={dir.PathName}, Path={dir.Path}");
+                Console.WriteLine($"[RESOLVED] UUID={dir.UUID}, Name={dir.PathName}, Path={dir.Path}");
 
-            // 3 Update the directory
+            foreach (var dir in unresolvedDirs)
+                Console.WriteLine($"[UNRESOLVED] UUID={dir.UUID}, Name={dir.PathName}");
+
+            // 3️⃣ Update directory
             string updatedDir = Path.Combine(testBase, "UpdatedFolder");
             Directory.CreateDirectory(updatedDir);
-            Console.WriteLine("Updating Generic Directory...");
-            await Media.UpdateGenericDirectory(uuid, updatedDir, "UpdatedFolder");
+
+            Console.WriteLine("\nUpdating Generic Directory...");
+
+            await Yuuko.Media.UpdateGenericDirectory(
+                uuid,
+                updatedDir,
+                "UpdatedFolder",
+                dataType
+            );
+
             Console.WriteLine("Update complete.");
 
-            // 4 Create a file and test GetFile
-            string testFile = "testfile.txt";
-            string testFilePath = Path.Combine(updatedDir, testFile);
-            File.WriteAllText(testFilePath, "Hello Yuuko!");
-            Console.WriteLine("Testing Media.GetFile...");
+            // 4️⃣ Create file + test GetFile (NEW SIGNATURE)
+            string testFileName = "testfile.txt";
+            string testFilePath = Path.Combine(updatedDir, testFileName);
 
-            var mediaInfo = await Media.GetFile(uuid, testFile);
-            Console.WriteLine($"File found: {mediaInfo.FileName}, Path: {mediaInfo.FullPath}, Size: {mediaInfo.SizeBytes} bytes");
+            await File.WriteAllTextAsync(testFilePath, "Hello Yuuko!");
 
-            // 5 Remove the directory
-            Console.WriteLine("Removing Generic Directory...");
-            await Media.RemoveGenericDirectory(uuid, deleteDirectory: true);
+            Console.WriteLine("\nTesting Media.GetFile...");
 
-            // 6 Verify deletion
-            Console.WriteLine("Directory removed. Checking if it still exists...");
-            Console.WriteLine(Directory.Exists(updatedDir) ? "Directory still exists!" : "Directory successfully deleted.");
+            var mediaInfo = await Yuuko.Media.GetFile(
+                uuid,
+                testFileName,
+                dataType
+            );
+
+            Console.WriteLine($"File found:");
+            Console.WriteLine($"  Name: {mediaInfo.FileName}");
+            Console.WriteLine($"  Full Path: {mediaInfo.FullPath}");
+            Console.WriteLine($"  Size: {mediaInfo.SizeBytes} bytes");
+            Console.WriteLine($"  Last Modified (UTC): {mediaInfo.LastModifiedUtc}");
+
+            // 5️⃣ Remove directory
+            Console.WriteLine("\nRemoving Generic Directory...");
+
+            await Yuuko.Media.RemoveGenericDirectory(
+                uuid,
+                dataType,
+                deleteDirectory: true
+            );
+
+            // 6️⃣ Verify deletion
+            Console.WriteLine("\nVerifying deletion...");
+
+            bool exists = Directory.Exists(updatedDir);
+            Console.WriteLine(exists
+                ? "Directory still exists! Something went wrong."
+                : "Directory successfully deleted.");
 
             Console.WriteLine("=== Full Yuuko + Media Test Completed ===");
         }
-
 
 
         static async Task TestAlarm()
@@ -300,7 +335,7 @@ namespace XRUIOS.TestHarness
                 alarmTime: DateTime.Now.AddSeconds(10),
                 isRecurring: false,
                 recurringDays: new List<DayOfWeek>(),
-                soundFilePath: new FileRecord { File = "oneshot.wav" },
+                soundFilePath: new Yuuko.FileRecord { File = "oneshot.wav" },
                 volume: 70,
                 isEnabled: true
             );
@@ -319,7 +354,7 @@ namespace XRUIOS.TestHarness
                 DayOfWeek.Thursday,
                 DayOfWeek.Friday
                 },
-                soundFilePath: new FileRecord { File = "recurring.wav" },
+                soundFilePath: new Yuuko.FileRecord { File = "recurring.wav" },
                 volume: 60,
                 isEnabled: true
             );
@@ -406,7 +441,7 @@ namespace XRUIOS.TestHarness
                 pointData: new byte[] { 0x01, 0x02 },
                 pointName: "AlphaRecon",
                 pointDescription: "Survey point for battlefield analysis",
-                pointImagePath: new FileRecord { File = "alpha.png" },
+                pointImagePath: new Yuuko.FileRecord { File = "alpha.png" },
                 userCentric: false,
                 staticObjs: new List<StaticObject>(),
                 appObjs: new List<App>(),
@@ -443,7 +478,7 @@ namespace XRUIOS.TestHarness
                 name: "Turret_X1",
                 spatialData: new Vector3(1, 0, 1),
                 objectLabel: ObjectOSLabel.Objects,
-                assetFile: new FileRecord { File = "turret.obj" }
+                assetFile: new Yuuko.FileRecord { File = "turret.obj" }
             );
             updatedWP = updatedWP with { StaticObjs = new List<StaticObject> { turret } };
             await UpdateWorldPoint(updatedWP);
@@ -609,9 +644,11 @@ namespace XRUIOS.TestHarness
         {
             string creatorType = "Music";
 
+
             // Grab a random file from the Music folder
-            string musicFolder = Path.Combine(DataPath, "Music");
+            string musicFolder = System.Environment.SpecialFolder.MyMusic.ToString();
             List<string> filePaths = new List<string>();
+
 
             if (Directory.Exists(musicFolder))
             {
@@ -622,6 +659,7 @@ namespace XRUIOS.TestHarness
                     filePaths.Add(allFiles[rand.Next(allFiles.Count)]);
                 }
             }
+
 
             // Step 1: Create a new creator with at least one file
             await CreatorClass.CreatorFileClass.CreateCreator(
@@ -676,7 +714,7 @@ namespace XRUIOS.TestHarness
                 await CreatorClass.CreatorFileClass.RemoveFiles(
                     "YUNA",
                     creatorType,
-                    new List<FileRecord> { creator.Files[0] }
+                    new List<Yuuko.FileRecord> { creator.Files[0] }
                 );
             }
 
@@ -709,7 +747,7 @@ namespace XRUIOS.TestHarness
             );
 
             // 3. Create FileRecord pointing to actual directory UUID
-            var imgFile = new FileRecord(imgUuid, "workspace.png");
+            var imgFile = new Yuuko.FileRecord(imgUuid, "workspace.png");
 
             // 4. Create the dataslot
             var dataslot = new DataManagerClass.DataSlotClass.DataSlot(
@@ -796,33 +834,128 @@ namespace XRUIOS.TestHarness
         }
         public static async Task TestGeoClass()
         {
-            // Get current exact coordinates
-            GeoClass.Coordinate exact = await GeoClass.GetExactCoordinates();
-            Console.WriteLine($"Exact coordinates: Latitude={exact.Y}, Longitude={exact.X}");
 
-            // Get relative coordinates (AR-style jittered)
-            GeoClass.RelativePoint relative = await GeoClass.GetRelativeCoordinates();
-            Console.WriteLine($"Relative area: lat {relative.latmin} - {relative.latmax}, long {relative.longmin} - {relative.longmax}");
-
-            // Fetch recent exact locations
-            List<GeoClass.LocationPoint> recentExact = await GeoClass.GetRecentLocations();
-            Console.WriteLine($"Exact location history ({recentExact.Count} points):");
-            foreach (var point in recentExact)
+            try
             {
-                Console.WriteLine($"{point.TimeStamp}: {point.Latitude}, {point.Longitude}");
+                // Get current exact coordinates
+                GeoClass.Coordinate exact = await GeoClass.GetExactCoordinates();
+                Console.WriteLine($"Exact coordinates: Latitude={exact.Y}, Longitude={exact.X}");
+
+                // Get relative coordinates (AR-style jittered)
+                GeoClass.RelativePoint relative = await GeoClass.GetRelativeCoordinates();
+                Console.WriteLine($"Relative area: lat {relative.latmin} - {relative.latmax}, long {relative.longmin} - {relative.longmax}");
+
+                // Fetch recent exact locations
+                List<GeoClass.LocationPoint> recentExact = await GeoClass.GetRecentLocations();
+                Console.WriteLine($"Exact location history ({recentExact.Count} points):");
+                foreach (var point in recentExact)
+                {
+                    Console.WriteLine($"{point.TimeStamp}: {point.Latitude}, {point.Longitude}");
+                }
+
+                // Fetch recent relative locations
+                List<GeoClass.RelativeLocationPoint> recentRelative = await GeoClass.GetRecentRelativeLocations();
+                Console.WriteLine($"Relative location history ({recentRelative.Count} points):");
+                foreach (var rel in recentRelative)
+                {
+                    Console.WriteLine($"{rel.Timestamp}: lat {rel.Area.latmin}-{rel.Area.latmax}, long {rel.Area.longmin}-{rel.Area.longmax}");
+                }
+
+
+
+                // --- Virtual Evangelion Battle Test ---
+                string virtualProfile = "Tokyo3_Battle";
+
+                // clear previous run
+
+                // Base: Tokyo-3 (fictional, but we’ll use Hakone-ish coords)
+                double baseLat = 35.2333;
+                double baseLon = 139.1069;
+
+                Console.WriteLine("=== TOKYO-3 TACTICAL FEED INITIALIZED ===");
+                Console.WriteLine("Angel detected. Evangelion Unit-02 deploying...\n");
+
+                // Simulate battle movement
+                for (int i = 0; i < 8; i++)
+                {
+                    // chaotic EVA movement
+                    baseLat += (new Random().NextDouble() - 0.5) * 0.0015;
+                    baseLon += (new Random().NextDouble() - 0.5) * 0.0015;
+
+                    await GeoClass.AddVirtualPoint(baseLat, baseLon, virtualProfile);
+
+                    Console.WriteLine($"[COMBAT STEP {i + 1}] EVA-02 position locked -> Lat:{baseLat:F6}, Lon:{baseLon:F6}");
+                }
+
+                Console.WriteLine("\nAngel neutralization attempt underway...\n");
+
+                // Fetch virtual history
+                List<GeoClass.LocationPoint> virtualHistory =
+                    await GeoClass.GetVirtualRelativeLocations(virtualProfile);
+
+                Console.WriteLine($"=== BATTLE LOG ({virtualHistory.Count} entries) ===");
+
+                foreach (var v in virtualHistory)
+                {
+                    Console.WriteLine($"[{v.TimeStamp:HH:mm:ss}] EVA-02 maneuvered to {v.Latitude:F6}, {v.Longitude:F6}");
+                }
+
+                Console.WriteLine("\nTarget destroyed. Tokyo-3 structural integrity holding.");
+                Console.WriteLine("Power levels stabilizing.\n");
+
+                // Clear history
+                await GeoClass.ClearLocationHistory(new GeoClass.LocationPoint());
+                await GeoClass.ClearRelativeLocationHistory(new GeoClass.RelativeLocationPoint());
+                await GeoClass.ClearVirtualLocationHistory(new GeoClass.LocationPoint(), virtualProfile);
             }
 
-            // Fetch recent relative locations
-            List<GeoClass.RelativeLocationPoint> recentRelative = await GeoClass.GetRecentRelativeLocations();
-            Console.WriteLine($"Relative location history ({recentRelative.Count} points):");
-            foreach (var rel in recentRelative)
+            catch
             {
-                Console.WriteLine($"{rel.Timestamp}: lat {rel.Area.latmin}-{rel.Area.latmax}, long {rel.Area.longmin}-{rel.Area.longmax}");
+                // --- Virtual Evangelion Battle Test ---
+                string virtualProfile = "Tokyo3_Battle";
+
+                // clear previous run
+
+                // Base: Tokyo-3 (fictional, but we’ll use Hakone-ish coords)
+                double baseLat = 35.2333;
+                double baseLon = 139.1069;
+
+                Console.WriteLine("=== TOKYO-3 TACTICAL FEED INITIALIZED ===");
+                Console.WriteLine("Angel detected. Evangelion Unit-02 deploying...\n");
+
+                // Simulate battle movement
+                for (int i = 0; i < 8; i++)
+                {
+                    // chaotic EVA movement
+                    baseLat += (new Random().NextDouble() - 0.5) * 0.0015;
+                    baseLon += (new Random().NextDouble() - 0.5) * 0.0015;
+
+                    await GeoClass.AddVirtualPoint(baseLat, baseLon, virtualProfile);
+
+                    Console.WriteLine($"[COMBAT STEP {i + 1}] EVA-02 position locked -> Lat:{baseLat:F6}, Lon:{baseLon:F6}");
+                }
+
+                Console.WriteLine("\nAngel neutralization attempt underway...\n");
+
+                // Fetch virtual history
+                List<GeoClass.LocationPoint> virtualHistory =
+                    await GeoClass.GetVirtualRelativeLocations(virtualProfile);
+
+                Console.WriteLine($"=== BATTLE LOG ({virtualHistory.Count} entries) ===");
+
+                foreach (var v in virtualHistory)
+                {
+                    Console.WriteLine($"[{v.TimeStamp:HH:mm:ss}] EVA-02 maneuvered to {v.Latitude:F6}, {v.Longitude:F6}");
+                }
+
+                Console.WriteLine("\nTarget destroyed. Tokyo-3 structural integrity holding.");
+                Console.WriteLine("Power levels stabilizing.\n");
+
+                // Clear history
+
+                await GeoClass.ClearVirtualLocationHistory(new GeoClass.LocationPoint(), virtualProfile);
             }
 
-            // Clear history
-            await GeoClass.ClearLocationHistory(new GeoClass.LocationPoint());
-            await GeoClass.ClearRelativeLocationHistory(new GeoClass.RelativeLocationPoint());
         }
         public static async Task TestMediaAlbumClass()
         {
@@ -838,7 +971,7 @@ namespace XRUIOS.TestHarness
                 UIColor: Color.Red,
                 UIColorAlt: Color.Blue,
                 CoverImageFilePath: "cover.jpg",
-                mediaPaths: new List<FileRecord> { new FileRecord("file-uuid", "song.mp3") }
+                mediaPaths: new List<Yuuko.FileRecord> { new Yuuko.FileRecord("file-uuid", "song.mp3") }
             );
 
 
@@ -903,14 +1036,14 @@ namespace XRUIOS.TestHarness
             }
 
             // Just use the path to create a FileRecord without altering the file
-            var fileRecord = new FileRecord(Guid.NewGuid().ToString(), Path.GetFileName(randomFile));
+            var fileRecord = new Yuuko.FileRecord(Guid.NewGuid().ToString(), Path.GetFileName(randomFile));
 
             // Create a new Creator with that file in its Files list
             var creator = new MediaTagger.CreatorClass.Creator(
                 name: "RandomMusicCreator",
                 description: "Demo creator using a random music file",
                 pfp: null,
-                files: new List<FileRecord?> { fileRecord } // safe null-coalescing in constructor
+                files: new List<Yuuko.FileRecord?> { fileRecord } // safe null-coalescing in constructor
             );
 
             Console.WriteLine($"Creator Name: {creator.Name}");
@@ -941,7 +1074,7 @@ namespace XRUIOS.TestHarness
             Console.WriteLine($"Resolved XRUIOS path: {resolvedPath}");
 
             // Step 3: Add to Media and sync UUID
-            var mediaRecord = await Media.AddGenericDirectory(resolvedPath, "System Music Folder");
+            var mediaRecord = await Yuuko.Media.AddGenericDirectory(resolvedPath, "System Music Folder");
             musicDirUUID = mediaRecord.UUID; // USE the Media UUID from now on
 
             // Step 4: Find MP3 files
@@ -960,7 +1093,7 @@ namespace XRUIOS.TestHarness
                 string fileName = Path.GetFileName(fullFilePath);
                 try
                 {
-                    var media = await Media.GetFile(musicDirUUID, fileName);
+                    var media = await Yuuko.Media.GetFile(musicDirUUID, fileName);
                     Console.WriteLine($"  Already registered: {fileName} → {media.FullPath}");
                 }
                 catch (FileNotFoundException)
@@ -1036,10 +1169,10 @@ namespace XRUIOS.TestHarness
                 description: "What Muv-Luv is, and why it escalates from romcom to existential horror.",
                 mainImage: null,
                 miniImage: null,
-                notes: new List<FileRecord>
+                notes: new List<Yuuko.FileRecord>
                 {
-            new FileRecord("note-001", "what_is_muvluv.md"),
-            new FileRecord("note-002", "themes_and_tone.md")
+            new Yuuko.FileRecord("note-001", "what_is_muvluv.md"),
+            new Yuuko.FileRecord("note-002", "themes_and_tone.md")
                 }
             );
             var timelines = new Category(
@@ -1047,11 +1180,11 @@ namespace XRUIOS.TestHarness
                 description: "Extra, Unlimited, and Alternative — and why they matter.",
                 mainImage: null,
                 miniImage: null,
-                notes: new List<FileRecord>
+                notes: new List<Yuuko.FileRecord>
                 {
-            new FileRecord("note-003", "extra_timeline.md"),
-            new FileRecord("note-004", "unlimited_timeline.md"),
-            new FileRecord("note-005", "alternative_timeline.md")
+            new Yuuko.FileRecord("note-003", "extra_timeline.md"),
+            new Yuuko.FileRecord("note-004", "unlimited_timeline.md"),
+            new Yuuko.FileRecord("note-005", "alternative_timeline.md")
                 }
             );
             var beta = new Category(
@@ -1059,10 +1192,10 @@ namespace XRUIOS.TestHarness
                 description: "The alien threat and the collapse of human morality.",
                 mainImage: null,
                 miniImage: null,
-                notes: new List<FileRecord>
+                notes: new List<Yuuko.FileRecord>
                 {
-            new FileRecord("note-006", "what_are_beta.md"),
-            new FileRecord("note-007", "human_extinction_wars.md")
+            new Yuuko.FileRecord("note-006", "what_are_beta.md"),
+            new Yuuko.FileRecord("note-007", "human_extinction_wars.md")
                 }
             );
 
@@ -1762,104 +1895,169 @@ namespace XRUIOS.TestHarness
 
         static async Task TestSongs()
         {
-            Console.WriteLine("=== SongsClass Full Test Started ===");
+            Console.WriteLine("=== Simple Songs Test ===");
 
-            // Setup: Create a dummy directory and "audio" file (txt as placeholder; ATL will fail gracefully)
-            string testDir = Path.Combine(DataPath, "TestMusicDir");
-            Directory.CreateDirectory(testDir);
-            string dummyAudio = Path.Combine(testDir, "dummy.mp3");
-            File.WriteAllText(dummyAudio, "Not real audio, but for test");
+            // Step 1: Find a real song in your Music folder
+            string musicFolder = Environment.GetFolderPath(Environment.SpecialFolder.MyMusic);
+            string realSong = Directory.EnumerateFiles(musicFolder, "*.*", SearchOption.AllDirectories)
+                .FirstOrDefault(f => f.EndsWith(".mp3", StringComparison.OrdinalIgnoreCase) ||
+                                     f.EndsWith(".flac", StringComparison.OrdinalIgnoreCase));
 
-            // Get or create directory UUID
-            var record = await Media.AddGenericDirectory(testDir, "TestMusicDir");
-            string uuid = record.UUID;
-            Console.WriteLine($"Created test directory UUID: {uuid}");
+            string testFileName;
+            string testAudioPath;
 
-            // Test CreateSongInfo (will use ATL, but catch if invalid audio)
-            SongOverview? overview = null;
-            SongDetailed? detailed = null;
+            if (realSong != null)
+            {
+                Console.WriteLine($"Found real song: {Path.GetFileName(realSong)}");
+                testFileName = Path.GetFileName(realSong);
+                testAudioPath = Path.Combine(DataPath, "TestMusicDir", testFileName);
+                Directory.CreateDirectory(Path.GetDirectoryName(testAudioPath)!);
+                File.Copy(realSong, testAudioPath, true);
+            }
+            else
+            {
+                Console.WriteLine("No real songs found — using tiny dummy file.");
+                testFileName = "silent_test.mp3";
+                testAudioPath = Path.Combine(DataPath, "TestMusicDir", testFileName);
+                Directory.CreateDirectory(Path.GetDirectoryName(testAudioPath)!);
+                File.WriteAllBytes(testAudioPath, new byte[4096]);
+            }
+
+            // Step 2: Register test directory
+            string testDir = Path.GetDirectoryName(testAudioPath)!;
+            var record = await Yuuko.Media.AddGenericDirectory(testDir, "TestSongsDir", "Music");
+            string uuid = record.UUID ?? throw new Exception("UUID missing — Media broke");
+
+            Console.WriteLine($"UUID: {uuid}");
+            Console.WriteLine($"Test file: {testFileName}");
+
+            // Step 3: Force resolution 
+            var freshManager = new Yuuko.Bindings.DirectoryManager(Path.Combine(DataPath, "Music"));
+            await freshManager.LoadBindings();
+            string? resolved = await freshManager.GetDirectoryById(uuid);
+
+            if (resolved == null || !Directory.Exists(resolved))
+            {
+                Console.WriteLine("Resolution FAILED — check if .binding file exists in XRUIOS\\Music");
+                return;
+            }
+
+            Console.WriteLine($"Resolved OK: {resolved}");
+
+            // Step 4: Try to create & read metadata
             try
             {
-                (overview, detailed) = await SongClass.CreateSongInfo("dummy.mp3", uuid);
-                Console.WriteLine($"Created overview: {overview.SongName}");
+                var (overview, _) = await Songs.SongClass.CreateSongInfo(testFileName, uuid);
+                Console.WriteLine("\n=== Metadata Success ===");
+                Console.WriteLine($"Title:  {overview.SongName ?? "N/A"}");
+                Console.WriteLine($"Artist: {overview.TrackArtist ?? "N/A"}");
+                Console.WriteLine($"Album:  {overview.AlbumName ?? "N/A"}");
+                Console.WriteLine($"Length: {overview.Duration?.ToString(@"mm\:ss") ?? "??:??"}");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"ATL failed on dummy (expected): {ex.Message.Split('\n')[0]}");
-                // Mock for test continuation
-                overview = new SongOverview("Dummy Song", "Test Artist", DateTime.Now);
-                detailed = new SongDetailed("Dummy Song", "Test Artist");
+                Console.WriteLine("Metadata Failed");
+                Console.WriteLine(ex.Message);
             }
 
-            // Test GetSongInfo
-            var (fetchedOverview, fetchedDetailed) = await SongClass.GetSongInfo("dummy.mp3", uuid, SongClass.MusicInfoStyle.both);
-            Console.WriteLine($"Fetched overview: {fetchedOverview?.SongName ?? "None"}");
+            // ─── FAVORITES ───
+            Console.WriteLine("\nTesting favorites...");
+            try
+            {
+                await Songs.SongFavoritesClass.AddToFavorites(testFileName, uuid);
+                var (favResolved, favUnres) = await Songs.SongFavoritesClass.GetFavorites();
+                Console.WriteLine($"Favorites count: {favResolved.Count} resolved / {favUnres.Count} unresolved");
 
+                // Optionally list the favorites
+                if (favResolved.Count > 0)
+                {
+                    Console.WriteLine("Resolved favorites:");
+                    foreach (var path in favResolved)
+                        Console.WriteLine($"  {path}");
+                }
+                if (favUnres.Count > 0)
+                {
+                    Console.WriteLine("Unresolved favorites:");
+                    foreach (var entry in favUnres)
+                        Console.WriteLine($"  {entry}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Favorites test failed: {ex.Message}");
+            }
 
+            // ─── HISTORY ───
+            Console.WriteLine("\nTesting history...");
+            try
+            {
+                await Songs.MusicHistoryClass.AddToPlayHistory(testFileName, uuid);
+                var (histR, histU) = await Songs.MusicHistoryClass.GetPlayHistory();
+                Console.WriteLine($"History count: {histR.Count} resolved / {histU.Count} unresolved");
+
+                if (histR.Count > 0)
+                {
+                    Console.WriteLine("History entries:");
+                    foreach (var path in histR)
+                        Console.WriteLine($"  {path}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"History test failed: {ex.Message}");
+            }
+
+            // Step 5: Cleanup
+            Console.WriteLine("\nCleaning up...");
+            try
+            {
+                // Remove from favorites first
+                await Songs.SongFavoritesClass.RemoveFromFavorites(testFileName, uuid);
+                Console.WriteLine("Removed from favorites");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Favorite removal warning: {ex.Message}");
+            }
+
+            try
+            {
+                // Delete the metadata files
+                await Songs.SongClass.DeleteSongInfo(testFileName, uuid, deleteSong: false);
+                Console.WriteLine("Deleted metadata");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Metadata deletion warning: {ex.Message}");
+            }
+
+            try
+            {
+                // Delete the audio file
+                File.Delete(testAudioPath);
+                Console.WriteLine("Deleted audio file");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Audio deletion warning: {ex.Message}");
+            }
+
+            try
+            {
+                // Remove the directory binding
+                await Yuuko.Media.RemoveGenericDirectory(uuid, "Music", deleteDirectory: true);
+                Console.WriteLine("Removed directory binding");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Directory removal warning: {ex.Message}");
+            }
+
+            Console.WriteLine("\n=== Test Complete ===");
         }
 
         // New test function for Playlists
-        static async Task TestPlaylists()
-        {
-            Console.WriteLine("=== Playlists Test Started ===");
-
-            // Setup dummy directory and songs (reuse from Songs test if possible, but standalone)
-            string testDir = Path.Combine(DataPath, "TestPlaylistDir");
-            Directory.CreateDirectory(testDir);
-            string dummy1 = Path.Combine(testDir, "song1.mp3");
-            string dummy2 = Path.Combine(testDir, "song2.mp3");
-            File.WriteAllText(dummy1, "Dummy1");
-            File.WriteAllText(dummy2, "Dummy2");
-
-            var record = await Media.AddGenericDirectory(testDir, "TestPlaylistDir");
-            string uuid = record.UUID;
-
-            // Create playlist
-            var playlist = new Playlists.Playlist("Test Playlist", "For Asuka's awesomeness");
-            string plId = await Playlists.CreatePlaylist(playlist);
-            Console.WriteLine($"Created playlist ID: {plId}");
-
-            // Add songs
-            await Playlists.AddSongToPlaylist(plId, "song1.mp3", uuid);
-            await Playlists.AddSongToPlaylist(plId, "song2.mp3", uuid);
-            Console.WriteLine("Songs added to playlist.");
-
-            // Get and verify
-            var fetchedPl = await Playlists.GetPlaylist(plId);
-            Console.WriteLine($"Fetched playlist: {fetchedPl?.PlaylistName}, Songs: {fetchedPl?.Songs.Count ?? 0}");
-
-            // Reorder (swap)
-            await Playlists.ReorderPlaylist(plId, new List<string> { $"{uuid}:song2.mp3", $"{uuid}:song1.mp3" });
-            fetchedPl = await Playlists.GetPlaylist(plId);
-            Console.WriteLine($"Reordered first song: {fetchedPl?.Songs[0].SongFileName}");
-
-            // Toggle favorite
-            await Playlists.ToggleFavorite(plId);
-            fetchedPl = await Playlists.GetPlaylist(plId);
-            Console.WriteLine($"Favorite status: {fetchedPl?.IsFavorite}");
-
-            // Remove song
-            await Playlists.RemoveSongFromPlaylist(plId, "song1.mp3", uuid);
-            Console.WriteLine("Song removed.");
-
-            // Get resolved paths
-            var resolvedPaths = await Playlists.GetResolvedPlaylistSongs(plId);
-            Console.WriteLine($"Resolved paths: {resolvedPaths.Count}");
-
-            // Create from folder
-            string folderPlId = await Playlists.CreatePlaylistFromFolder("Folder Playlist", uuid);
-            Console.WriteLine($"Folder playlist created: {folderPlId}");
-
-            // Delete
-            await Playlists.DeletePlaylist(plId);
-            Console.WriteLine("Playlist deleted.");
-
-            // Cleanup
-            await Media.RemoveGenericDirectory(uuid, true);
-            Console.WriteLine("=== Playlists Test Completed ===");
-        }
-
-
+     
 
 
 

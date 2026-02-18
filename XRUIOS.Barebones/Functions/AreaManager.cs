@@ -30,7 +30,7 @@ namespace XRUIOS.Barebones.Functions
             public string PointName;
             public string PointDescription;
 
-            public FileRecord PointImagePath;
+            public Yuuko.FileRecord PointImagePath;
             public bool UserCentric; // Is this a point which is at a fixed point relative to the user
             public List<StaticObject> StaticObjs;
             public List<App> AppObjs;
@@ -40,7 +40,7 @@ namespace XRUIOS.Barebones.Functions
 
             public WorldPoint() { }
 
-            public WorldPoint(RenderingMode renderingMode, byte[] pointData, string pointName, string pointDescription, FileRecord pointImagePath,
+            public WorldPoint(RenderingMode renderingMode, byte[] pointData, string pointName, string pointDescription, Yuuko.FileRecord pointImagePath,
                 bool userCentric, List<StaticObject> staticObjs, List<App> appObjs,
                 List<DesktopScreen> desktopScreenObjs, List<StaciaItems> staciaObjs, string? identifier)
             {
@@ -67,7 +67,7 @@ namespace XRUIOS.Barebones.Functions
             public string Name; // Path to the object
             public Vector3? SpatialData;
             public ObjectOSLabel ObjectLabel;
-            public FileRecord? AssetFile; // Reference to the file
+            public Yuuko.FileRecord? AssetFile; // Reference to the file
 
             public StaticObject(
                 PositionalTrackingMode? pTrackingType,
@@ -75,7 +75,7 @@ namespace XRUIOS.Barebones.Functions
                 string name,
                 Vector3? spatialData,
                 ObjectOSLabel objectLabel,
-                FileRecord? assetFile)
+                Yuuko.FileRecord? assetFile)
             {
                 PTrackingType = pTrackingType;
                 RTrackingType = rTrackingType;
@@ -191,7 +191,7 @@ namespace XRUIOS.Barebones.Functions
         {
             public string? PointName { get; init; }
             public string? PointDescription { get; init; }
-            public FileRecord? PointImagePath { get; init; }
+            public Yuuko.FileRecord? PointImagePath { get; init; }
             public bool? UserCentric { get; init; }
             public List<StaticObject>? StaticObjs { get; init; }
             public List<App>? AppObjs { get; init; }
@@ -206,7 +206,7 @@ namespace XRUIOS.Barebones.Functions
             public string? Name { get; init; }
             public Vector3? SpatialData { get; init; }
             public ObjectOSLabel? ObjectLabel { get; init; }
-            public FileRecord? AssetFile { get; init; }
+            public Yuuko.FileRecord? AssetFile { get; init; }
         }
 
         public sealed record AppPatch

@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
-using System.Text.Json.Serialization;
 using System.Runtime.InteropServices;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using static Pariah_Cybersecurity.DataHandler;
 using static XRUIOS.Barebones.XRUIOS;
 
@@ -9,217 +10,171 @@ namespace XRUIOS.Barebones
     public static class ProcessesClass
     {
         private const int MaxProcessHistory = 100;
+        private static readonly TimeSpan CpuSampleInterval = TimeSpan.FromMilliseconds(500);
 
-
-        // PROCESS RECORD - Device, PID, Type (your exact request!)
-
-        public record ProcessInfo
+        public record ProcessInfo(
+            string DeviceId,
+            int ProcessId,
+            string ProcessName,
+            string ProcessType,
+            string? WindowTitle = null,
+            DateTime? StartTime = null,
+            long MemoryMB = 0,
+            float CpuPercent = 0,
+            string? ExecutablePath = null,
+            string? IconPath = null,
+            bool IsResponsive = true,
+            DateTime LastSeen = default)
         {
-            public string DeviceId { get; init; }           // Which device (EVA-02, AX-01, etc)
-            public int ProcessId { get; init; }              // PID
-            public string ProcessName { get; init; }          // Visible name
-            public string ProcessType { get; init; }          // Steam, App, System, Game, etc
-            public string? WindowTitle { get; init; }         // Current window title
-            public DateTime StartTime { get; init; }          // When it started
-            public long MemoryMB { get; init; }               // Memory usage in MB
-            public float CpuPercent { get; init; }            // CPU usage percentage
-            public string? ExecutablePath { get; init; }      // Where it's running from
-            public string? IconPath { get; init; }            // For UI display
-            public bool IsResponsive { get; init; }           // Is it frozen? (Shinji's EVA = false)
-            public DateTime LastSeen { get; init; }           // Last time we checked
-
-            // Parameterless constructor for serialization
-            public ProcessInfo()
-            {
-                DeviceId = Environment.MachineName;
-                ProcessId = 0;
-                ProcessName = string.Empty;
-                ProcessType = "Unknown";
-                StartTime = DateTime.UtcNow;
-                LastSeen = DateTime.UtcNow;
-            }
-
-            // Main constructor
-            public ProcessInfo(
-                string deviceId,
-                int processId,
-                string processName,
-                string processType,
-                string? windowTitle = null,
-                DateTime? startTime = null,
-                long memoryMB = 0,
-                float cpuPercent = 0,
-                string? executablePath = null,
-                string? iconPath = null,
-                bool isResponsive = true)
-            {
-                DeviceId = deviceId;
-                ProcessId = processId;
-                ProcessName = processName;
-                ProcessType = processType;
-                WindowTitle = windowTitle;
-                StartTime = startTime ?? DateTime.UtcNow;
-                MemoryMB = memoryMB;
-                CpuPercent = cpuPercent;
-                ExecutablePath = executablePath;
-                IconPath = iconPath;
-                IsResponsive = isResponsive;
-                LastSeen = DateTime.UtcNow;
-            }
+            public ProcessInfo() : this(
+                Environment.MachineName,
+                0,
+                string.Empty,
+                "Unknown",
+                null,
+                DateTime.UtcNow,
+                0,
+                0,
+                null,
+                null,
+                true,
+                DateTime.UtcNow)
+            { }
         }
 
+        public record ProcessSnapshot(
+            string DeviceId,
+            DateTime Timestamp,
+            string SnapshotName,
+            int ProcessCount,
+            List<ProcessInfo> Processes);
 
-        // GET CURRENT PROCESSES (Live from system)
-
-        public static List<ProcessInfo> GetCurrentProcesses()
+        public static List<ProcessInfo> GetCurrentProcesses(bool includeCpu = true)
         {
             var processes = new List<ProcessInfo>();
             var currentDevice = Environment.MachineName;
 
-            try
+            // Batch CPU sampling for efficiency (cross-platform)
+            Dictionary<int, TimeSpan>? startCpuTimes = null;
+            if (includeCpu)
             {
-                foreach (var process in Process.GetProcesses())
-                {
-                    try
-                    {
-                        // Skip system idle process (PID 0) and other system processes
-                        if (process.Id == 0) continue;
-
-                        // Get process type based on common patterns
-                        string processType = DetectProcessType(process.ProcessName, process.MainModule?.FileName);
-
-                        // Get memory in MB
-                        long memoryMB = 0;
-                        try
-                        {
-                            memoryMB = process.WorkingSet64 / 1024 / 1024;
-                        }
-                        catch { /* Access denied, skip memory */ }
-
-                        // Get CPU percentage (approximate)
-                        float cpuPercent = 0;
-                        try
-                        {
-                            // This is simplified - real CPU monitoring needs perf counters
-                            cpuPercent = GetCpuUsage(process);
-                        }
-                        catch { /* Skip CPU if can't access */ }
-
-                        processes.Add(new ProcessInfo(
-                            deviceId: currentDevice,
-                            processId: process.Id,
-                            processName: process.ProcessName,
-                            processType: processType,
-                            windowTitle: GetMainWindowTitle(process),
-                            startTime: GetProcessStartTime(process),
-                            memoryMB: memoryMB,
-                            cpuPercent: cpuPercent,
-                            executablePath: GetExecutablePath(process),
-                            isResponsive: process.Responding
-                        ));
-                    }
-                    catch
-                    {
-                        // Skip processes we can't access
-                        continue;
-                    }
-                }
+                startCpuTimes = BatchGetStartCpuTimes();
+                Thread.Sleep(CpuSampleInterval);
             }
-            catch (Exception ex)
+
+            foreach (var proc in Process.GetProcesses())
             {
-                Console.WriteLine($"[ERROR] Failed to get processes: {ex.Message}");
+                if (proc.Id == 0) continue;
+
+                try
+                {
+                    long memoryMB = proc.WorkingSet64 / 1024 / 1024;
+                    float cpuPercent = includeCpu ? CalculateCpuPercent(proc, startCpuTimes) : 0f;
+
+                    processes.Add(new ProcessInfo(
+                        DeviceId: currentDevice,
+                        ProcessId: proc.Id,
+                        ProcessName: proc.ProcessName,
+                        ProcessType: "System", // TODO: improve detection (e.g., check paths for Steam/Game/App)
+                        WindowTitle: GetMainWindowTitle(proc),
+                        StartTime: GetProcessStartTime(proc),
+                        MemoryMB: memoryMB,
+                        CpuPercent: cpuPercent,
+                        ExecutablePath: GetExecutablePath(proc),
+                        IsResponsive: proc.Responding
+                    ));
+                }
+                catch { /* Access denied or zombie process */ }
             }
 
             return processes.OrderBy(p => p.ProcessName).ToList();
         }
 
-
-        // DETECT PROCESS TYPE (Steam, App, Game, System, etc)
-
-        private static string DetectProcessType(string processName, string? executablePath)
+        private static Dictionary<int, TimeSpan> BatchGetStartCpuTimes()
         {
-            processName = processName.ToLowerInvariant();
-            executablePath = executablePath?.ToLowerInvariant() ?? "";
-
-            // Common process type detection
-            if (processName.Contains("steam") || executablePath.Contains("steam"))
-                return "Steam";
-
-            if (processName.Contains("chrome") || processName.Contains("firefox") ||
-                processName.Contains("edge") || processName.Contains("opera"))
-                return "Browser";
-
-            if (processName.Contains("explorer"))
-                return "System";
-
-            if (processName.Contains("code") || processName.Contains("devenv") ||
-                processName.Contains("visualstudio"))
-                return "Development";
-
-            if (processName.Contains("spotify") || processName.Contains("itunes") ||
-                processName.Contains("wmplayer"))
-                return "Media";
-
-            if (processName.Contains("winword") || processName.Contains("excel") ||
-                processName.Contains("powerpnt") || processName.Contains("outlook"))
-                return "Office";
-
-            if (processName.Contains("discord") || processName.Contains("slack") ||
-                processName.Contains("teams") || processName.Contains("zoom"))
-                return "Communication";
-
-            if (processName.Contains("game") || processName.Contains("unity") ||
-                processName.Contains("unreal") || processName.Contains("ue4") ||
-                processName.Contains("ue5") || processName.Contains("godot"))
-                return "Game/Engine";
-
-            // Check if it's a known game (you could expand this list)
-            string[] knownGames = { "hl2", "csgo", "dota", "lol", "valorant",
-                                    "fortnite", "minecraft", "rocketleague" };
-            if (knownGames.Any(g => processName.Contains(g)))
-                return "Game";
-
-            return "Application";
+            var startTimes = new Dictionary<int, TimeSpan>();
+            foreach (var proc in Process.GetProcesses())
+            {
+                try
+                {
+                    if (proc.Id != 0)
+                        startTimes[proc.Id] = proc.TotalProcessorTime;
+                }
+                catch { /* Skip inaccessible */ }
+            }
+            return startTimes;
         }
+
+        private static float CalculateCpuPercent(Process proc, Dictionary<int, TimeSpan>? startCpuTimes)
+        {
+            if (startCpuTimes == null || !startCpuTimes.TryGetValue(proc.Id, out var startCpu))
+                return 0f;
+
+            try
+            {
+                var endCpu = proc.TotalProcessorTime;
+                var cpuDeltaMs = (endCpu - startCpu).TotalMilliseconds;
+                var timeDeltaMs = CpuSampleInterval.TotalMilliseconds;
+                var numCores = Environment.ProcessorCount;
+                var usage = (cpuDeltaMs / (timeDeltaMs * numCores)) * 100;
+                return (float)Math.Min(usage, 100.0); // Clamp to 100%
+            }
+            catch
+            {
+                return 0f;
+            }
+        }
+
+        private static string? GetMainWindowTitle(Process p) => p.Safe(() => string.IsNullOrEmpty(p.MainWindowTitle) ? null : p.MainWindowTitle);
+        private static DateTime GetProcessStartTime(Process p) => p.Safe(() => p.StartTime.ToUniversalTime(), DateTime.UtcNow);
+        private static string? GetExecutablePath(Process p) => p.Safe(() => p.MainModule?.FileName);
+
+        private static T Safe<T>(this Process p, Func<T> action, T defaultValue = default!)
+        {
+            try { return action(); } catch { return defaultValue; }
+        }
+
+        public static async Task<string> SaveProcessSnapshot(string? snapshotName = null)
+        {
+            var procs = GetCurrentProcesses(includeCpu: true);
+            var snapshot = new ProcessSnapshot(
+                DeviceId: Environment.MachineName,
+                Timestamp: DateTime.UtcNow,
+                SnapshotName: snapshotName ?? $"Processes_{DateTime.UtcNow:yyyyMMdd_HHmmss}",
+                ProcessCount: procs.Count,
+                Processes: procs
+            );
+
+            var dir = Path.Combine(DataPath, "ProcessSnapshots");
+            Directory.CreateDirectory(dir);
+            var path = Path.Combine(dir, $"{snapshot.SnapshotName}.json");
+
+            var options = new JsonSerializerOptions { WriteIndented = true };
+            await File.WriteAllTextAsync(path, JsonSerializer.Serialize(snapshot, options));
+
+            return path;
+        }
+
+        public static List<string> GetSavedSnapshots()
+        {
+            var dir = Path.Combine(DataPath, "ProcessSnapshots");
+            return Directory.Exists(dir)
+                ? Directory.GetFiles(dir, "*.json").Select(Path.GetFileNameWithoutExtension!).OrderByDescending(x => x).ToList()
+                : new List<string>();
+        }
+
+        public static async Task<ProcessSnapshot?> LoadProcessSnapshot(string snapshotFileName)
+        {
+            var path = Path.Combine(DataPath, "ProcessSnapshots", $"{snapshotFileName}.json"); // Fixed: add .json if missing
+            if (!File.Exists(path)) return null;
+
+            var json = await File.ReadAllTextAsync(path);
+            return JsonSerializer.Deserialize<ProcessSnapshot>(json);
+        }
+        // DETECT PROCESS TYPE (Steam, App, Game, System, etc)
 
 
         // HELPER METHODS
-
-        private static string? GetMainWindowTitle(Process process)
-        {
-            try
-            {
-                return string.IsNullOrEmpty(process.MainWindowTitle) ? null : process.MainWindowTitle;
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
-        private static DateTime GetProcessStartTime(Process process)
-        {
-            try
-            {
-                return process.StartTime.ToUniversalTime();
-            }
-            catch
-            {
-                return DateTime.UtcNow;
-            }
-        }
-
-        private static string? GetExecutablePath(Process process)
-        {
-            try
-            {
-                return process.MainModule?.FileName;
-            }
-            catch
-            {
-                return null;
-            }
-        }
 
         private static float GetCpuUsage(Process process)
         {
@@ -249,88 +204,7 @@ namespace XRUIOS.Barebones
         }
 
 
-        // SHARE PROCESS SNAPSHOT (Save to share easily!)
 
-        public static async Task<string> SaveProcessSnapshot(string? snapshotName = null)
-        {
-            var processes = GetCurrentProcesses();
-
-            var snapshot = new
-            {
-                DeviceId = Environment.MachineName,
-                Timestamp = DateTime.UtcNow,
-                SnapshotName = snapshotName ?? $"Processes_{DateTime.UtcNow:yyyyMMdd_HHmmss}",
-                ProcessCount = processes.Count,
-                Processes = processes
-            };
-
-            var directoryPath = Path.Combine(DataPath, "ProcessSnapshots");
-            Directory.CreateDirectory(directoryPath);
-
-            var fileName = $"{snapshot.SnapshotName}.json";
-            var filePath = Path.Combine(directoryPath, fileName);
-
-            var json = System.Text.Json.JsonSerializer.Serialize(snapshot, new System.Text.Json.JsonSerializerOptions
-            {
-                WriteIndented = true
-            });
-
-            await File.WriteAllTextAsync(filePath, json);
-
-            return filePath;
-        }
-
-
-        // GET SAVED SNAPSHOTS
-
-        public static List<string> GetSavedSnapshots()
-        {
-            var directoryPath = Path.Combine(DataPath, "ProcessSnapshots");
-            if (!Directory.Exists(directoryPath))
-                return new List<string>();
-
-            return Directory.GetFiles(directoryPath, "*.json")
-                .Select(Path.GetFileName)
-                .OrderByDescending(f => f)
-                .ToList()!;
-        }
-
-
-        // LOAD SNAPSHOT
-
-        public static async Task<List<ProcessInfo>?> LoadProcessSnapshot(string snapshotFileName)
-        {
-            var directoryPath = Path.Combine(DataPath, "ProcessSnapshots");
-            var filePath = Path.Combine(directoryPath, snapshotFileName);
-
-            if (!File.Exists(filePath))
-                throw new FileNotFoundException($"Snapshot {snapshotFileName} not found!");
-
-            var json = await File.ReadAllTextAsync(filePath);
-            var snapshot = System.Text.Json.JsonSerializer.Deserialize<dynamic>(json);
-
-            // Deserialize back to ProcessInfo list
-            var processes = System.Text.Json.JsonSerializer.Deserialize<List<ProcessInfo>>(
-                snapshot?.GetProperty("Processes").ToString() ?? "[]");
-
-            return processes;
-        }
-
-
-        // SHARE PROCESS SNAPSHOT VIA WORLD EVENTS
-
-        public static async Task ShareProcessSnapshot(string? targetDeviceId = null)
-        {
-            var snapshotPath = await SaveProcessSnapshot();
-            var processes = GetCurrentProcesses();
-
-
-
-            Console.WriteLine($"[NERV] Process snapshot shared! Check World Events for details.");
-        }
-
-
-        // GET PROCESSES BY TYPE
 
         public static Dictionary<string, List<ProcessInfo>> GetProcessesByType()
         {
@@ -342,7 +216,6 @@ namespace XRUIOS.Barebones
         }
 
 
-        // KILL PROCESS (with proper warnings!)
 
         public static async Task<bool> KillProcess(int processId, string processName)
         {

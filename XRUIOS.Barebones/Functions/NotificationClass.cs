@@ -10,8 +10,8 @@ namespace XRUIOS.Barebones.Functions
             public string Action;
             public Dictionary<string, string> Args;
             public List<string> Texts;
-            public FileRecord? InlineImage;
-            public FileRecord? Logo;
+            public Yuuko.FileRecord? InlineImage;
+            public Yuuko.FileRecord? Logo;
             public List<Button> Buttons;
             public string? Tag;
             public string? Group;
@@ -23,8 +23,8 @@ namespace XRUIOS.Barebones.Functions
                 string action,
                 Dictionary<string, string>? args = null,
                 List<string>? texts = null,
-                FileRecord? inlineImage = null,
-                FileRecord? logo = null,
+                Yuuko.FileRecord? inlineImage = null,
+                Yuuko.FileRecord? logo = null,
                 List<Button>? buttons = null,
                 string? tag = null,
                 string? group = null,

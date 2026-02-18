@@ -1,5 +1,6 @@
 ﻿using GeoCoordinatePortable;
 using Microsoft.Maui.Devices.Sensors;
+using System.Text.Json.Nodes;
 using static Pariah_Cybersecurity.DataHandler;
 using static XRUIOS.Barebones.XRUIOS;
 
@@ -248,7 +249,7 @@ namespace XRUIOS.Barebones
 
             if (locationHistory.Count >= 40)
             {
-                locationHistory.RemoveAt(39);
+                locationHistory.RemoveAt(0);
             }
 
             locationHistory.Add(newLocation);
@@ -256,7 +257,6 @@ namespace XRUIOS.Barebones
             await JSONDataHandler.SaveJson(json);
 
 
-            await JSONDataHandler.SaveJson(json);
 
         }
 
@@ -283,10 +283,40 @@ namespace XRUIOS.Barebones
 
         }
 
-        //WIP
-        private static async Task SaveVirtualLocationHistory(LocationPoint newLocation)
+
+        public static async Task AddVirtualPoint(
+    double latitude,
+    double longitude,
+    string virtualLocation)
         {
-            var directoryPath = Path.Combine(DataPath, "Coords");
+            var locationPoint = new LocationPoint
+            {
+                TimeStamp = DateTime.UtcNow,
+                Latitude = latitude,
+                Longitude = longitude
+            };
+
+            await SaveVirtualLocationHistory(locationPoint, virtualLocation);
+        }
+
+
+        private static async Task SaveVirtualLocationHistory(LocationPoint newLocation, string virtualLocation)
+        {
+            var directoryPath = Path.Combine(DataPath, "Coords", virtualLocation);
+
+            if (!File.Exists(Path.Combine(directoryPath, "VirtualLocationData.json")))
+            {
+                Directory.CreateDirectory(directoryPath);
+                var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+
+                await JSONDataHandler.CreateJsonFile("VirtualLocationData", directoryPath, new JsonObject());
+
+                var relativeCoordFile = await JSONDataHandler.LoadJsonFile("VirtualLocationData", directoryPath);
+                relativeCoordFile = await JSONDataHandler.AddToJson<List<LocationPoint>>(relativeCoordFile, "Data", new List<LocationPoint>(), encryptionKey);
+
+                await JSONDataHandler.SaveJson(relativeCoordFile);
+
+            }
 
             var json = await JSONDataHandler.LoadJsonFile("VirtualLocationData", directoryPath);
 
@@ -294,21 +324,18 @@ namespace XRUIOS.Barebones
 
             if (locationHistory.Count >= 40)
             {
-                locationHistory.RemoveAt(39);
+                locationHistory.RemoveAt(0);
             }
 
             locationHistory.Add(newLocation);
             json = await JSONDataHandler.UpdateJson<List<LocationPoint>>(json, "Data", locationHistory, encryptionKey);
             await JSONDataHandler.SaveJson(json);
 
-
-            await JSONDataHandler.SaveJson(json);
-
         }
 
-        public static async Task<List<LocationPoint>> GetVirtualRelativeLocations()
+        public static async Task<List<LocationPoint>> GetVirtualRelativeLocations(string virtualLocation)
         {
-            var directoryPath = Path.Combine(DataPath, "Coords");
+            var directoryPath = Path.Combine(DataPath, "Coords", virtualLocation);
 
             var json = await JSONDataHandler.LoadJsonFile("VirtualLocationData", directoryPath);
 
@@ -317,9 +344,9 @@ namespace XRUIOS.Barebones
             return locationHistory;
         }
 
-        public static async Task ClearVirtualLocationHistory(LocationPoint newLocation)
+        public static async Task ClearVirtualLocationHistory(LocationPoint newLocation, string virtualLocation)
         {
-            var directoryPath = Path.Combine(DataPath, "Coords");
+            var directoryPath = Path.Combine(DataPath, "Coords", virtualLocation);
 
             var json = await JSONDataHandler.LoadJsonFile("VirtualLocationData", directoryPath);
 

@@ -1,6 +1,7 @@
 ﻿using Pariah_Cybersecurity;
 using Standart.Hash.xxHash;
 using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 using System.Text.Json.Nodes;
 using WISecureData;
@@ -33,19 +34,7 @@ namespace XRUIOS.Barebones
             }
         }
 
-        public record FileRecord
-        {
-            public string UUID { get; set; }
-            public string File { get; set; }
 
-            public FileRecord() { }
-
-            public FileRecord(string? uuid, string file)
-            {
-                UUID = uuid ?? Guid.NewGuid().ToString();
-                File = file;
-            }
-        }
 
         public class Yuuko
         {
@@ -86,7 +75,11 @@ namespace XRUIOS.Barebones
                                 if (binding != null)
                                     _bindings[binding.Ref.DirectoryId] = binding;
                             }
-                            catch { }
+                            catch (Exception ex)
+                            {
+                                Console.WriteLine($"Failed to load binding {Path.GetFileName(file)}: {ex.Message}");
+  
+                            }
                         }
                     }
 
@@ -95,6 +88,7 @@ namespace XRUIOS.Barebones
                     public DirectoryBinding? GetBindingById(string uuid)
                     {
                         _bindings.TryGetValue(uuid, out var binding);
+                        Console.WriteLine($"Looking up {uuid} → found? {(binding != null ? "YES" : "NO")}");
                         return binding;
                     }
 
@@ -102,8 +96,20 @@ namespace XRUIOS.Barebones
                     {
                         if (!_bindings.TryGetValue(directoryId, out var binding)) return null;
 
-                        if (binding.Ref.OriginalDevice == ThisDeviceId && Directory.Exists(binding.Ref.FullPath))
+                        // Prefer the newer resolution if present
+                        if (binding.Resolution != null &&
+                            Directory.Exists(binding.Resolution.ResolvedPath))
+                        {
+                            return binding.Resolution.ResolvedPath;
+                        }
+
+                        // Fallback to original reference (You guys have NO clue how important this was but how overlooked it was too)
+                        if (binding.Ref.OriginalDevice == ThisDeviceId &&
+                            Directory.Exists(binding.Ref.FullPath))
+                        {
                             return binding.Ref.FullPath;
+                        }
+
 
                         if (defaultFolder == null) return null;
 
@@ -131,9 +137,17 @@ namespace XRUIOS.Barebones
 
                     public string ResolveDirectory(DirectoryBinding binding, string? defaultFolder = null)
                     {
+                        if (binding.Resolution != null &&
+                            Directory.Exists(binding.Resolution.ResolvedPath))
+                        {
+                            return binding.Resolution.ResolvedPath;
+                        }
+
                         if (Directory.Exists(binding.Ref.FullPath))
                         {
-                            binding.SetResolution(new DirectoryResolution(binding.Ref.FullPath, verified: true));
+                            if (binding.Resolution == null || !Directory.Exists(binding.Resolution.ResolvedPath))
+                                binding.SetResolution(new DirectoryResolution(binding.Ref.FullPath, verified: true));
+
                             return binding.Ref.FullPath;
                         }
 
@@ -174,8 +188,8 @@ namespace XRUIOS.Barebones
 
                 public sealed class DirectoryBinding
                 {
-                    public DirectoryRef Ref { get; private set; }  // private setter
-                    public DirectoryResolution? Resolution { get; private set; }
+                    public DirectoryRef Ref { get; set; }  // private setter
+                    public DirectoryResolution? Resolution { get;  set; }
 
                     public DirectoryBinding() { }
 
@@ -187,17 +201,19 @@ namespace XRUIOS.Barebones
                     public void SetResolution(DirectoryResolution resolution) => Resolution = resolution;
                     public void ClearResolution() => Resolution = null;
 
-                    public void SetRef(DirectoryRef newRef) => Ref = newRef;  // <-- add this
+                    public void SetRef(DirectoryRef newRef) => Ref = newRef;  
                 }
 
 
                 public readonly struct DirectoryRef
                 {
-                    public string FullPath { get; }
-                    public string OriginalDevice { get; }
-                    public string DirectoryId { get; }
+                    public string FullPath { get; init; } = string.Empty;  // ← init for safety
+                    public string OriginalDevice { get; init; } = string.Empty;
+                    public string DirectoryId { get; init; } = string.Empty;
 
-                    private const ulong HashSeed = 0x59554B4F; // "YUUKO"
+                    private const ulong HashSeed = 0x59554B4F;
+
+                    public DirectoryRef() { }
 
                     public DirectoryRef(string fullPath, string originalDevice)
                     {
@@ -214,7 +230,6 @@ namespace XRUIOS.Barebones
                         return hash.ToString("X16");
                     }
                 }
-
                 public record DirectoryResolution
                 {
                     public string ResolvedPath { get; set; }
@@ -256,167 +271,207 @@ namespace XRUIOS.Barebones
                 string DeviceOrigin = "",
                 string? DefaultCommand = null
             );
+
+            public sealed record ResolvedMedia(string FullPath, string FileName, string DirectoryUuid, long SizeBytes, DateTime LastModifiedUtc);
+
+            public record FileRecord
+            {
+                public string UUID { get; set; }
+                public string File { get; set; }
+
+                public FileRecord() { }
+
+                public FileRecord(string? uuid, string file)
+                {
+                    UUID = uuid ?? Guid.NewGuid().ToString();
+                    File = file;
+                }
+            }
+
+            public static class Media
+            {
+
+
+ 
+
+                public static async Task<ResolvedMedia> GetFile(string directoryUuid, string fileName, string DataType = "Generic", CancellationToken ct = default)
+                {
+                    Yuuko.Bindings.DirectoryManager manager = new Yuuko.Bindings.DirectoryManager(Path.Combine(DataPath, DataType));
+
+                    await manager.LoadBindings();
+
+                    if (string.IsNullOrWhiteSpace(directoryUuid)) throw new ArgumentException("Invalid directory UUID.", nameof(directoryUuid));
+                    if (string.IsNullOrWhiteSpace(fileName)) throw new ArgumentException("Invalid file name.", nameof(fileName));
+
+                    if (Path.IsPathRooted(fileName) || fileName.Contains(Path.DirectorySeparatorChar) || fileName.Contains(Path.AltDirectorySeparatorChar))
+                        throw new InvalidOperationException("Invalid media file name.");
+
+                    var directory = await manager.GetDirectoryById(directoryUuid, ct: ct);
+                    if (directory == null) throw new DirectoryNotFoundException("Media directory could not be resolved.");
+
+                    var fullPath = Path.Combine(directory, fileName);
+                    var info = new FileInfo(fullPath);
+
+                    Console.WriteLine(fullPath);
+
+
+                    if (!info.Exists) throw new FileNotFoundException("Media file not found.", fileName);
+
+                    return new ResolvedMedia(info.FullName, info.Name, directoryUuid, info.Length, info.LastWriteTimeUtc);
+                }
+
+                public static async Task<XRUIOS.DirectoryRecord?> GetOrCreateDirectory(string fullFilePath, string? directory, string? directoryName, string DataType = "Generic", CancellationToken ct = default)
+                {
+
+                    Yuuko.Bindings.DirectoryManager manager = new Yuuko.Bindings.DirectoryManager(Path.Combine(DataPath, DataType));
+
+                    await manager.LoadBindings();
+
+
+                    var (resolved, unresolved) = await GetGenericDirectories();
+                    var match = resolved.Concat(unresolved).FirstOrDefault(r => string.Equals(r.Path, directory, StringComparison.OrdinalIgnoreCase));
+                    if (match != null) return match;
+
+                    await AddGenericDirectory(directory!, directoryName ?? Guid.NewGuid().ToString());
+
+                    (resolved, unresolved) = await GetGenericDirectories();
+                    return resolved.Concat(unresolved).FirstOrDefault(r => string.Equals(r.Path, directory, StringComparison.OrdinalIgnoreCase));
+                }
+
+                public static async Task<XRUIOS.DirectoryRecord> AddGenericDirectory(string directory, string directoryName, string DataType = "Generic")
+                {
+                    Yuuko.Bindings.DirectoryManager manager = new Yuuko.Bindings.DirectoryManager(Path.Combine(DataPath, DataType));
+
+                    await manager.LoadBindings();
+
+
+                    var bankFilePath = Path.Combine(DataPath, DataType, "GenericBank.json");
+
+                    if (!File.Exists(bankFilePath))
+                    {
+                        await DataHandler.JSONDataHandler.CreateJsonFile("GenericBank", Path.Combine(DataPath, DataType), new JsonObject());
+                        var json = await DataHandler.JSONDataHandler.LoadJsonFile("GenericBank", Path.Combine(DataPath, DataType));
+                        json = await DataHandler.JSONDataHandler.AddToJson<List<DirectoryRecord>>(json, "Data", new List<DirectoryRecord>(), encryptionKey);
+                        await DataHandler.JSONDataHandler.SaveJson(json);
+                    }
+
+                    var directoryFile = await DataHandler.JSONDataHandler.LoadJsonFile("GenericBank", Path.Combine(DataPath, DataType));
+                    var directories = (List<DirectoryRecord>)await DataHandler.JSONDataHandler.GetVariable<List<DirectoryRecord>>(directoryFile, "Data", encryptionKey);
+
+                    var (uuid, resolvedPath) = await manager.GetOrCreateDirectory(directory);
+
+                    var existing = directories.FirstOrDefault(d => d.UUID == uuid);
+                    if (existing != null) return existing;
+
+                    var newRecord = new DirectoryRecord(uuid, directoryName, resolvedPath);
+                    directories.Add(newRecord);
+
+                    var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<DirectoryRecord>>(directoryFile, "Data", directories, encryptionKey);
+                    await DataHandler.JSONDataHandler.SaveJson(editedJSON);
+
+                    return newRecord;
+                }
+
+                public static async Task<(List<DirectoryRecord>, List<DirectoryRecord>)> GetGenericDirectories(string DataType = "Generic")
+                {
+                    Yuuko.Bindings.DirectoryManager manager = new Yuuko.Bindings.DirectoryManager(Path.Combine(DataPath, DataType));
+
+                    await manager.LoadBindings();
+
+
+                    var directoryFile = await DataHandler.JSONDataHandler.LoadJsonFile("GenericBank", Path.Combine(DataPath, DataType));
+                    var directories = (List<DirectoryRecord>)await DataHandler.JSONDataHandler.GetVariable<List<DirectoryRecord>>(directoryFile, "Data", encryptionKey);
+
+                    var resolved = new List<DirectoryRecord>();
+                    var unresolved = new List<DirectoryRecord>();
+
+                    foreach (var dir in directories)
+                    {
+                        var path = await manager.GetDirectoryById(dir.UUID);
+                        if (path != null)
+                            resolved.Add(dir with { Path = path });
+                        else
+                            unresolved.Add(dir);
+                    }
+
+                    return (resolved, unresolved);
+                }
+
+                public static async Task UpdateGenericDirectory(string uuid, string newDirectory, string newDirectoryName, string DataType = "Generic")
+                {
+                    Yuuko.Bindings.DirectoryManager manager = new Yuuko.Bindings.DirectoryManager(Path.Combine(DataPath, DataType));
+
+                    await manager.LoadBindings();
+
+                    var directoryFile = await DataHandler.JSONDataHandler.LoadJsonFile("GenericBank", Path.Combine(DataPath, DataType));
+                    var directories = (List<DirectoryRecord>)await DataHandler.JSONDataHandler.GetVariable<List<DirectoryRecord>>(directoryFile, "Data", encryptionKey);
+
+                    var recordIndex = directories.FindIndex(d => d.UUID == uuid);
+                    if (recordIndex == -1)
+                    {
+                        Console.WriteLine($"No record found for UUID {uuid}.");
+                        return;
+                    }
+
+                    directories[recordIndex] = directories[recordIndex] with
+                    {
+                        Path = newDirectory,
+                        PathName = newDirectoryName
+                    };
+
+                    var newResolution = new Yuuko.Bindings.DirectoryResolution(newDirectory, verified: true);
+                    var updateResult = await manager.UpdateBinding(uuid, newResolution);
+                    if (!updateResult)
+                    {
+
+                        await manager.GetOrCreateDirectory(newDirectory);
+                        await manager.UpdateBinding(uuid, newResolution);
+                    }
+
+                    var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<DirectoryRecord>>(directoryFile, "Data", directories, encryptionKey);
+                    await DataHandler.JSONDataHandler.SaveJson(editedJSON);
+                }
+
+
+
+                public static async Task RemoveGenericDirectory(string uuid, string DataType = "Generic", bool deleteDirectory = true)
+                {
+                    Yuuko.Bindings.DirectoryManager manager = new Yuuko.Bindings.DirectoryManager(Path.Combine(DataPath, DataType));
+
+                    await manager.LoadBindings();
+
+
+                    var directoryFile = await DataHandler.JSONDataHandler.LoadJsonFile("GenericBank", Path.Combine(DataPath, DataType));
+                    var directories = (List<DirectoryRecord>)await DataHandler.JSONDataHandler.GetVariable<List<DirectoryRecord>>(directoryFile, "Data", encryptionKey);
+
+                    var record = directories.FirstOrDefault(d => d.UUID == uuid);
+                    if (record == null)
+                    {
+                        Console.WriteLine($"No record found for UUID {uuid}.");
+                        return;
+                    }
+
+                    // Get path FIRST
+                    string? currentPath = await manager.GetDirectoryById(uuid);
+
+                    if (deleteDirectory && currentPath != null && Directory.Exists(currentPath))
+                    {
+                        Directory.Delete(currentPath, true);
+                    }
+
+                    // Now remove binding
+                    await manager.DeleteBinding(uuid);
+
+                    // Remove JSON record
+                    directories.Remove(record);
+                    var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<DirectoryRecord>>(directoryFile, "Data", directories, encryptionKey);
+                    await DataHandler.JSONDataHandler.SaveJson(editedJSON);
+                }
+
+            }
+
+
         }
 
-        public sealed record ResolvedMedia(string FullPath, string FileName, string DirectoryUuid, long SizeBytes, DateTime LastModifiedUtc);
-
-        public static class Media
-        {
-            private static readonly Yuuko.Bindings.DirectoryManager _manager = new Yuuko.Bindings.DirectoryManager(Path.Combine(DataPath, "Generic"));
-
-            static Media() => _manager.LoadBindings().GetAwaiter().GetResult();
-
-            public static async Task<ResolvedMedia> GetFile(string directoryUuid, string fileName, CancellationToken ct = default)
-            {
-                if (string.IsNullOrWhiteSpace(directoryUuid)) throw new ArgumentException("Invalid directory UUID.", nameof(directoryUuid));
-                if (string.IsNullOrWhiteSpace(fileName)) throw new ArgumentException("Invalid file name.", nameof(fileName));
-
-                if (Path.IsPathRooted(fileName) || fileName.Contains(Path.DirectorySeparatorChar) || fileName.Contains(Path.AltDirectorySeparatorChar))
-                    throw new InvalidOperationException("Invalid media file name.");
-
-                var directory = await _manager.GetDirectoryById(directoryUuid, ct: ct);
-                if (directory == null) throw new DirectoryNotFoundException("Media directory could not be resolved.");
-
-                var fullPath = Path.Combine(directory, fileName);
-                var info = new FileInfo(fullPath);
-                if (!info.Exists) throw new FileNotFoundException("Media file not found.", fileName);
-
-                return new ResolvedMedia(info.FullName, info.Name, directoryUuid, info.Length, info.LastWriteTimeUtc);
-            }
-
-            public static async Task<XRUIOS.DirectoryRecord?> GetOrCreateDirectory(string fullFilePath, string? directory, string? directoryName, CancellationToken ct = default)
-            {
-                var (resolved, unresolved) = await GetGenericDirectories();
-                var match = resolved.Concat(unresolved).FirstOrDefault(r => string.Equals(r.Path, directory, StringComparison.OrdinalIgnoreCase));
-                if (match != null) return match;
-
-                await AddGenericDirectory(directory!, directoryName ?? Guid.NewGuid().ToString());
-
-                (resolved, unresolved) = await GetGenericDirectories();
-                return resolved.Concat(unresolved).FirstOrDefault(r => string.Equals(r.Path, directory, StringComparison.OrdinalIgnoreCase));
-            }
-
-            public static async Task<XRUIOS.DirectoryRecord> AddGenericDirectory(string directory, string directoryName)
-            {
-                var bankFilePath = Path.Combine(DataPath, "Generic", "GenericBank.json");
-
-                if (!File.Exists(bankFilePath))
-                {
-                    await DataHandler.JSONDataHandler.CreateJsonFile("GenericBank", Path.Combine(DataPath, "Generic"), new JsonObject());
-                    var json = await DataHandler.JSONDataHandler.LoadJsonFile("GenericBank", Path.Combine(DataPath, "Generic"));
-                    json = await DataHandler.JSONDataHandler.AddToJson<List<DirectoryRecord>>(json, "Data", new List<DirectoryRecord>(), encryptionKey);
-                    await DataHandler.JSONDataHandler.SaveJson(json);
-                }
-
-                var directoryFile = await DataHandler.JSONDataHandler.LoadJsonFile("GenericBank", Path.Combine(DataPath, "Generic"));
-                var directories = (List<DirectoryRecord>)await DataHandler.JSONDataHandler.GetVariable<List<DirectoryRecord>>(directoryFile, "Data", encryptionKey);
-
-                var (uuid, resolvedPath) = await _manager.GetOrCreateDirectory(directory);
-
-                var existing = directories.FirstOrDefault(d => d.UUID == uuid);
-                if (existing != null) return existing;
-
-                var newRecord = new DirectoryRecord(uuid, directoryName, resolvedPath);
-                directories.Add(newRecord);
-
-                var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<DirectoryRecord>>(directoryFile, "Data", directories, encryptionKey);
-                await DataHandler.JSONDataHandler.SaveJson(editedJSON);
-
-                return newRecord;
-            }
-
-            public static async Task<(List<DirectoryRecord>, List<DirectoryRecord>)> GetGenericDirectories()
-            {
-                var directoryFile = await DataHandler.JSONDataHandler.LoadJsonFile("GenericBank", Path.Combine(DataPath, "Generic"));
-                var directories = (List<DirectoryRecord>)await DataHandler.JSONDataHandler.GetVariable<List<DirectoryRecord>>(directoryFile, "Data", encryptionKey);
-
-                var resolved = new List<DirectoryRecord>();
-                var unresolved = new List<DirectoryRecord>();
-
-                foreach (var dir in directories)
-                {
-                    var path = await _manager.GetDirectoryById(dir.UUID);
-                    if (path != null)
-                        resolved.Add(dir with { Path = path });
-                    else
-                        unresolved.Add(dir);
-                }
-
-                return (resolved, unresolved);
-            }
-
-            public static async Task UpdateGenericDirectory(string uuid, string newDirectory, string newDirectoryName)
-            {
-                // Load JSON
-                var directoryFile = await DataHandler.JSONDataHandler.LoadJsonFile("GenericBank", Path.Combine(DataPath, "Generic"));
-                var directories = (List<DirectoryRecord>)await DataHandler.JSONDataHandler.GetVariable<List<DirectoryRecord>>(directoryFile, "Data", encryptionKey);
-
-                // Find the record
-                var recordIndex = directories.FindIndex(d => d.UUID == uuid);
-                if (recordIndex == -1)
-                {
-                    Console.WriteLine($"No record found for UUID {uuid}.");
-                    return;
-                }
-
-                // Update JSON record
-                directories[recordIndex] = directories[recordIndex] with
-                {
-                    Path = newDirectory,
-                    PathName = newDirectoryName
-                };
-
-                // Update binding safely
-                var binding = _manager.GetBindingById(uuid);
-                if (binding != null)
-                {
-                    // Update Resolution
-                    binding.SetResolution(new Yuuko.Bindings.DirectoryResolution(newDirectory, verified: true));
-
-                    // Update Ref properly
-                    var newRef = new Yuuko.Bindings.DirectoryRef(newDirectory, Environment.MachineName);
-                    binding.SetRef(newRef);  // <-- now works cleanly
-                }
-
-                // Save updated JSON
-                var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<DirectoryRecord>>(directoryFile, "Data", directories, encryptionKey);
-                await DataHandler.JSONDataHandler.SaveJson(editedJSON);
-            }
-
-
-
-
-
-
-            public static async Task RemoveGenericDirectory(string uuid, bool deleteDirectory = true)
-            {
-                var directoryFile = await DataHandler.JSONDataHandler.LoadJsonFile("GenericBank", Path.Combine(DataPath, "Generic"));
-                var directories = (List<DirectoryRecord>)await DataHandler.JSONDataHandler.GetVariable<List<DirectoryRecord>>(directoryFile, "Data", encryptionKey);
-
-                var record = directories.FirstOrDefault(d => d.UUID == uuid);
-                if (record == null)
-                {
-                    Console.WriteLine($"No record found for UUID {uuid}.");
-                    return;
-                }
-
-                // Get path FIRST
-                string? currentPath = await _manager.GetDirectoryById(uuid);
-
-                if (deleteDirectory && currentPath != null && Directory.Exists(currentPath))
-                {
-                    Directory.Delete(currentPath, true);
-                }
-
-                // Now remove binding
-                await _manager.DeleteBinding(uuid);
-
-                // Remove JSON record
-                directories.Remove(record);
-                var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<DirectoryRecord>>(directoryFile, "Data", directories, encryptionKey);
-                await DataHandler.JSONDataHandler.SaveJson(editedJSON);
-            }
-
-        }
     }
 }

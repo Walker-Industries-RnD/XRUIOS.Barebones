@@ -54,7 +54,7 @@ namespace XRUIOS_UserManager
                 throw;
             }
 
-            
+
 
             var initTasks = new List<Func<Task>>
     {
@@ -65,7 +65,6 @@ namespace XRUIOS_UserManager
         async () => { await InitiateDataManagerFavorites();PrintWithPause("[DATASLOT] → Spatial bookmark favorites loaded"); },
         async () => { await InitiateLocationHistory();     PrintWithPause("[GEO] → Absolute coordinate log initialized"); },
         async () => { await InitiateRelativeCoordinates(); PrintWithPause("[GEO] → Relative AR jitter buffer active"); },
-                async () => { await InitiateVirtualCoordinates(); PrintWithPause("[GEO] → Virtual Coordinate System Activated"); },
         async () => { await InitiateMediaAlbumClassFavorites(); PrintWithPause("[MEDIA] → Album favorites secured"); },
         async () => { await InitiateMediaTaggerFavorites();PrintWithPause("[TAGGER] → Creator metadata vault opened"); },
         async () => { await InitiateNoteFavorites();       PrintWithPause("[JOURNAL] → Favorite entry anchors locked"); },
@@ -78,9 +77,9 @@ namespace XRUIOS_UserManager
         async () => { await InitiateCalendar();            PrintWithPause("[SCHEDULE] → Event calendar database initialized"); },
         async () => { await InitiateWorldPoint();          PrintWithPause("[SPATIAL] → World point anchor system primed"); },
                 async () => { await InitiateTheme();          PrintWithPause("[THEME] → System theme slots created."); },
-                async () => {await InitiateWorldEvents();          PrintWithPause("[EVENTS] → World Event Container Created");}
-
-    };
+                async () => {await InitiateWorldEvents();          PrintWithPause("[EVENTS] → World Event Container Created");},
+                                async () => {await InitiatMusic();          PrintWithPause("[MUSIC] → Music Handling systems created."); }
+            };
 
             Console.ForegroundColor = ConsoleColor.Red;
             Console.WriteLine("\n  [WARNING] LCL pressure stabilizing...");
@@ -126,6 +125,54 @@ namespace XRUIOS_UserManager
             Thread.Sleep(1); // tiny dramatic beat
         }
 
+        public static async Task InitiatMusic()
+        {
+            var directoryPath = Path.Combine(DataPath, "Music");
+            Directory.CreateDirectory(directoryPath);
+            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+
+            await JSONDataHandler.CreateJsonFile("MusicDirectory", directoryPath, new JsonObject());
+
+            var musicDirFile = await JSONDataHandler.LoadJsonFile("MusicDirectory", directoryPath);
+            musicDirFile = await JSONDataHandler.AddToJson<List<DirectoryRecord>>(musicDirFile, "Data", new List<DirectoryRecord>(), encryptionKey);
+
+            await JSONDataHandler.SaveJson(musicDirFile);
+
+
+
+            await JSONDataHandler.CreateJsonFile("MusicFavorites", directoryPath, new JsonObject());
+
+            var musicFavFile = await JSONDataHandler.LoadJsonFile("MusicFavorites", directoryPath);
+            musicFavFile = await JSONDataHandler.AddToJson<List<Yuuko.FileRecord>>(musicFavFile, "Data", new List<Yuuko.FileRecord>(), encryptionKey);
+
+            await JSONDataHandler.SaveJson(musicFavFile);
+
+
+
+
+            await JSONDataHandler.CreateJsonFile("MusicHistory", directoryPath, new JsonObject());
+
+            var musicHistoryFile = await JSONDataHandler.LoadJsonFile("MusicHistory", directoryPath);
+            musicHistoryFile = await JSONDataHandler.AddToJson<List<Yuuko.FileRecord>>(musicHistoryFile, "Data", new List<Yuuko.FileRecord>(), encryptionKey);
+
+            await JSONDataHandler.SaveJson(musicHistoryFile);
+
+
+
+
+
+            await JSONDataHandler.CreateJsonFile("Playlists", directoryPath + "/Playlists", new JsonObject());
+
+            var playlistsFile = await JSONDataHandler.LoadJsonFile("Playlists", directoryPath);
+            playlistsFile = await JSONDataHandler.AddToJson<List<Songs.Playlists.Playlist>>(playlistsFile, "Data", new List<Songs.Playlists.Playlist>(), encryptionKey);
+
+            await JSONDataHandler.SaveJson(playlistsFile);
+
+
+
+
+        }
+
         public static async Task InitiateAlarm()
         {
             var directoryPath = Path.Combine(DataPath, "Alarms");
@@ -153,7 +200,7 @@ namespace XRUIOS_UserManager
             var favoritesFile = await JSONDataHandler.LoadJsonFile("AppFavorites", directoryPath);
 
             // Initialize the "Data" key
-            favoritesFile = await JSONDataHandler.AddToJson<List<FileRecord>>(favoritesFile, "Data", new List<FileRecord>(), encryptionKey);
+            favoritesFile = await JSONDataHandler.AddToJson<List<Yuuko.FileRecord>>(favoritesFile, "Data", new List<Yuuko.FileRecord>(), encryptionKey);
 
             await JSONDataHandler.SaveJson(favoritesFile);
         }
@@ -182,7 +229,7 @@ namespace XRUIOS_UserManager
             await JSONDataHandler.CreateJsonFile("DataSlotFavorites", directoryPath, new JsonObject());
 
             var alarmsFile = await JSONDataHandler.LoadJsonFile("DataSlotFavorites", directoryPath);
-            alarmsFile = await JSONDataHandler.AddToJson<List<FileRecord>>(alarmsFile, "Data", new List<FileRecord>(), encryptionKey);
+            alarmsFile = await JSONDataHandler.AddToJson<List<Yuuko.FileRecord>>(alarmsFile, "Data", new List<Yuuko.FileRecord>(), encryptionKey);
 
             await JSONDataHandler.SaveJson(alarmsFile);
         }
@@ -245,19 +292,7 @@ namespace XRUIOS_UserManager
             await JSONDataHandler.SaveJson(relativeCoordFile);
         }
 
-        public static async Task InitiateVirtualCoordinates()
-        {
-            var directoryPath = Path.Combine(DataPath, "Coords");
-            Directory.CreateDirectory(directoryPath);
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
 
-            await JSONDataHandler.CreateJsonFile("VirtualLocationData", directoryPath, new JsonObject());
-
-            var relativeCoordFile = await JSONDataHandler.LoadJsonFile("VirtualLocationData", directoryPath);
-            relativeCoordFile = await JSONDataHandler.AddToJson<List<LocationPoint>>(relativeCoordFile, "Data", new List<LocationPoint>(), encryptionKey);
-
-            await JSONDataHandler.SaveJson(relativeCoordFile);
-        }
 
         public static async Task InitiateMediaAlbumClassFavorites()
         {
@@ -269,7 +304,7 @@ namespace XRUIOS_UserManager
             await JSONDataHandler.CreateJsonFile("MediaAlbumFavorites", directoryPath, new JsonObject());
 
             var relativeCoordFile = await JSONDataHandler.LoadJsonFile("MediaAlbumFavorites", directoryPath);
-            relativeCoordFile = await JSONDataHandler.AddToJson<List<FileRecord>>(relativeCoordFile, "Data", new List<FileRecord>(), encryptionKey);
+            relativeCoordFile = await JSONDataHandler.AddToJson<List<Yuuko.FileRecord>>(relativeCoordFile, "Data", new List<Yuuko.FileRecord>(), encryptionKey);
 
             await JSONDataHandler.SaveJson(relativeCoordFile);
         }
@@ -283,7 +318,7 @@ namespace XRUIOS_UserManager
             await JSONDataHandler.CreateJsonFile("Creators", directoryPath, new JsonObject());
 
             var relativeCoordFile = await JSONDataHandler.LoadJsonFile("Creators", directoryPath);
-            relativeCoordFile = await JSONDataHandler.AddToJson<List<FileRecord>>(relativeCoordFile, "Data", new List<FileRecord>(), encryptionKey);
+            relativeCoordFile = await JSONDataHandler.AddToJson<List<Yuuko.FileRecord>>(relativeCoordFile, "Data", new List<Yuuko.FileRecord>(), encryptionKey);
 
             await JSONDataHandler.SaveJson(relativeCoordFile);
         }
@@ -339,7 +374,7 @@ namespace XRUIOS_UserManager
             await JSONDataHandler.CreateJsonFile("RecentlyRecorded", directoryPath, new JsonObject());
 
             var recentlyRecorded = await JSONDataHandler.LoadJsonFile("RecentlyRecorded", directoryPath);
-            recentlyRecorded = await JSONDataHandler.AddToJson<List<FileRecord>>(recentlyRecorded, "Data", new List<FileRecord>(), encryptionKey);
+            recentlyRecorded = await JSONDataHandler.AddToJson<List<Yuuko.FileRecord>>(recentlyRecorded, "Data", new List<Yuuko.FileRecord>(), encryptionKey);
 
             await JSONDataHandler.SaveJson(recentlyRecorded);
         }

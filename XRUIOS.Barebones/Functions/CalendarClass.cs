@@ -20,7 +20,7 @@ namespace XRUIOS.Barebones
             string description,
             TimeZoneInfo timezone = null,
             int durationHours = 0,
-            List<FileRecord> attachmentsList = null)
+            List<Yuuko.FileRecord> attachmentsList = null)
         {
             timezone ??= TimeZoneInfo.Local;
 
@@ -43,7 +43,7 @@ namespace XRUIOS.Barebones
             if (attachmentsList != null && attachmentsList.Count > 0)
             {
                 var firstAttachment = attachmentsList[0];
-                var mediaPath = await Media.GetFile(firstAttachment.UUID, firstAttachment.File);
+                var mediaPath = await Yuuko.Media.GetFile(firstAttachment.UUID, firstAttachment.File);
 
                 byte[] fileBytes;
                 using (var fs = new FileStream(mediaPath.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
@@ -91,7 +91,7 @@ namespace XRUIOS.Barebones
             RecurrencePattern recurrencePattern,
             TimeZoneInfo timezone = null,
             int durationHours = 0,
-            List<FileRecord> attachmentsList = null)
+            List<Yuuko.FileRecord> attachmentsList = null)
         {
             timezone ??= TimeZoneInfo.Local;
 
@@ -117,7 +117,7 @@ namespace XRUIOS.Barebones
             if (attachmentsList != null && attachmentsList.Count > 0)
             {
                 var firstAttachment = attachmentsList[0];
-                var mediaPath = await Media.GetFile(firstAttachment.UUID, firstAttachment.File);
+                var mediaPath = await Yuuko.Media.GetFile(firstAttachment.UUID, firstAttachment.File);
 
                 byte[] fileBytes;
                 using (var fs = new FileStream(mediaPath.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))

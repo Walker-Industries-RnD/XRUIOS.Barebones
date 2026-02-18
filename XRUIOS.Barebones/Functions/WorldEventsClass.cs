@@ -1,4 +1,5 @@
 ﻿using static Pariah_Cybersecurity.DataHandler;
+using static XRUIOS.Barebones.ProcessesClass;
 using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones
@@ -16,6 +17,7 @@ namespace XRUIOS.Barebones
             public string? EventId { get; init; }
             public string? WorldPointIdentifier { get; init; }
 
+            public ProcessSnapshot? Snapshot { get; init; }
 
             public WorldEvent()
             {
@@ -25,6 +27,7 @@ namespace XRUIOS.Barebones
                 SceneDescription = string.Empty;
                 EventId = Guid.NewGuid().ToString();
                 WorldPointIdentifier = null;
+                Snapshot = null;
             }
 
             public WorldEvent(
@@ -33,7 +36,8 @@ namespace XRUIOS.Barebones
                 string action,
                 string sceneDescription,
                 string? eventId = null,
-                string? worldPointIdentifier = null)
+                string? worldPointIdentifier = null,
+                ProcessSnapshot snapshot = null)
             {
                 DeviceId = deviceId;
                 Timestamp = timestamp.Kind != DateTimeKind.Utc ? timestamp.ToUniversalTime() : timestamp;
@@ -41,6 +45,7 @@ namespace XRUIOS.Barebones
                 SceneDescription = sceneDescription;
                 EventId = eventId ?? Guid.NewGuid().ToString();
                 WorldPointIdentifier = worldPointIdentifier;
+                Snapshot = snapshot;
             }
         }
         public static async Task<List<WorldEvent>> GetWorldEvents()

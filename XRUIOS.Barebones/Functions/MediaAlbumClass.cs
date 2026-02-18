@@ -14,10 +14,10 @@ namespace XRUIOS.Barebones.Functions
             public Color UIColor;
             public Color UIColorAlt;
             public string CoverImageFilePath;
-            public List<FileRecord> MediaPaths;
+            public List<Yuuko.FileRecord> MediaPaths;
             public string Identifier;
 
-            public AlbumMedia(string AlbumName, string AlbumDescription, bool IsFavorite, Color UIColor, Color UIColorAlt, string CoverImageFilePath, List<FileRecord> mediaPaths)
+            public AlbumMedia(string AlbumName, string AlbumDescription, bool IsFavorite, Color UIColor, Color UIColorAlt, string CoverImageFilePath, List<Yuuko.FileRecord> mediaPaths)
             {
                 this.AlbumName = AlbumName;
                 this.AlbumDescription = AlbumDescription;
@@ -40,7 +40,7 @@ namespace XRUIOS.Barebones.Functions
             public Color? UIColor { get; init; }
             public Color? UIColorAlt { get; init; }
             public string? CoverImageFilePath { get; init; }
-            public List<FileRecord>? MediaPaths { get; init; }
+            public List<Yuuko.FileRecord>? MediaPaths { get; init; }
         }
 
         public static class AlbumMediaPatcher
@@ -181,19 +181,19 @@ namespace XRUIOS.Barebones.Functions
 
             var favoritesFile = await DataHandler.JSONDataHandler.LoadJsonFile("MediaAlbumFavorites", directoryPath);
 
-            List<FileRecord> favorites;
+            List<Yuuko.FileRecord> favorites;
             try
             {
-                favorites = (List<FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<FileRecord>>(favoritesFile, "Data", encryptionKey);
+                favorites = (List<Yuuko.FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<Yuuko.FileRecord>>(favoritesFile, "Data", encryptionKey);
             }
             catch
             {
-                favorites = new List<FileRecord>();
+                favorites = new List<Yuuko.FileRecord>();
             }
 
             if (!favorites.Any(d => d.UUID == directoryUUID && d.File == MediaAlbumIdentifier))
             {
-                var record = new FileRecord(directoryUUID, MediaAlbumIdentifier);
+                var record = new Yuuko.FileRecord(directoryUUID, MediaAlbumIdentifier);
                 favorites.Add(record);
             }
             else
@@ -201,7 +201,7 @@ namespace XRUIOS.Barebones.Functions
                 throw new InvalidOperationException($"Song already favorited.");
             }
 
-            var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<FileRecord>>(favoritesFile, "Data", favorites, encryptionKey);
+            var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<Yuuko.FileRecord>>(favoritesFile, "Data", favorites, encryptionKey);
             await DataHandler.JSONDataHandler.SaveJson(editedJSON);
         }
 
@@ -215,10 +215,10 @@ namespace XRUIOS.Barebones.Functions
 
             var favoritesFile = await DataHandler.JSONDataHandler.LoadJsonFile("MediaAlbumFavorites", directoryPath);
 
-            List<FileRecord> favorites;
+            List<Yuuko.FileRecord> favorites;
             try
             {
-                favorites = (List<FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<FileRecord>>(favoritesFile, "Data", encryptionKey);
+                favorites = (List<Yuuko.FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<Yuuko.FileRecord>>(favoritesFile, "Data", encryptionKey);
             }
             catch
             {
@@ -270,10 +270,10 @@ namespace XRUIOS.Barebones.Functions
 
             var favoritesFile = await DataHandler.JSONDataHandler.LoadJsonFile("MediaAlbumFavorites", directoryPath);
 
-            List<FileRecord> favorites;
+            List<Yuuko.FileRecord> favorites;
             try
             {
-                favorites = (List<FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<FileRecord>>(favoritesFile, "Data", encryptionKey);
+                favorites = (List<Yuuko.FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<Yuuko.FileRecord>>(favoritesFile, "Data", encryptionKey);
             }
             catch
             {
@@ -288,7 +288,7 @@ namespace XRUIOS.Barebones.Functions
                 return;
             }
 
-            var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<FileRecord>>(favoritesFile, "Data", favorites, encryptionKey);
+            var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<Yuuko.FileRecord>>(favoritesFile, "Data", favorites, encryptionKey);
             await DataHandler.JSONDataHandler.SaveJson(editedJSON);
         }
     }

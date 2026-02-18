@@ -195,8 +195,8 @@ namespace XRUIOS.Barebones.Functions
                 public DateTime DateAndTime; //The date and time it was made
                 public string Title; //Title
                 public string Description; //Description
-                public FileRecord ImgPath; //The path to the img icon
-                public FileRecord TextureFolder; //2.5D images for previewing, for v2
+                public Yuuko.FileRecord ImgPath; //The path to the img icon
+                public Yuuko.FileRecord TextureFolder; //2.5D images for previewing, for v2
                 public List<string> Sessions; //GUIDs
                 public string Identifier;
 
@@ -206,8 +206,8 @@ namespace XRUIOS.Barebones.Functions
                     DateTime? dateTimeVar, // nullable, may be default
                     string title,
                     string description,
-                    FileRecord imgPath,
-                    FileRecord? textureFolder, // optional for now
+                    Yuuko.FileRecord imgPath,
+                    Yuuko.FileRecord? textureFolder, // optional for now
                     List<string> structSessions,
                     string? identifier)
                 {
@@ -232,8 +232,8 @@ namespace XRUIOS.Barebones.Functions
                 public DateTime? DateAndTime { get; init; }
                 public string? Title { get; init; }
                 public string? Description { get; init; }
-                public FileRecord? ImgPath { get; init; }
-                public FileRecord? TextureFolder { get; init; }
+                public Yuuko.FileRecord? ImgPath { get; init; }
+                public Yuuko.FileRecord? TextureFolder { get; init; }
                 public List<string>? Sessions { get; init; }
             }
 
@@ -364,18 +364,18 @@ namespace XRUIOS.Barebones.Functions
                 await manager.LoadBindings();
 
                 var favoritesFile = await DataHandler.JSONDataHandler.LoadJsonFile("DataSlotFavorites", directoryPath);
-                var favorites = (List<FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<FileRecord>>(favoritesFile, "Data", encryptionKey);
+                var favorites = (List<Yuuko.FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<Yuuko.FileRecord>>(favoritesFile, "Data", encryptionKey);
 
                 if (!favorites.Any(d => d.UUID == directoryUUID && d.File == dataSlotIdentifier))
                 {
-                    favorites.Add(new FileRecord(directoryUUID, dataSlotIdentifier));
+                    favorites.Add(new Yuuko.FileRecord(directoryUUID, dataSlotIdentifier));
                 }
                 else
                 {
                     throw new InvalidOperationException($"DataSlot already favorited.");
                 }
 
-                var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<FileRecord>>(favoritesFile, "Data", favorites, encryptionKey);
+                var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<Yuuko.FileRecord>>(favoritesFile, "Data", favorites, encryptionKey);
                 await DataHandler.JSONDataHandler.SaveJson(editedJSON);
             }
 
@@ -389,7 +389,7 @@ namespace XRUIOS.Barebones.Functions
                 await manager.LoadBindings();
 
                 var favoritesFile = await DataHandler.JSONDataHandler.LoadJsonFile("DataSlotFavorites", directoryPath);
-                var favorites = (List<FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<FileRecord>>(favoritesFile, "Data", encryptionKey);
+                var favorites = (List<Yuuko.FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<Yuuko.FileRecord>>(favoritesFile, "Data", encryptionKey);
 
                 var resolvedPaths = new List<string>();
                 var unresolvedNames = new List<string>();
@@ -439,13 +439,13 @@ namespace XRUIOS.Barebones.Functions
                 await manager.LoadBindings();
 
                 var favoritesFile = await DataHandler.JSONDataHandler.LoadJsonFile("DataSlotFavorites", directoryPath);
-                var favorites = (List<FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<FileRecord>>(favoritesFile, "Data", encryptionKey);
+                var favorites = (List<Yuuko.FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<Yuuko.FileRecord>>(favoritesFile, "Data", encryptionKey);
 
                 var removedCount = favorites.RemoveAll(d => d.UUID == directoryUUID && d.File == dataSlotIdentifier);
                 if (removedCount == 0)
                     throw new InvalidOperationException($"DataSlot not favorited.");
 
-                var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<FileRecord>>(favoritesFile, "Data", favorites, encryptionKey);
+                var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<Yuuko.FileRecord>>(favoritesFile, "Data", favorites, encryptionKey);
                 await DataHandler.JSONDataHandler.SaveJson(editedJSON);
             }
 

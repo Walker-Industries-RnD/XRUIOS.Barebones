@@ -16,17 +16,17 @@ namespace XRUIOS.Barebones.Functions
             {
                 public string Name;
                 public string Description;
-                public FileRecord? PFP;
-                public List<FileRecord> Files;
+                public Yuuko.FileRecord? PFP;
+                public List<Yuuko.FileRecord> Files;
 
                 public Creator() { }
 
-                public Creator(string name, string description, FileRecord? pfp, List<FileRecord?> files)
+                public Creator(string name, string description, Yuuko.FileRecord? pfp, List<Yuuko.FileRecord?> files)
                 {
                     this.Name = name;
                     this.Description = description;
                     this.PFP = pfp;
-                    this.Files = files ?? new List<FileRecord>();
+                    this.Files = files ?? new List<Yuuko.FileRecord>();
                 }
 
             }
@@ -69,30 +69,30 @@ namespace XRUIOS.Barebones.Functions
                         Description = "No Description Provided.";
                     }
 
-                    FileRecord PossiblePFP = null;
+                    Yuuko.FileRecord PossiblePFP = null;
 
                     if (PFPPath != null)
                     {
 
-                        var fileDirectoryID = await Media.GetOrCreateDirectory(PFPPath, Path.GetDirectoryName(PFPPath), Guid.NewGuid().ToString());
+                        var fileDirectoryID = await Yuuko.Media.GetOrCreateDirectory(PFPPath, Path.GetDirectoryName(PFPPath), Guid.NewGuid().ToString());
 
                         var fileName = Path.GetFileName(PFPPath);
 
-                        var newFileRecord = new FileRecord(fileDirectoryID.UUID, fileName);
+                        var newFileRecord = new Yuuko.FileRecord(fileDirectoryID.UUID, fileName);
 
                         PossiblePFP = newFileRecord;
 
 
                     }
 
-                    List<FileRecord> Files = new List<FileRecord>();
+                    List<Yuuko.FileRecord> Files = new List<Yuuko.FileRecord>();
 
                     foreach (var file in FilePaths)
                     {
-                        var fileDirectoryID = await Media.GetOrCreateDirectory(file, Path.GetDirectoryName(file), Guid.NewGuid().ToString());
+                        var fileDirectoryID = await Yuuko.Media.GetOrCreateDirectory(file, Path.GetDirectoryName(file), Guid.NewGuid().ToString());
                         var fileName = Path.GetFileName(file);
 
-                        Files.Add(new FileRecord(fileDirectoryID.UUID, fileName));
+                        Files.Add(new Yuuko.FileRecord(fileDirectoryID.UUID, fileName));
                     }
 
 
@@ -159,7 +159,7 @@ namespace XRUIOS.Barebones.Functions
 
                 }
 
-                public static async Task<List<FileRecord>> GetCreatorFiles(string CreatorName, string CreatorType)
+                public static async Task<List<Yuuko.FileRecord>> GetCreatorFiles(string CreatorName, string CreatorType)
                 {
 
                     var directoryPath = Path.Combine(DataPath, "Creators", CreatorType);
@@ -193,10 +193,10 @@ namespace XRUIOS.Barebones.Functions
                         throw new InvalidOperationException("Creator not found.");
                     foreach (var file in FilePaths)
                     {
-                        var fileDirectoryID = await Media.GetOrCreateDirectory(file, Path.GetDirectoryName(file), Guid.NewGuid().ToString());
+                        var fileDirectoryID = await Yuuko.Media.GetOrCreateDirectory(file, Path.GetDirectoryName(file), Guid.NewGuid().ToString());
                         var fileName = Path.GetFileName(file);
 
-                        CreatorFile.Files.Add(new FileRecord(fileDirectoryID.UUID, fileName));
+                        CreatorFile.Files.Add(new Yuuko.FileRecord(fileDirectoryID.UUID, fileName));
                     }
 
                     var directoryPath = Path.Combine(DataPath, "Creators", CreatorType);
@@ -230,7 +230,7 @@ namespace XRUIOS.Barebones.Functions
 
 
                 //D
-                public static async Task RemoveFiles(string CreatorName, string CreatorType, List<FileRecord> filesToRemove)
+                public static async Task RemoveFiles(string CreatorName, string CreatorType, List<Yuuko.FileRecord> filesToRemove)
                 {
                     var creator = await GetCreator(CreatorName, CreatorType);
                     if (creator == null)

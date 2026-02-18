@@ -21,13 +21,13 @@ namespace XRUIOS.Barebones.Functions
             public string MiniDescription;
             public string NoteID;
             public string XRUIOSNoteID;
-            public FileRecord Markdown;
-            public List<FileRecord>? Images;
+            public Yuuko.FileRecord Markdown;
+            public List<Yuuko.FileRecord>? Images;
 
             public Note() { }
 
             // Constructor
-            public Note(string title, string category, DateTime created, DateTime lastUpdate, string savedID, string miniDescription, string noteID, string xRUIOSNoteID, FileRecord markdown, List<FileRecord>? images)
+            public Note(string title, string category, DateTime created, DateTime lastUpdate, string savedID, string miniDescription, string noteID, string xRUIOSNoteID, Yuuko.FileRecord markdown, List<Yuuko.FileRecord>? images)
             {
                 // Assign new fields
                 Title = title;
@@ -79,10 +79,10 @@ namespace XRUIOS.Barebones.Functions
             public string MainImage;
             public string MiniImage;
 
-            public List<FileRecord> Notes; //We treat order as pages
+            public List<Yuuko.FileRecord> Notes; //We treat order as pages
             public Category() { }
 
-            public Category(string title, string description, string mainImage, string miniImage, List<FileRecord> notes)
+            public Category(string title, string description, string mainImage, string miniImage, List<Yuuko.FileRecord> notes)
             {
 
                 Title = title;

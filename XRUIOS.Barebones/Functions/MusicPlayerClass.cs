@@ -98,19 +98,21 @@ namespace XRUIOS.Barebones
         //Trying something new
         public static async Task<SongOverview> GetOrCreateOverview(string audioFile, string directoryUUID)
         {
-            var overview = await SongClass.GetSongInfo(audioFile, directoryUUID, SongClass.MusicInfoStyle.overview);
+            var overviewTuple = await SongClass.GetSongInfo(audioFile, directoryUUID, SongClass.MusicInfoStyle.overview);
 
-            if (overview.Item1 == null)
+            if (overviewTuple.Item1 == null)
             {
                 await SongClass.CreateSongInfo(audioFile, directoryUUID);
-                overview = await SongClass.GetSongInfo(audioFile, directoryUUID, SongClass.MusicInfoStyle.overview);
 
-                if (overview.Item1 == null)
+                overviewTuple = await SongClass.GetSongInfo(audioFile, directoryUUID, SongClass.MusicInfoStyle.overview);
+
+                if (overviewTuple.Item1 == null)
                     throw new InvalidOperationException("The song overview could not be found or created.");
             }
 
-            return (SongOverview)overview.Item1;
+            return (SongOverview)overviewTuple.Item1;
         }
+
 
         //Convert musicqueue to playlist
         public static class Random
