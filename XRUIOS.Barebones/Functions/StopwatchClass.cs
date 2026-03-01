@@ -1,6 +1,7 @@
 ﻿using CsvHelper;
 using System.Diagnostics;
 using System.Globalization;
+using static XRUIOS.Barebones.Interfaces.StopwatchClass;
 using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones
@@ -8,19 +9,7 @@ namespace XRUIOS.Barebones
     public static class StopwatchClass
     {
 
-        public record StopwatchRecord
-        {
-            public int LapCount { get; set; }
-            public int SecondsElapsed { get; set; }
-
-            public StopwatchRecord() { }
-
-            public StopwatchRecord(int lapCount, int secondsElapsed)
-            {
-                LapCount = lapCount;
-                SecondsElapsed = secondsElapsed;
-            }
-        }
+     
 
 
         public static Dictionary<string, (long, List<StopwatchRecord>)> StopWatches = new Dictionary<string, (long, List<StopwatchRecord>)>();

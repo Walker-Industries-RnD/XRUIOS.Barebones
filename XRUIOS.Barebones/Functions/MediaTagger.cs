@@ -1,6 +1,8 @@
 ﻿using Pariah_Cybersecurity;
 using System.Text.Json.Nodes;
+using static XRUIOS.Barebones.Interfaces.CreatorClass;
 using static XRUIOS.Barebones.XRUIOS;
+using YuukoProtocol;
 
 namespace XRUIOS.Barebones.Functions
 {
@@ -12,24 +14,7 @@ namespace XRUIOS.Barebones.Functions
 
         public class CreatorClass
         {
-            public record Creator
-            {
-                public string Name;
-                public string Description;
-                public Yuuko.FileRecord? PFP;
-                public List<Yuuko.FileRecord> Files;
 
-                public Creator() { }
-
-                public Creator(string name, string description, Yuuko.FileRecord? pfp, List<Yuuko.FileRecord?> files)
-                {
-                    this.Name = name;
-                    this.Description = description;
-                    this.PFP = pfp;
-                    this.Files = files ?? new List<Yuuko.FileRecord>();
-                }
-
-            }
 
             public class CreatorFileClass
             {
@@ -42,7 +27,7 @@ namespace XRUIOS.Barebones.Functions
 
                     var directoryPath = Path.Combine(DataPath, "Creators", CreatorType);
 
-                    var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+                    var manager = new Bindings.DirectoryManager(directoryPath);
 
                     var folder = Path.Combine(DataPath, "Creators", CreatorType);
                     var fileNameToFind = CreatorName;
@@ -69,30 +54,30 @@ namespace XRUIOS.Barebones.Functions
                         Description = "No Description Provided.";
                     }
 
-                    Yuuko.FileRecord PossiblePFP = null;
+                    FileRecord PossiblePFP = null;
 
                     if (PFPPath != null)
                     {
 
-                        var fileDirectoryID = await Yuuko.Media.GetOrCreateDirectory(PFPPath, Path.GetDirectoryName(PFPPath), Guid.NewGuid().ToString());
+                        var fileDirectoryID = await Media.GetOrCreateDirectory(DataPath, encryptionKey, PFPPath, Path.GetDirectoryName(PFPPath), Guid.NewGuid().ToString());
 
                         var fileName = Path.GetFileName(PFPPath);
 
-                        var newFileRecord = new Yuuko.FileRecord(fileDirectoryID.UUID, fileName);
+                        var newFileRecord = new FileRecord(fileDirectoryID.UUID, fileName);
 
                         PossiblePFP = newFileRecord;
 
 
                     }
 
-                    List<Yuuko.FileRecord> Files = new List<Yuuko.FileRecord>();
+                    List<FileRecord> Files = new List<FileRecord>();
 
                     foreach (var file in FilePaths)
                     {
-                        var fileDirectoryID = await Yuuko.Media.GetOrCreateDirectory(file, Path.GetDirectoryName(file), Guid.NewGuid().ToString());
+                        var fileDirectoryID = await Media.GetOrCreateDirectory(DataPath, encryptionKey, file, Path.GetDirectoryName(file), Guid.NewGuid().ToString());
                         var fileName = Path.GetFileName(file);
 
-                        Files.Add(new Yuuko.FileRecord(fileDirectoryID.UUID, fileName));
+                        Files.Add(new FileRecord(fileDirectoryID.UUID, fileName));
                     }
 
 
@@ -159,7 +144,7 @@ namespace XRUIOS.Barebones.Functions
 
                 }
 
-                public static async Task<List<Yuuko.FileRecord>> GetCreatorFiles(string CreatorName, string CreatorType)
+                public static async Task<List<FileRecord>> GetCreatorFiles(string CreatorName, string CreatorType)
                 {
 
                     var directoryPath = Path.Combine(DataPath, "Creators", CreatorType);
@@ -193,10 +178,10 @@ namespace XRUIOS.Barebones.Functions
                         throw new InvalidOperationException("Creator not found.");
                     foreach (var file in FilePaths)
                     {
-                        var fileDirectoryID = await Yuuko.Media.GetOrCreateDirectory(file, Path.GetDirectoryName(file), Guid.NewGuid().ToString());
+                        var fileDirectoryID = await Media.GetOrCreateDirectory(DataPath, encryptionKey, file, Path.GetDirectoryName(file), Guid.NewGuid().ToString());
                         var fileName = Path.GetFileName(file);
 
-                        CreatorFile.Files.Add(new Yuuko.FileRecord(fileDirectoryID.UUID, fileName));
+                        CreatorFile.Files.Add(new FileRecord(fileDirectoryID.UUID, fileName));
                     }
 
                     var directoryPath = Path.Combine(DataPath, "Creators", CreatorType);
@@ -230,7 +215,7 @@ namespace XRUIOS.Barebones.Functions
 
 
                 //D
-                public static async Task RemoveFiles(string CreatorName, string CreatorType, List<Yuuko.FileRecord> filesToRemove)
+                public static async Task RemoveFiles(string CreatorName, string CreatorType, List<FileRecord> filesToRemove)
                 {
                     var creator = await GetCreator(CreatorName, CreatorType);
                     if (creator == null)
@@ -276,7 +261,7 @@ namespace XRUIOS.Barebones.Functions
                         Console.WriteLine($"Creator doesn't exist.");
                         return;
                     }
-                    var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+                    var manager = new Bindings.DirectoryManager(directoryPath);
 
                     await manager.LoadBindings();
 
@@ -309,7 +294,7 @@ namespace XRUIOS.Barebones.Functions
 
                     var directoryPath = Path.Combine(DataPath, "Music");
 
-                    var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+                    var manager = new Bindings.DirectoryManager(directoryPath);
 
                     var favoritesFile = await DataHandler.JSONDataHandler.LoadJsonFile("CreatorFavorites", directoryPath);
 
@@ -371,7 +356,7 @@ namespace XRUIOS.Barebones.Functions
                         Console.WriteLine($"Creator doesn't exist.");
                         return;
                     }
-                    var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+                    var manager = new Bindings.DirectoryManager(directoryPath);
 
                     await manager.LoadBindings();
 

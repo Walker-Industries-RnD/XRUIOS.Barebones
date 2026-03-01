@@ -17,6 +17,32 @@ using static XRUIOS.Barebones.Functions.VolumeClass;
 using static XRUIOS.Barebones.Songs;
 using static XRUIOS.Barebones.Songs.SongGetClass;
 using static XRUIOS.Barebones.XRUIOS;
+using YuukoProtocol;
+
+using XRUIOS.Barebones.Interfaces;
+using AlarmClass = XRUIOS.Barebones.AlarmClass;
+using static XRUIOS.Barebones.Interfaces.AlarmClass;
+using static XRUIOS.Barebones.Interfaces.AppClass;
+using WorldEventsClass = XRUIOS.Barebones.WorldEventsClass;
+using Songs = XRUIOS.Barebones.Songs;
+using static XRUIOS.Barebones.Interfaces.TimerManagerClass;
+using TimerManagerClass = XRUIOS.Barebones.TimerManagerClass;
+using static XRUIOS.Barebones.Interfaces.ThemeSystem;
+using ThemeSystem = XRUIOS.Barebones.Functions.ThemeSystem;
+using StopwatchClass = XRUIOS.Barebones.StopwatchClass;
+using SoundEQClass = XRUIOS.Barebones.SoundEQClass;
+using static XRUIOS.Barebones.Interfaces.ExperimentalAudioClass;
+using static XRUIOS.Barebones.Interfaces.SoundEQClass;
+using NotificationClass = XRUIOS.Barebones.Functions.NotificationClass;
+using static XRUIOS.Barebones.Interfaces.NotificationClass;
+using static XRUIOS.Barebones.Interfaces.NoteClass;
+using ThemeIdentity = XRUIOS.Barebones.Interfaces.NoteClass.ThemeIdentity;
+using GeoClass = XRUIOS.Barebones.GeoClass;
+using static XRUIOS.Barebones.Interfaces.GeoClass;
+using CreatorClass = XRUIOS.Barebones.CreatorClass;
+using DataManagerClass = XRUIOS.Barebones.Functions.DataManagerClass;
+using App = XRUIOS.Barebones.Functions.AreaManagerClass.App;
+using ChronoClass = XRUIOS.Barebones.ChronoClass;
 
 namespace XRUIOS.TestHarness
 {
@@ -246,7 +272,7 @@ namespace XRUIOS.TestHarness
 
             Console.WriteLine("Creating Generic Directory via Media class...");
 
-            var record = await Yuuko.Media.AddGenericDirectory(sampleDir, "SampleFolder", dataType);
+            var record = await Media.AddGenericDirectory(DataPath, encryptionKey, sampleDir, "SampleFolder", dataType);
             string uuid = record.UUID;
 
             Console.WriteLine($"Created UUID: {uuid}");
@@ -256,7 +282,7 @@ namespace XRUIOS.TestHarness
             Console.WriteLine("\nGetting Generic Directories...");
 
             var (resolvedDirs, unresolvedDirs) =
-                await Yuuko.Media.GetGenericDirectories(dataType);
+                await Media.GetGenericDirectories(DataPath, encryptionKey,dataType);
 
             foreach (var dir in resolvedDirs)
                 Console.WriteLine($"[RESOLVED] UUID={dir.UUID}, Name={dir.PathName}, Path={dir.Path}");
@@ -270,7 +296,7 @@ namespace XRUIOS.TestHarness
 
             Console.WriteLine("\nUpdating Generic Directory...");
 
-            await Yuuko.Media.UpdateGenericDirectory(
+            await Media.UpdateGenericDirectory(DataPath, encryptionKey,
                 uuid,
                 updatedDir,
                 "UpdatedFolder",
@@ -287,7 +313,8 @@ namespace XRUIOS.TestHarness
 
             Console.WriteLine("\nTesting Media.GetFile...");
 
-            var mediaInfo = await Yuuko.Media.GetFile(
+            var mediaInfo = await Media.GetFile(
+                DataPath,
                 uuid,
                 testFileName,
                 dataType
@@ -302,7 +329,7 @@ namespace XRUIOS.TestHarness
             // 5️⃣ Remove directory
             Console.WriteLine("\nRemoving Generic Directory...");
 
-            await Yuuko.Media.RemoveGenericDirectory(
+            await Media.RemoveGenericDirectory(DataPath, encryptionKey, 
                 uuid,
                 dataType,
                 deleteDirectory: true
@@ -322,27 +349,27 @@ namespace XRUIOS.TestHarness
 
         static async Task TestAlarm()
         {
-            // 1️ Start Hangfire
+            // 1 Start Hangfire
             HangfireBootstrap.Start();
 
-            // 2️ Load any existing alarms
+            // 2 Load any existing alarms
             await AlarmClass.LoadAlarms();
             Console.WriteLine($"Loaded {AlarmClass.Alarms.Count} alarms.");
 
-            // 3️ Create a one-shot alarm (fires in 10 seconds)
+            // 3 Create a one-shot alarm (fires in 10 seconds)
             var oneShot = new Alarm(
                 alarmName: "OneShotTest",
                 alarmTime: DateTime.Now.AddSeconds(10),
                 isRecurring: false,
                 recurringDays: new List<DayOfWeek>(),
-                soundFilePath: new Yuuko.FileRecord { File = "oneshot.wav" },
+                soundFilePath: new FileRecord { File = "oneshot.wav" },
                 volume: 70,
                 isEnabled: true
             );
             await AlarmClass.AddAlarm(oneShot);
             Console.WriteLine("One-shot alarm scheduled.");
 
-            // 4️ Create a recurring alarm (fires next minute, weekdays)
+            // 4 Create a recurring alarm (fires next minute, weekdays)
             var recurring = new Alarm(
                 alarmName: "RecurringTest",
                 alarmTime: DateTime.Now.AddMinutes(1),
@@ -354,14 +381,14 @@ namespace XRUIOS.TestHarness
                 DayOfWeek.Thursday,
                 DayOfWeek.Friday
                 },
-                soundFilePath: new Yuuko.FileRecord { File = "recurring.wav" },
+                soundFilePath: new FileRecord { File = "recurring.wav" },
                 volume: 60,
                 isEnabled: true
             );
             await AlarmClass.AddAlarm(recurring);
             Console.WriteLine("Recurring alarm scheduled.");
 
-            // 5️ Update the one-shot alarm (disable it)
+            // 5 Update the one-shot alarm (disable it)
             await AlarmClass.UpdateAlarm(oneShot, alarm =>
             {
                 alarm.IsEnabled = false;
@@ -380,7 +407,7 @@ namespace XRUIOS.TestHarness
         }
         static async Task TestApps()
         {
-            // 1. Create a new app manifest – like launching an Eva for the first time
+            // 1. Create a new app manifest 
             var app = new XRUIOSAppManifest(
                 appID: "com.walkerdev.testapp",
                 name: "TestApp",
@@ -395,26 +422,26 @@ namespace XRUIOS.TestHarness
             await AddApp(app);
             Console.WriteLine($"App '{app.Name}' deployed to XRUIOS dock.");
 
-            // 2. Load app by identifier – syncing across multiple rigs like Titanfall dropships
+            // 2. Load app by identifier 
             var loadedApp = await GetApp(app.Identifier);
             Console.WriteLine($"Loaded App: {loadedApp.Name}, EntryPoint: {loadedApp.EntryPoint}");
 
-            // 3. Patch app – upgrade like equipping a new Armored Core chassis
+            // 3. Patch app 
             var patch = new XRUIOSAppManifestPatch
             {
                 Name = "TestAppUpgraded",
                 Version = "1.1.0"
             };
-            var patchedApp = UpdateDataSlot(loadedApp, patch);
+            var patchedApp = Barebones.Functions.AppClass.UpdateApp(loadedApp, patch);
             await UpdateApp(patchedApp);
             Console.WriteLine($"App patched: {patchedApp.Name}, Version: {patchedApp.Version}");
 
-            // 4. Add to favorites – your personal loadout, like selecting preferred Muv-Luv units
+            // 4. Add to favorites
             string fakeUUID = Guid.NewGuid().ToString();
             await AppFavoritesClass.AddToFavorites(app.Identifier, fakeUUID);
             Console.WriteLine($"App '{app.Name}' added to favorites (UUID: {fakeUUID})");
 
-            // 5. Get favorites – checking which apps survive a Cyberpunk 2077-style data purge
+            // 5. Get favorites 
             var favoritePaths = await AppFavoritesClass.GetFavoritePathsAsync();
             Console.WriteLine("Current favorite app paths:");
 
@@ -425,23 +452,23 @@ namespace XRUIOS.TestHarness
             }
  
 
-            // 6. Remove from favorites – deleting what’s no longer needed, like Yorha clearing corrupted units
+            // 6. Remove from favorites 
             await AppFavoritesClass.RemoveFromFavorites(app.Identifier, fakeUUID);
             Console.WriteLine($"Removed app '{app.Name}' from favorites");
 
-            // 7. Delete app – final decommission, like retiring an Eva after mission failure
+            // 7. Delete app 
             DeleteApp(app.Identifier);
             Console.WriteLine($"App '{app.Name}' deleted from XRUIOS storage");
         }
         static async Task TestWorldPoints()
         {
-            // 1. Create a WorldPoint – like deploying a reconnaissance drone in Muv-Luv
+            // 1. Create a WorldPoint 
             var wp = new WorldPoint(
                 renderingMode: RenderingMode.AllFrames,
                 pointData: new byte[] { 0x01, 0x02 },
                 pointName: "AlphaRecon",
                 pointDescription: "Survey point for battlefield analysis",
-                pointImagePath: new Yuuko.FileRecord { File = "alpha.png" },
+                pointImagePath: new FileRecord { File = "alpha.png" },
                 userCentric: false,
                 staticObjs: new List<StaticObject>(),
                 appObjs: new List<App>(),
@@ -453,7 +480,7 @@ namespace XRUIOS.TestHarness
             await AddWorldPoint(wp);
             Console.WriteLine($"WorldPoint '{wp.PointName}' deployed.");
 
-            // 2. Fetch list of all WorldPoints – like scanning for active Titans
+            // 2. Fetch list of all WorldPoints
             var worldPoints = GetWorldPoints();
             Console.WriteLine($"Found {worldPoints.Count} WorldPoints: {string.Join(", ", worldPoints)}");
 
@@ -461,7 +488,7 @@ namespace XRUIOS.TestHarness
             var loadedWP = await GetWorldPoint(wp.Identifier);
             Console.WriteLine($"Loaded WorldPoint: {loadedWP.PointName} - {loadedWP.PointDescription}");
 
-            // 4. Patch WorldPoint – like upgrading a Yorha unit mid-mission
+            // 4. Patch WorldPoint 
             var patch = new WorldPointPatch
             {
                 PointName = "AlphaRecon_Upgraded",
@@ -471,32 +498,32 @@ namespace XRUIOS.TestHarness
             await UpdateWorldPoint(updatedWP);
             Console.WriteLine($"WorldPoint updated: {updatedWP.PointName} - {updatedWP.PointDescription}");
 
-            // 5. Add static object – like placing a turret in Titanfall
+            // 5. Add static object 
             var turret = new StaticObject(
                 pTrackingType: PositionalTrackingMode.Follow,
                 rTrackingType: RotationalTrackingMode.LAM,
                 name: "Turret_X1",
                 spatialData: new Vector3(1, 0, 1),
                 objectLabel: ObjectOSLabel.Objects,
-                assetFile: new Yuuko.FileRecord { File = "turret.obj" }
+                assetFile: new FileRecord { File = "turret.obj" }
             );
             updatedWP = updatedWP with { StaticObjs = new List<StaticObject> { turret } };
             await UpdateWorldPoint(updatedWP);
             Console.WriteLine("StaticObject 'Turret_X1' added to WorldPoint.");
 
-            // 6. Add app object – like deploying a support AI in Cyberpunk 2077 hacking
+            // 6. Add app object 
             var appObj = new App(
                 pTrackingType: PositionalTrackingMode.Anchored,
                 rTrackingType: RotationalTrackingMode.Static,
                 spatialData: new Vector3(0, 0, 0),
                 objectLabel: ObjectOSLabel.Software,
-                reference: new Yuuko.Handle() // placeholder
+                reference: new Handle() // placeholder
             );
-            updatedWP = updatedWP with { AppObjs = new List<App> { appObj } };
+            updatedWP = updatedWP with { AppObjs = new List<Barebones.Functions.AreaManagerClass.App> { appObj } };
             await UpdateWorldPoint(updatedWP);
             Console.WriteLine("App object added to WorldPoint.");
 
-            // 7. Delete WorldPoint – evac like Nier units retreating
+            // 7. Delete WorldPoint – evac 
             DeleteWorldPoint(updatedWP.Identifier);
             Console.WriteLine($"WorldPoint '{updatedWP.PointName}' deleted.");
         }
@@ -714,7 +741,7 @@ namespace XRUIOS.TestHarness
                 await CreatorClass.CreatorFileClass.RemoveFiles(
                     "YUNA",
                     creatorType,
-                    new List<Yuuko.FileRecord> { creator.Files[0] }
+                    new List<FileRecord> { creator.Files[0] }
                 );
             }
 
@@ -737,7 +764,7 @@ namespace XRUIOS.TestHarness
 
             // 2. Prepare DataSlot directory via Yuuko DirectoryManager
             var dataSlotBasePath = Path.Combine(DataPath, "DataSlot");
-            var manager = new Yuuko.Bindings.DirectoryManager(dataSlotBasePath);
+            var manager = new Bindings.DirectoryManager(dataSlotBasePath);
             await manager.LoadBindings();
 
             // Ensure a folder exists for this dataslot's images
@@ -747,7 +774,7 @@ namespace XRUIOS.TestHarness
             );
 
             // 3. Create FileRecord pointing to actual directory UUID
-            var imgFile = new Yuuko.FileRecord(imgUuid, "workspace.png");
+            var imgFile = new FileRecord(imgUuid, "workspace.png");
 
             // 4. Create the dataslot
             var dataslot = new DataManagerClass.DataSlotClass.DataSlot(
@@ -838,15 +865,15 @@ namespace XRUIOS.TestHarness
             try
             {
                 // Get current exact coordinates
-                GeoClass.Coordinate exact = await GeoClass.GetExactCoordinates();
+                Coordinate exact = await GeoClass.GetExactCoordinates();
                 Console.WriteLine($"Exact coordinates: Latitude={exact.Y}, Longitude={exact.X}");
 
                 // Get relative coordinates (AR-style jittered)
-                GeoClass.RelativePoint relative = await GeoClass.GetRelativeCoordinates();
+                RelativePoint relative = await GeoClass.GetRelativeCoordinates();
                 Console.WriteLine($"Relative area: lat {relative.latmin} - {relative.latmax}, long {relative.longmin} - {relative.longmax}");
 
                 // Fetch recent exact locations
-                List<GeoClass.LocationPoint> recentExact = await GeoClass.GetRecentLocations();
+                List<LocationPoint> recentExact = await GeoClass.GetRecentLocations();
                 Console.WriteLine($"Exact location history ({recentExact.Count} points):");
                 foreach (var point in recentExact)
                 {
@@ -854,7 +881,7 @@ namespace XRUIOS.TestHarness
                 }
 
                 // Fetch recent relative locations
-                List<GeoClass.RelativeLocationPoint> recentRelative = await GeoClass.GetRecentRelativeLocations();
+                List<RelativeLocationPoint> recentRelative = await GeoClass.GetRecentRelativeLocations();
                 Console.WriteLine($"Relative location history ({recentRelative.Count} points):");
                 foreach (var rel in recentRelative)
                 {
@@ -890,7 +917,7 @@ namespace XRUIOS.TestHarness
                 Console.WriteLine("\nAngel neutralization attempt underway...\n");
 
                 // Fetch virtual history
-                List<GeoClass.LocationPoint> virtualHistory =
+                List<LocationPoint> virtualHistory =
                     await GeoClass.GetVirtualRelativeLocations(virtualProfile);
 
                 Console.WriteLine($"=== BATTLE LOG ({virtualHistory.Count} entries) ===");
@@ -904,9 +931,9 @@ namespace XRUIOS.TestHarness
                 Console.WriteLine("Power levels stabilizing.\n");
 
                 // Clear history
-                await GeoClass.ClearLocationHistory(new GeoClass.LocationPoint());
-                await GeoClass.ClearRelativeLocationHistory(new GeoClass.RelativeLocationPoint());
-                await GeoClass.ClearVirtualLocationHistory(new GeoClass.LocationPoint(), virtualProfile);
+                await GeoClass.ClearLocationHistory(new LocationPoint());
+                await GeoClass.ClearRelativeLocationHistory(new RelativeLocationPoint());
+                await GeoClass.ClearVirtualLocationHistory(new LocationPoint(), virtualProfile);
             }
 
             catch
@@ -938,7 +965,7 @@ namespace XRUIOS.TestHarness
                 Console.WriteLine("\nAngel neutralization attempt underway...\n");
 
                 // Fetch virtual history
-                List<GeoClass.LocationPoint> virtualHistory =
+                List<LocationPoint> virtualHistory =
                     await GeoClass.GetVirtualRelativeLocations(virtualProfile);
 
                 Console.WriteLine($"=== BATTLE LOG ({virtualHistory.Count} entries) ===");
@@ -953,7 +980,7 @@ namespace XRUIOS.TestHarness
 
                 // Clear history
 
-                await GeoClass.ClearVirtualLocationHistory(new GeoClass.LocationPoint(), virtualProfile);
+                await GeoClass.ClearVirtualLocationHistory(new LocationPoint(), virtualProfile);
             }
 
         }
@@ -964,27 +991,27 @@ namespace XRUIOS.TestHarness
             Directory.CreateDirectory(testBase);
 
             // Create a fake media album
-            var album = new MediaAlbumClass.AlbumMedia(
+            var album = new Barebones.Interfaces.MediaAlbumClass.AlbumMedia(
                 AlbumName: "Test Album",
                 AlbumDescription: "Just a test album",
                 IsFavorite: false,
                 UIColor: Color.Red,
                 UIColorAlt: Color.Blue,
                 CoverImageFilePath: "cover.jpg",
-                mediaPaths: new List<Yuuko.FileRecord> { new Yuuko.FileRecord("file-uuid", "song.mp3") }
+                mediaPaths: new List<FileRecord> { new FileRecord("file-uuid", "song.mp3") }
             );
 
 
             // Add album
-            await MediaAlbumClass.AddMediaAlbum(album);
+            await Barebones.Functions.MediaAlbumClass.AddMediaAlbum(album);
             Console.WriteLine("Album added.");
 
             // Read album
-            var albumRead = await MediaAlbumClass.GetMediaAlbum(album.Identifier);
+            var albumRead = await Barebones.Functions.MediaAlbumClass.GetMediaAlbum(album.Identifier);
             Console.WriteLine($"Album Loaded: {album.Identifier} ID: {albumRead.AlbumName}");
 
             // Read all albums
-            var allAlbums = await MediaAlbumClass.GetMediaAlbums();
+            var allAlbums = await Barebones.Functions.MediaAlbumClass.GetMediaAlbums();
             Console.WriteLine($"Total albums: {allAlbums.Count}");
             foreach (var a in allAlbums)
             {
@@ -992,15 +1019,15 @@ namespace XRUIOS.TestHarness
             }
 
             // Patch the album
-            var patch = new MediaAlbumClass.AlbumMediaPatch
+            var patch = new Barebones.Interfaces.MediaAlbumClass.AlbumMediaPatch
             {
                 AlbumDescription = "Updated description",
                 IsFavorite = true
             };
-            var updatedAlbum = MediaAlbumClass.AlbumMediaPatcher.Apply(album, patch);
+            var updatedAlbum = Barebones.Interfaces.MediaAlbumClass.AlbumMediaPatcher.Apply(album, patch);
 
             // Save updated album
-            await MediaAlbumClass.UpdateMediaAlbum(updatedAlbum);
+            await Barebones.Functions.MediaAlbumClass.UpdateMediaAlbum(updatedAlbum);
             Console.WriteLine("Album updated.");
 
             // Add to favorites
@@ -1036,14 +1063,14 @@ namespace XRUIOS.TestHarness
             }
 
             // Just use the path to create a FileRecord without altering the file
-            var fileRecord = new Yuuko.FileRecord(Guid.NewGuid().ToString(), Path.GetFileName(randomFile));
+            var fileRecord = new FileRecord(Guid.NewGuid().ToString(), Path.GetFileName(randomFile));
 
             // Create a new Creator with that file in its Files list
-            var creator = new MediaTagger.CreatorClass.Creator(
+            var creator = new Barebones.Interfaces.CreatorClass.Creator(
                 name: "RandomMusicCreator",
                 description: "Demo creator using a random music file",
                 pfp: null,
-                files: new List<Yuuko.FileRecord?> { fileRecord } // safe null-coalescing in constructor
+                files: new List<FileRecord?> { fileRecord } // safe null-coalescing in constructor
             );
 
             Console.WriteLine($"Creator Name: {creator.Name}");
@@ -1067,14 +1094,14 @@ namespace XRUIOS.TestHarness
             Console.WriteLine($"Using real Music directory: {musicDir}");
 
             // Step 2: DirectoryManager resolves folder
-            var manager = new Yuuko.Bindings.DirectoryManager(Path.Combine(DataPath, "Music"));
+            var manager = new Bindings.DirectoryManager(Path.Combine(DataPath, "Music"));
             await manager.LoadBindings();
             var (musicDirUUID, resolvedPath) = await manager.GetOrCreateDirectory(musicDir);
             Console.WriteLine($"Resolved Music UUID: {musicDirUUID}");
             Console.WriteLine($"Resolved XRUIOS path: {resolvedPath}");
 
             // Step 3: Add to Media and sync UUID
-            var mediaRecord = await Yuuko.Media.AddGenericDirectory(resolvedPath, "System Music Folder");
+            var mediaRecord = await Media.AddGenericDirectory(DataPath, encryptionKey, resolvedPath, "System Music Folder");
             musicDirUUID = mediaRecord.UUID; // USE the Media UUID from now on
 
             // Step 4: Find MP3 files
@@ -1093,7 +1120,7 @@ namespace XRUIOS.TestHarness
                 string fileName = Path.GetFileName(fullFilePath);
                 try
                 {
-                    var media = await Yuuko.Media.GetFile(musicDirUUID, fileName);
+                    var media = await Media.GetFile(DataPath, musicDirUUID, fileName);
                     Console.WriteLine($"  Already registered: {fileName} → {media.FullPath}");
                 }
                 catch (FileNotFoundException)
@@ -1150,7 +1177,7 @@ namespace XRUIOS.TestHarness
         public static async Task TestNotes()
         {
             // Theme identity (THIS is your stable anchor)
-            var identity = new NoteClass.ThemeIdentity(
+            var identity = new ThemeIdentity(
                 themeID: "muvluv_universe",
                 name: "Muv-Luv",
                 author: "âge",
@@ -1169,10 +1196,10 @@ namespace XRUIOS.TestHarness
                 description: "What Muv-Luv is, and why it escalates from romcom to existential horror.",
                 mainImage: null,
                 miniImage: null,
-                notes: new List<Yuuko.FileRecord>
+                notes: new List<FileRecord>
                 {
-            new Yuuko.FileRecord("note-001", "what_is_muvluv.md"),
-            new Yuuko.FileRecord("note-002", "themes_and_tone.md")
+            new FileRecord("note-001", "what_is_muvluv.md"),
+            new FileRecord("note-002", "themes_and_tone.md")
                 }
             );
             var timelines = new Category(
@@ -1180,11 +1207,11 @@ namespace XRUIOS.TestHarness
                 description: "Extra, Unlimited, and Alternative — and why they matter.",
                 mainImage: null,
                 miniImage: null,
-                notes: new List<Yuuko.FileRecord>
+                notes: new List<FileRecord>
                 {
-            new Yuuko.FileRecord("note-003", "extra_timeline.md"),
-            new Yuuko.FileRecord("note-004", "unlimited_timeline.md"),
-            new Yuuko.FileRecord("note-005", "alternative_timeline.md")
+            new FileRecord("note-003", "extra_timeline.md"),
+            new FileRecord("note-004", "unlimited_timeline.md"),
+            new FileRecord("note-005", "alternative_timeline.md")
                 }
             );
             var beta = new Category(
@@ -1192,10 +1219,10 @@ namespace XRUIOS.TestHarness
                 description: "The alien threat and the collapse of human morality.",
                 mainImage: null,
                 miniImage: null,
-                notes: new List<Yuuko.FileRecord>
+                notes: new List<FileRecord>
                 {
-            new Yuuko.FileRecord("note-006", "what_are_beta.md"),
-            new Yuuko.FileRecord("note-007", "human_extinction_wars.md")
+            new FileRecord("note-006", "what_are_beta.md"),
+            new FileRecord("note-007", "human_extinction_wars.md")
                 }
             );
 
@@ -1216,11 +1243,11 @@ namespace XRUIOS.TestHarness
             // Save
             Console.WriteLine("Saving Journal...");
             Console.WriteLine("Journal saved successfully! Error will come from using dummy files.");
-            await NoteClass.SaveJournal(journal);
+            await SaveJournal(journal);
 
             // READ ALL JOURNALS
             Console.WriteLine("Fetching all journals...");
-            var allJournals = await NoteClass.GetAllJournals();
+            var allJournals = await GetAllJournals();
             Console.WriteLine($"Total journals found: {allJournals.Count}");
             foreach (var j in allJournals)
             {
@@ -1230,24 +1257,25 @@ namespace XRUIOS.TestHarness
             // READ SINGLE JOURNAL
             var fileName = $"{identity.Name} v{identity.Version} by {identity.Author}__ID {identity.ThemeID}";
             Console.WriteLine("Fetching single journal...");
-            var fetchedJournal = await NoteClass.GetJournal(fileName);
+            var fetchedJournal = await GetJournal(fileName);
             Console.WriteLine($"Fetched: {fetchedJournal.JournalName}");
 
             // GET CATEGORY
             Console.WriteLine("Fetching category 'Timelines'...");
-            var fetchedCategory = await NoteClass.GetCategory(fileName, "Timelines");
+            var fetchedCategory = await GetCategory(fileName, "Timelines");
             Console.WriteLine($"Category found: {fetchedCategory.Title} with {fetchedCategory.Notes.Count} notes");
 
             // UPDATE JOURNAL (Version bump)
+            //Be careful! You want to use the ThemeIdentity in Notes, not Themes
             Console.WriteLine("Updating journal version...");
-            var updatedIdentity = new NoteClass.ThemeIdentity(
+            var updatedIdentity = new ThemeIdentity(
                 themeID: identity.ThemeID,
                 name: identity.Name,
                 author: identity.Author,
                 version: "1.0.1", // version bump
                 targetModes: identity.TargetModes
             );
-            var updatedJournal = new NoteClass.Journal(
+            var updatedJournal = new Journal(
                 journalName: journal.JournalName,
                 description: journal.Description + " (Updated)",
                 coverImagePath: journal.CoverImagePath,
@@ -1256,22 +1284,22 @@ namespace XRUIOS.TestHarness
             );
 
             // This is the key line you had — we capture the NEW filename
-            var currentFileName = await NoteClass.UpdateJournal(journal, updatedJournal);
+            var currentFileName = await UpdateJournal(journal, updatedJournal);
             Console.WriteLine("Journal updated successfully.");
 
             // FAVORITES TEST — use currentFileName instead of the stale fileName
             Console.WriteLine("Adding to favorites...");
-            await NoteClass.AddJournalToFavorites(currentFileName);
+            await AddJournalToFavorites(currentFileName);
             Console.WriteLine("Added to favorites.");
-            var (resolved, unresolved) = await NoteClass.GetJournalFavorites();
+            var (resolved, unresolved) = await GetJournalFavorites();
             Console.WriteLine($"Favorites Resolved: {resolved.Count}, Unresolved: {unresolved.Count}");
             Console.WriteLine("Removing from favorites...");
-            await NoteClass.RemoveJournalFromFavorites(currentFileName);
+            await RemoveJournalFromFavorites(currentFileName);
             Console.WriteLine("Removed from favorites.");
 
             // HISTORY TEST — unchanged, uses ThemeID
             Console.WriteLine("Adding history entry...");
-            await NoteClass.AddHistoryEntry(
+            await AddHistoryEntry(
                 TargetType: "Journal",
                 Action: "Viewed",
                 TargetID: identity.ThemeID,
@@ -1279,7 +1307,7 @@ namespace XRUIOS.TestHarness
                 {
             { "Source", "UnitTest" }
                 });
-            var history = await NoteClass.GetHistory("Journal", identity.ThemeID);
+            var history = await GetHistory("Journal", identity.ThemeID);
             Console.WriteLine($"History entries for journal: {history.Count}");
             foreach (var entry in history)
             {
@@ -1288,13 +1316,13 @@ namespace XRUIOS.TestHarness
 
             // DELETE TEST — use currentFileName here too!
             Console.WriteLine("Deleting journal...");
-            await NoteClass.DeleteJournal(currentFileName);
+            await DeleteJournal(currentFileName);
             Console.WriteLine("Journal deleted.");
         }
 
         public static async Task TestNotifications()
         {
-            var notification = new NotificationClass.NotificationContent(
+            var notification = new NotificationContent(
                 action: "viewJournal",
                 texts: new List<string>
                 {
@@ -1308,7 +1336,7 @@ namespace XRUIOS.TestHarness
 
 
             // Optional: add a button to view the journal
-            notification.Buttons.Add(new NotificationClass.NotificationContent.Button(
+            notification.Buttons.Add(new NotificationContent.Button(
                 content: "Open Journal",
                 action: "openJournal",
                 args: new Dictionary<string, string> { { "journalId", "SAO001" } }
@@ -1324,7 +1352,7 @@ namespace XRUIOS.TestHarness
         {
             // Create a new EQ profile
             var experimentalAudio = new ExperimentalAudio(false, false, 0, 0);
-            var myEQ = new SoundEQClass.SoundEQ(
+            var myEQ = new SoundEQ(
                 eqname: "MyTestEQ",
                 software: 80,
                 effects: 90,
@@ -1409,7 +1437,7 @@ namespace XRUIOS.TestHarness
             Console.WriteLine("Gathering system specs...");
 
             // Create an instance of SystemSpecs and generate the specs
-            var specs = new SystemSpecs().GenerateSpecs();
+            var specs = GenerateSpecs();
 
             Console.WriteLine("\n=== System Information ===");
             Console.WriteLine($"OS Info: {specs.OSInfo}");
@@ -1429,7 +1457,7 @@ namespace XRUIOS.TestHarness
 
             // Create a theme
             var testTheme = new XRUIOSTheme(
-                new ThemeSystem.ThemeIdentity("sao001", "SAO Dark", "WalkerDev", "1.0", new List<string> { "VR", "Desktop" }),
+                new XRUIOS.Barebones.Interfaces.ThemeSystem.ThemeIdentity("sao001", "SAO Dark", "WalkerDev", "1.0", new List<string> { "VR", "Desktop" }),
                 new ThemeColors(
                     ("", "#0a0a0a"),       // BackgroundPrimary
                     ("", "#1a1a1a"),       // BackgroundSecondary
@@ -1473,7 +1501,7 @@ namespace XRUIOS.TestHarness
             Console.WriteLine("Creating test Evangelion theme...");
 
             var evaTheme = new XRUIOSTheme(
-                new ThemeSystem.ThemeIdentity("eva001", "NERV Dark", "WalkerDev", "1.0", new List<string> { "VR", "Desktop" }),
+                new XRUIOS.Barebones.Interfaces.ThemeSystem.ThemeIdentity("eva001", "NERV Dark", "WalkerDev", "1.0", new List<string> { "VR", "Desktop" }),
                 new ThemeColors(
                     ("", "#0a0a0a"),       // BackgroundPrimary (dark)
                     ("", "#1a1a1a"),       // BackgroundSecondary
@@ -1637,14 +1665,14 @@ namespace XRUIOS.TestHarness
             HangfireBootstrap.Start();
 
             // EVA-01 Sync Timer
-            var eva01Timer = new TimerManagerClass.TimerRecord(
+            var eva01Timer = new TimerRecord(
                 "EVA-01 Sync Test",
                 TimeSpan.FromSeconds(5), // short for demo
                 () => Console.WriteLine("[ALERT] EVA-01 synchronization complete!")
             );
 
             // EVA-02 Sync Timer
-            var eva02Timer = new TimerManagerClass.TimerRecord(
+            var eva02Timer = new TimerRecord(
                 "EVA-02 Sync Test",
                 TimeSpan.FromSeconds(8),
                 () => Console.WriteLine("[ALERT] EVA-02 synchronization complete!")
@@ -1661,28 +1689,28 @@ namespace XRUIOS.TestHarness
 
         public static async Task TestWorldEvents()
         {
-            var asukaMusicEvent = new WorldEventsClass.WorldEvent(
+            var asukaMusicEvent = new Barebones.Interfaces.WorldEventsClass.WorldEvent(
                 deviceId: "EVA-02",
                 timestamp: DateTime.UtcNow,
                 action: "MusicStarted",
                 sceneDescription: "Asuka blasted Eurobeat in the cockpit during sync test"
             );
 
-            var reiQuietEvent = new WorldEventsClass.WorldEvent(
+            var reiQuietEvent = new Barebones.Interfaces.WorldEventsClass.WorldEvent(
                 deviceId: "EVA-00",
                 timestamp: DateTime.UtcNow.AddSeconds(2),
                 action: "MusicStarted",
                 sceneDescription: "Rei quietly played classical music in Unit-00"
             );
 
-            var shinjiCryingEvent = new WorldEventsClass.WorldEvent(
+            var shinjiCryingEvent = new Barebones.Interfaces.WorldEventsClass.WorldEvent(
                 deviceId: "EVA-01",
                 timestamp: DateTime.UtcNow.AddSeconds(-30),
                 action: "EmotionalBreakdown",
                 sceneDescription: "Shinji started crying because the sync test was too hard"
             );
 
-            var trainingStartEvent = new WorldEventsClass.WorldEvent(
+            var trainingStartEvent = new Barebones.Interfaces.WorldEventsClass.WorldEvent(
     deviceId: "SIM-01",
     timestamp: DateTime.UtcNow,
     action: "TrainingStart",
@@ -1690,28 +1718,28 @@ namespace XRUIOS.TestHarness
     eventId: "training-start-001"
 );
 
-            var asukaTrashTalkEvent = new WorldEventsClass.WorldEvent(
+            var asukaTrashTalkEvent = new Barebones.Interfaces.WorldEventsClass.WorldEvent(
                 deviceId: "EVA-02",
                 timestamp: DateTime.UtcNow.AddSeconds(2),
                 action: "TrashTalk",
                 sceneDescription: "Asuka loudly taunts Shinji, claiming he'll fall behind again"
             );
 
-            var shinjiDefensiveEvent = new WorldEventsClass.WorldEvent(
+            var shinjiDefensiveEvent = new Barebones.Interfaces.WorldEventsClass.WorldEvent(
                 deviceId: "EVA-01",
                 timestamp: DateTime.UtcNow.AddSeconds(4),
                 action: "Defensive",
                 sceneDescription: "Shinji nervously insists he can do it, cheeks red as he grips controls"
             );
 
-            var reiSilentFocusEvent = new WorldEventsClass.WorldEvent(
+            var reiSilentFocusEvent = new Barebones.Interfaces.WorldEventsClass.WorldEvent(
                 deviceId: "EVA-00",
                 timestamp: DateTime.UtcNow.AddSeconds(6),
                 action: "FocusedPlay",
                 sceneDescription: "Rei calmly ignores the bickering, eyes steady on the simulator"
             );
 
-            var asukaPoint5Event = new WorldEventsClass.WorldEvent(
+            var asukaPoint5Event = new Barebones.Interfaces.WorldEventsClass.WorldEvent(
                 deviceId: "EVA-02",
                 timestamp: DateTime.UtcNow.AddSeconds(10),
                 action: "ScoreUpdate",
@@ -1719,7 +1747,7 @@ namespace XRUIOS.TestHarness
                 eventId: "asuka-score-005"
             );
 
-            var shinjiPoint7Event = new WorldEventsClass.WorldEvent(
+            var shinjiPoint7Event = new Barebones.Interfaces.WorldEventsClass.WorldEvent(
                 deviceId: "EVA-01",
                 timestamp: DateTime.UtcNow.AddSeconds(12),
                 action: "ScoreUpdate",
@@ -1727,28 +1755,28 @@ namespace XRUIOS.TestHarness
                 eventId: "shinji-score-007"
             );
 
-            var asukaFrustrationEvent = new WorldEventsClass.WorldEvent(
+            var asukaFrustrationEvent = new Barebones.Interfaces.WorldEventsClass.WorldEvent(
                 deviceId: "EVA-02",
                 timestamp: DateTime.UtcNow.AddSeconds(13),
                 action: "Frustration",
                 sceneDescription: "Asuka shouts at Shinji for being slow, slamming the simulator console"
             );
 
-            var shinjiPanicEvent = new WorldEventsClass.WorldEvent(
+            var shinjiPanicEvent = new Barebones.Interfaces.WorldEventsClass.WorldEvent(
                 deviceId: "EVA-01",
                 timestamp: DateTime.UtcNow.AddSeconds(14),
                 action: "Panic",
                 sceneDescription: "Shinji panics, losing a point due to misfire, muttering under his breath"
             );
 
-            var reiCalmEvent = new WorldEventsClass.WorldEvent(
+            var reiCalmEvent = new Barebones.Interfaces.WorldEventsClass.WorldEvent(
                 deviceId: "EVA-00",
                 timestamp: DateTime.UtcNow.AddSeconds(15),
                 action: "CalmObservation",
                 sceneDescription: "Rei glances briefly at Asuka and Shinji’s antics but remains composed, barely moving"
             );
 
-            var asukaPoint10Event = new WorldEventsClass.WorldEvent(
+            var asukaPoint10Event = new Barebones.Interfaces.WorldEventsClass.WorldEvent(
                 deviceId: "EVA-02",
                 timestamp: DateTime.UtcNow.AddSeconds(16),
                 action: "ScoreUpdate",
@@ -1756,7 +1784,7 @@ namespace XRUIOS.TestHarness
                 eventId: "asuka-score-010"
             );
 
-            var shinjiPoint9Event = new WorldEventsClass.WorldEvent(
+            var shinjiPoint9Event = new Barebones.Interfaces.WorldEventsClass.WorldEvent(
                 deviceId: "EVA-01",
                 timestamp: DateTime.UtcNow.AddSeconds(17),
                 action: "ScoreUpdate",
@@ -1764,7 +1792,7 @@ namespace XRUIOS.TestHarness
                 eventId: "shinji-score-009"
             );
 
-            var reiVictoryEvent = new WorldEventsClass.WorldEvent(
+            var reiVictoryEvent = new Barebones.Interfaces.WorldEventsClass.WorldEvent(
                 deviceId: "EVA-00",
                 timestamp: DateTime.UtcNow.AddSeconds(20),
                 action: "Victory",
@@ -1772,21 +1800,21 @@ namespace XRUIOS.TestHarness
                 eventId: "rei-victory-001"
             );
 
-            var asukaMeltdownEvent = new WorldEventsClass.WorldEvent(
+            var asukaMeltdownEvent = new Barebones.Interfaces.WorldEventsClass.WorldEvent(
                 deviceId: "EVA-02",
                 timestamp: DateTime.UtcNow.AddSeconds(21),
                 action: "Meltdown",
                 sceneDescription: "Asuka throws her joystick, yelling, 'HOW DID SHE DO THAT?!'"
             );
 
-            var shinjiAwkwardEvent = new WorldEventsClass.WorldEvent(
+            var shinjiAwkwardEvent = new Barebones.Interfaces.WorldEventsClass.WorldEvent(
                 deviceId: "EVA-01",
                 timestamp: DateTime.UtcNow.AddSeconds(22),
                 action: "AwkwardDefeat",
                 sceneDescription: "Shinji slumps back, mumbling 'I… I lost… again…'"
             );
 
-            var trainingEndEvent = new WorldEventsClass.WorldEvent(
+            var trainingEndEvent = new Barebones.Interfaces.WorldEventsClass.WorldEvent(
                 deviceId: "SIM-01",
                 timestamp: DateTime.UtcNow.AddSeconds(23),
                 action: "TrainingEnd",
@@ -1794,35 +1822,35 @@ namespace XRUIOS.TestHarness
                 eventId: "training-end-001"
             );
 
-            var misatoReactionEvent = new WorldEventsClass.WorldEvent(
+            var misatoReactionEvent = new Barebones.Interfaces.WorldEventsClass.WorldEvent(
     deviceId: "NERV-OPS",
     timestamp: DateTime.UtcNow.AddSeconds(24),
     action: "Commentary",
     sceneDescription: "Misato bursts out laughing, then scolds Asuka: 'Calm down, it’s just a simulator!'"
 );
 
-            var ritsukoObservationEvent = new WorldEventsClass.WorldEvent(
+            var ritsukoObservationEvent = new Barebones.Interfaces.WorldEventsClass.WorldEvent(
                 deviceId: "NERV-OPS",
                 timestamp: DateTime.UtcNow.AddSeconds(25),
                 action: "ProfessionalComment",
                 sceneDescription: "Ritsuko adjusts her glasses, dryly noting: 'It seems discipline and focus are rewarded… as expected.'"
             );
 
-            var misatoAdviceEvent = new WorldEventsClass.WorldEvent(
+            var misatoAdviceEvent = new Barebones.Interfaces.WorldEventsClass.WorldEvent(
                 deviceId: "NERV-OPS",
                 timestamp: DateTime.UtcNow.AddSeconds(26),
                 action: "Advice",
                 sceneDescription: "Misato points at Shinji: 'Try actually concentrating next time, Shinji! And Asuka… maybe tone down the theatrics.'"
             );
 
-            var ritsukoWarningEvent = new WorldEventsClass.WorldEvent(
+            var ritsukoWarningEvent = new Barebones.Interfaces.WorldEventsClass.WorldEvent(
                 deviceId: "NERV-OPS",
                 timestamp: DateTime.UtcNow.AddSeconds(27),
                 action: "Warning",
                 sceneDescription: "Ritsuko quietly warns: 'Remember, emotional instability could cost lives if this were real combat.'"
                 );
 
-            var reiSilentAcknowledgmentEvent = new WorldEventsClass.WorldEvent(
+            var reiSilentAcknowledgmentEvent = new Barebones.Interfaces.WorldEventsClass.WorldEvent(
                 deviceId: "EVA-00",
                 timestamp: DateTime.UtcNow.AddSeconds(28),
                 action: "SilentAcknowledgment",
@@ -1925,14 +1953,14 @@ namespace XRUIOS.TestHarness
 
             // Step 2: Register test directory
             string testDir = Path.GetDirectoryName(testAudioPath)!;
-            var record = await Yuuko.Media.AddGenericDirectory(testDir, "TestSongsDir", "Music");
+            var record = await Media.AddGenericDirectory(DataPath, encryptionKey, testDir, "TestSongsDir", "Music");
             string uuid = record.UUID ?? throw new Exception("UUID missing — Media broke");
 
             Console.WriteLine($"UUID: {uuid}");
             Console.WriteLine($"Test file: {testFileName}");
 
             // Step 3: Force resolution 
-            var freshManager = new Yuuko.Bindings.DirectoryManager(Path.Combine(DataPath, "Music"));
+            var freshManager = new Bindings.DirectoryManager(Path.Combine(DataPath, "Music"));
             await freshManager.LoadBindings();
             string? resolved = await freshManager.GetDirectoryById(uuid);
 
@@ -2045,7 +2073,7 @@ namespace XRUIOS.TestHarness
             try
             {
                 // Remove the directory binding
-                await Yuuko.Media.RemoveGenericDirectory(uuid, "Music", deleteDirectory: true);
+                await Media.RemoveGenericDirectory(DataPath, encryptionKey, uuid, "Music", deleteDirectory: true);
                 Console.WriteLine("Removed directory binding");
             }
             catch (Exception ex)

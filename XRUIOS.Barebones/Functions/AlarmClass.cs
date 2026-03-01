@@ -2,36 +2,15 @@
 using Hangfire.MemoryStorage;
 using System.Collections.ObjectModel;
 using static Pariah_Cybersecurity.DataHandler;
+using static XRUIOS.Barebones.Interfaces.AlarmClass;
 using static XRUIOS.Barebones.XRUIOS;
+using YuukoProtocol;
 
 namespace XRUIOS.Barebones
 {
     public class AlarmClass
     {
-        public record Alarm
-        {
-            public string AlarmName;
-            public DateTime AlarmTime;
-            public bool IsRecurring;
-            public List<DayOfWeek> RecurringDays;
-            public Yuuko.FileRecord SoundFilePath;
-            public int Volume;
-            public bool IsEnabled;
-
-            public List<string> JobIds = new(); // ADDED
-
-            public Alarm() { }
-            public Alarm(string alarmName, DateTime alarmTime, bool isRecurring, List<DayOfWeek> recurringDays, Yuuko.FileRecord soundFilePath, int volume, bool isEnabled)
-            {
-                AlarmName = alarmName;
-                AlarmTime = alarmTime;
-                IsRecurring = isRecurring;
-                RecurringDays = recurringDays;
-                SoundFilePath = soundFilePath;
-                Volume = volume;
-                IsEnabled = isEnabled;
-            }
-        }
+     
 
         public static ObservableCollection<Alarm> Alarms = new();
 
@@ -41,7 +20,7 @@ namespace XRUIOS.Barebones
             Alarms.Add(newAlarm);
 
             var directoryPath = Path.Combine(DataPath, "Alarms");
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            var manager = new Bindings.DirectoryManager(directoryPath);
 
             var alarmsFile = await JSONDataHandler.LoadJsonFile("Alarms", directoryPath);
             var alarms = (ObservableCollection<Alarm>)await JSONDataHandler.GetVariable<ObservableCollection<Alarm>>(alarmsFile, "Data", encryptionKey);
@@ -58,7 +37,7 @@ namespace XRUIOS.Barebones
         public static async Task LoadAlarms()
         {
             var directoryPath = Path.Combine(DataPath, "Alarms");
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            var manager = new Bindings.DirectoryManager(directoryPath);
 
             var alarmsFile = await JSONDataHandler.LoadJsonFile("Alarms", directoryPath);
             Alarms = (ObservableCollection<Alarm>)await JSONDataHandler.GetVariable<ObservableCollection<Alarm>>(alarmsFile, "Data", encryptionKey);
@@ -79,7 +58,7 @@ namespace XRUIOS.Barebones
             updateAction(existingAlarm);
 
             var directoryPath = Path.Combine(DataPath, "Alarms");
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            var manager = new Bindings.DirectoryManager(directoryPath);
 
             var alarmsFile = await JSONDataHandler.LoadJsonFile("Alarms", directoryPath);
             var alarms = (ObservableCollection<Alarm>)await JSONDataHandler.GetVariable<ObservableCollection<Alarm>>(alarmsFile, "Data", encryptionKey);
@@ -119,7 +98,7 @@ namespace XRUIOS.Barebones
             Alarms.Remove(alarm);
 
             var directoryPath = Path.Combine(DataPath, "Alarms");
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            var manager = new Bindings.DirectoryManager(directoryPath);
 
             var alarmsFile = await JSONDataHandler.LoadJsonFile("Alarms", directoryPath);
             var alarms = (ObservableCollection<Alarm>)await JSONDataHandler.GetVariable<ObservableCollection<Alarm>>(alarmsFile, "Data", encryptionKey);

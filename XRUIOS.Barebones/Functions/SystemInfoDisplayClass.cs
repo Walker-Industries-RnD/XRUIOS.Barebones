@@ -1,5 +1,7 @@
 ﻿using System.Management;
 using System.Text.Json.Nodes;
+using static XRUIOS.Barebones.Interfaces.SystemInfoDisplayClass;
+using static XRUIOS.Barebones.Interfaces.SystemInfoDisplayClass.SystemInfoDisplayWindows;
 
 namespace XRUIOS.Barebones.Functions
 {
@@ -10,37 +12,21 @@ namespace XRUIOS.Barebones.Functions
         {
 
 
-            public record SystemSpecs
+            public static SystemSpecs GenerateSpecs()
             {
-                public string OSInfo;
-                public string CPUInfo;
-                public string MemoryInfo;
-                public string DiskInfo;
-                public string GPUInfo;
-                public string NetworkInfo;
-                public string UptimeInfo;
-                public string VRHeadsetStatus;
-
-                public SystemSpecs() { }
-
-                public SystemSpecs GenerateSpecs()
+                SystemSpecs specs = new SystemSpecs
                 {
-                    SystemSpecs specs = new SystemSpecs
-                    {
-                        OSInfo = GetOSInfo(),
-                        CPUInfo = GetCPUInfo(),
-                        MemoryInfo = GetMemoryInfo(),
-                        DiskInfo = GetDiskInfo(),
-                        GPUInfo = GetGPUInfo(),
-                        NetworkInfo = GetNetworkInfo(),
-                        UptimeInfo = GetUptimeInfo(),
-                        VRHeadsetStatus = CheckHardware()
-                    };
+                    OSInfo = GetOSInfo(),
+                    CPUInfo = GetCPUInfo(),
+                    MemoryInfo = GetMemoryInfo(),
+                    DiskInfo = GetDiskInfo(),
+                    GPUInfo = GetGPUInfo(),
+                    NetworkInfo = GetNetworkInfo(),
+                    UptimeInfo = GetUptimeInfo(),
+                    VRHeadsetStatus = CheckHardware()
+                };
 
-                    return specs;
-                }
-
-
+                return specs;
             }
 
 

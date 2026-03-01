@@ -1,5 +1,7 @@
 ﻿using System.Text.Json.Nodes;
 using static Pariah_Cybersecurity.DataHandler;
+using static XRUIOS.Barebones.Interfaces.ExperimentalAudioClass;
+using static XRUIOS.Barebones.Interfaces.SoundEQClass;
 using static XRUIOS.Barebones.SoundEQClass;
 using static XRUIOS.Barebones.XRUIOS;
 
@@ -11,24 +13,7 @@ namespace XRUIOS.Barebones
 
 
 
-        public record ExperimentalAudio
-        {
-            public bool EnvironmentalReduction;
-            public bool DecibelLimit;
-            public int EnvironmentalReductionPercentage;
-            public int DecibelLimitLevel;
 
-            public ExperimentalAudio() { }
-
-            public ExperimentalAudio(bool EnvironmentalReduction, bool DecibelLimit,
-                int EnvironmentalReductionPercentage, int DecibelLimitLevel)
-            {
-                this.EnvironmentalReduction = EnvironmentalReduction;
-                this.DecibelLimit = DecibelLimit;
-                this.EnvironmentalReductionPercentage = EnvironmentalReductionPercentage;
-                this.DecibelLimitLevel = DecibelLimitLevel;
-            }
-        }
 
         public static int MasterVolume;
         public static ExperimentalAudio AdvancedAudioSettings;

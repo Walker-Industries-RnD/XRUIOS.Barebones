@@ -1,5 +1,7 @@
 ﻿using static Pariah_Cybersecurity.DataHandler;
 using static XRUIOS.Barebones.XRUIOS;
+using YuukoProtocol;
+
 
 namespace XRUIOS.Barebones
 {
@@ -7,19 +9,19 @@ namespace XRUIOS.Barebones
     {
         private const int MaxRecent = 30;
 
-        public static async Task<List<Yuuko.FileRecord>> GetRecentlyRecorded()
+        public static async Task<List<FileRecord>> GetRecentlyRecorded()
         {
             var directoryPath = Path.Combine(DataPath, "RecentlyRecorded");
             var file = await JSONDataHandler.LoadJsonFile(directoryPath, "RecentlyRecorded");
-            var loaded = (List<Yuuko.FileRecord>)await JSONDataHandler.GetVariable<List<Yuuko.FileRecord>>(file, "RecentlyRecorded", encryptionKey);
+            var loaded = (List<FileRecord>)await JSONDataHandler.GetVariable<List<FileRecord>>(file, "RecentlyRecorded", encryptionKey);
             return loaded;
         }
 
-        public static async Task AddToRecentlyRecorded(Yuuko.FileRecord newlyRecorded)
+        public static async Task AddToRecentlyRecorded(FileRecord newlyRecorded)
         {
             var directoryPath = Path.Combine(DataPath, "RecentlyRecorded");
             var file = await JSONDataHandler.LoadJsonFile(directoryPath, "RecentlyRecorded");
-            var loaded = (List<Yuuko.FileRecord>)await JSONDataHandler.GetVariable<List<Yuuko.FileRecord>>(file, "RecentlyRecorded", encryptionKey);
+            var loaded = (List<FileRecord>)await JSONDataHandler.GetVariable<List<FileRecord>>(file, "RecentlyRecorded", encryptionKey);
 
             // Remove oldest if over limit
             if (loaded.Count >= MaxRecent)
@@ -27,15 +29,15 @@ namespace XRUIOS.Barebones
 
             loaded.Add(newlyRecorded);
 
-            var updatedJSON = await JSONDataHandler.UpdateJson<List<Yuuko.FileRecord>>(file, "RecentlyRecorded", loaded, encryptionKey);
+            var updatedJSON = await JSONDataHandler.UpdateJson<List<FileRecord>>(file, "RecentlyRecorded", loaded, encryptionKey);
             await JSONDataHandler.SaveJson(updatedJSON);
         }
 
-        public static async Task DeleteSoundRecentlyRecorded(Yuuko.FileRecord deletedData)
+        public static async Task DeleteSoundRecentlyRecorded(FileRecord deletedData)
         {
             var directoryPath = Path.Combine(DataPath, "RecentlyRecorded");
             var file = await JSONDataHandler.LoadJsonFile(directoryPath, "RecentlyRecorded");
-            var loaded = (List<Yuuko.FileRecord>)await JSONDataHandler.GetVariable<List<Yuuko.FileRecord>>(file, "RecentlyRecorded", encryptionKey);
+            var loaded = (List<FileRecord>)await JSONDataHandler.GetVariable<List<FileRecord>>(file, "RecentlyRecorded", encryptionKey);
 
             var item = loaded.FirstOrDefault(d => d.GetHashCode() == deletedData.GetHashCode());
             if (item == null)
@@ -43,7 +45,7 @@ namespace XRUIOS.Barebones
 
             loaded.Remove(item);
 
-            var updatedJSON = await JSONDataHandler.UpdateJson<List<Yuuko.FileRecord>>(file, "RecentlyRecorded", loaded, encryptionKey);
+            var updatedJSON = await JSONDataHandler.UpdateJson<List<FileRecord>>(file, "RecentlyRecorded", loaded, encryptionKey);
             await JSONDataHandler.SaveJson(updatedJSON);
         }
 
@@ -51,10 +53,10 @@ namespace XRUIOS.Barebones
         {
             var directoryPath = Path.Combine(DataPath, "RecentlyRecorded");
             var file = await JSONDataHandler.LoadJsonFile(directoryPath, "RecentlyRecorded");
-            var loaded = (List<Yuuko.FileRecord>)await JSONDataHandler.GetVariable<List<Yuuko.FileRecord>>(file, "RecentlyRecorded", encryptionKey);
+            var loaded = (List<FileRecord>)await JSONDataHandler.GetVariable<List<FileRecord>>(file, "RecentlyRecorded", encryptionKey);
 
             loaded.Clear();
-            var updatedJSON = await JSONDataHandler.UpdateJson<List<Yuuko.FileRecord>>(file, "RecentlyRecorded", loaded, encryptionKey);
+            var updatedJSON = await JSONDataHandler.UpdateJson<List<FileRecord>>(file, "RecentlyRecorded", loaded, encryptionKey);
             await JSONDataHandler.SaveJson(updatedJSON);
         }
     }

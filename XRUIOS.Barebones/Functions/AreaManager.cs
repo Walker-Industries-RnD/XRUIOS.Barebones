@@ -2,6 +2,7 @@
 using System.Numerics;
 using System.Text.Json.Nodes;
 using static XRUIOS.Barebones.XRUIOS;
+using YuukoProtocol;
 
 namespace XRUIOS.Barebones.Functions
 {
@@ -30,7 +31,7 @@ namespace XRUIOS.Barebones.Functions
             public string PointName;
             public string PointDescription;
 
-            public Yuuko.FileRecord PointImagePath;
+            public FileRecord PointImagePath;
             public bool UserCentric; // Is this a point which is at a fixed point relative to the user
             public List<StaticObject> StaticObjs;
             public List<App> AppObjs;
@@ -40,7 +41,7 @@ namespace XRUIOS.Barebones.Functions
 
             public WorldPoint() { }
 
-            public WorldPoint(RenderingMode renderingMode, byte[] pointData, string pointName, string pointDescription, Yuuko.FileRecord pointImagePath,
+            public WorldPoint(RenderingMode renderingMode, byte[] pointData, string pointName, string pointDescription, FileRecord pointImagePath,
                 bool userCentric, List<StaticObject> staticObjs, List<App> appObjs,
                 List<DesktopScreen> desktopScreenObjs, List<StaciaItems> staciaObjs, string? identifier)
             {
@@ -67,7 +68,7 @@ namespace XRUIOS.Barebones.Functions
             public string Name; // Path to the object
             public Vector3? SpatialData;
             public ObjectOSLabel ObjectLabel;
-            public Yuuko.FileRecord? AssetFile; // Reference to the file
+            public FileRecord? AssetFile; // Reference to the file
 
             public StaticObject(
                 PositionalTrackingMode? pTrackingType,
@@ -75,7 +76,7 @@ namespace XRUIOS.Barebones.Functions
                 string name,
                 Vector3? spatialData,
                 ObjectOSLabel objectLabel,
-                Yuuko.FileRecord? assetFile)
+                FileRecord? assetFile)
             {
                 PTrackingType = pTrackingType;
                 RTrackingType = rTrackingType;
@@ -95,7 +96,7 @@ namespace XRUIOS.Barebones.Functions
             public RotationalTrackingMode? RTrackingType;
             public Vector3? SpatialData;
             public ObjectOSLabel ObjectLabel;
-            public Yuuko.Handle? Reference;
+            public Handle? Reference;
             // Reference can be:
             // - a desktop ID for a running app
             // - a local app name/path
@@ -111,7 +112,7 @@ namespace XRUIOS.Barebones.Functions
                 RotationalTrackingMode? rTrackingType,
                 Vector3? spatialData,
                 ObjectOSLabel objectLabel,
-                Yuuko.Handle? reference)
+                Handle? reference)
             {
                 PTrackingType = pTrackingType;
                 RTrackingType = rTrackingType;
@@ -130,7 +131,7 @@ namespace XRUIOS.Barebones.Functions
             public RotationalTrackingMode? RTrackingType;
             public Vector3? SpatialData;
             public ObjectOSLabel ObjectLabel;
-            public Yuuko.Handle? Reference;
+            public Handle? Reference;
             // Works same as App: represents the actual desktop program,
             // remote or local, possibly on another device
 
@@ -139,7 +140,7 @@ namespace XRUIOS.Barebones.Functions
                 RotationalTrackingMode? rTrackingType,
                 Vector3? spatialData,
                 ObjectOSLabel objectLabel,
-                Yuuko.Handle? reference)
+                Handle? reference)
             {
                 PTrackingType = pTrackingType;
                 RTrackingType = rTrackingType;
@@ -158,7 +159,7 @@ namespace XRUIOS.Barebones.Functions
             public RotationalTrackingMode? RTrackingType;
             public Vector3? SpatialData;
             public ObjectOSLabel ObjectLabel;
-            public Yuuko.Handle? Reference;
+            public Handle? Reference;
             // Widgets or dynamic items can reference:
             // - a local script or binary
             // - a YuukoApp mini-component
@@ -170,7 +171,7 @@ namespace XRUIOS.Barebones.Functions
                 RotationalTrackingMode? rTrackingType,
                 Vector3? spatialData,
                 ObjectOSLabel objectLabel,
-                Yuuko.Handle? reference)
+                Handle? reference)
             {
                 PTrackingType = pTrackingType;
                 RTrackingType = rTrackingType;
@@ -191,7 +192,7 @@ namespace XRUIOS.Barebones.Functions
         {
             public string? PointName { get; init; }
             public string? PointDescription { get; init; }
-            public Yuuko.FileRecord? PointImagePath { get; init; }
+            public FileRecord? PointImagePath { get; init; }
             public bool? UserCentric { get; init; }
             public List<StaticObject>? StaticObjs { get; init; }
             public List<App>? AppObjs { get; init; }
@@ -206,7 +207,7 @@ namespace XRUIOS.Barebones.Functions
             public string? Name { get; init; }
             public Vector3? SpatialData { get; init; }
             public ObjectOSLabel? ObjectLabel { get; init; }
-            public Yuuko.FileRecord? AssetFile { get; init; }
+            public FileRecord? AssetFile { get; init; }
         }
 
         public sealed record AppPatch
@@ -215,7 +216,7 @@ namespace XRUIOS.Barebones.Functions
             public RotationalTrackingMode? RTrackingType { get; init; }
             public Vector3? SpatialData { get; init; }
             public ObjectOSLabel? ObjectLabel { get; init; }
-            public Yuuko.Handle? Reference { get; init; }
+            public Handle? Reference { get; init; }
         }
 
         public sealed record DesktopScreenPatch
@@ -224,7 +225,7 @@ namespace XRUIOS.Barebones.Functions
             public RotationalTrackingMode? RTrackingType { get; init; }
             public Vector3? SpatialData { get; init; }
             public ObjectOSLabel? ObjectLabel { get; init; }
-            public Yuuko.Handle? Reference { get; init; }
+            public Handle? Reference { get; init; }
         }
 
         public sealed record StaciaItemsPatch
@@ -233,7 +234,7 @@ namespace XRUIOS.Barebones.Functions
             public RotationalTrackingMode? RTrackingType { get; init; }
             public Vector3? SpatialData { get; init; }
             public ObjectOSLabel? ObjectLabel { get; init; }
-            public Yuuko.Handle? Reference { get; init; }
+            public Handle? Reference { get; init; }
         }
 
 

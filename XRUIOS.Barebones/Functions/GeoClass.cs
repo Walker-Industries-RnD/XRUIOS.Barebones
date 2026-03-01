@@ -1,7 +1,9 @@
 ﻿using GeoCoordinatePortable;
 using Microsoft.Maui.Devices.Sensors;
 using System.Text.Json.Nodes;
+using YuukoProtocol;
 using static Pariah_Cybersecurity.DataHandler;
+using static XRUIOS.Barebones.Interfaces.GeoClass;
 using static XRUIOS.Barebones.XRUIOS;
 
 
@@ -11,34 +13,7 @@ namespace XRUIOS.Barebones
     {
 
 
-        public struct Coordinate
-        {
-            public double X, Y;
-
-            public Coordinate() { }
-            public Coordinate(double x, double y)
-            {
-                X = x; Y = y;
-            }
-        }
-
-        public struct LocationPoint
-        {
-            public DateTime TimeStamp;
-            public double Latitude;
-            public double Longitude;
-
-            public LocationPoint() { }
-
-
-            public LocationPoint(DateTime timestamp, double latitude, double longitude)
-            {
-                TimeStamp = timestamp;
-                Latitude = latitude;
-                Longitude = longitude;
-            }
-        }
-
+   
         //Use GeoClue on Linux
         public static async Task<Coordinate> GetExactCoordinates()
         {
@@ -121,39 +96,7 @@ namespace XRUIOS.Barebones
         //Relative Location
 
 
-        public struct RelativePoint
-        {
-            public double latmin;
-            public double latmax;
-            public double longmin;
-            public double longmax;
-            public RelativePoint() { }
-
-
-            public RelativePoint(double latmin, double latmax, double longmin, double longmax)
-            {
-                this.latmin = latmin;
-                this.latmax = latmax;
-                this.longmin = longmin;
-                this.longmax = longmax;
-            }
-        }
-
-        public struct RelativeLocationPoint
-        {
-            public DateTime Timestamp;
-            public RelativePoint Area;
-
-            public RelativeLocationPoint() { }
-
-
-            public RelativeLocationPoint(DateTime timestamp, RelativePoint area)
-            {
-                Timestamp = timestamp;
-                Area = area;
-            }
-        }
-
+  
 
         private static readonly Random _rng = new Random();
 
@@ -285,9 +228,9 @@ namespace XRUIOS.Barebones
 
 
         public static async Task AddVirtualPoint(
-    double latitude,
-    double longitude,
-    string virtualLocation)
+double latitude,
+double longitude,
+string virtualLocation)
         {
             var locationPoint = new LocationPoint
             {
@@ -307,7 +250,7 @@ namespace XRUIOS.Barebones
             if (!File.Exists(Path.Combine(directoryPath, "VirtualLocationData.json")))
             {
                 Directory.CreateDirectory(directoryPath);
-                var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+                var manager = new Bindings.DirectoryManager(directoryPath);
 
                 await JSONDataHandler.CreateJsonFile("VirtualLocationData", directoryPath, new JsonObject());
 

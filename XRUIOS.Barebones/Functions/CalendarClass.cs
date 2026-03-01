@@ -5,6 +5,7 @@ using Ical.Net.Serialization;
 using static XRUIOS.Barebones.XRUIOS;
 using Attachment = Ical.Net.DataTypes.Attachment;
 using Calendar = Ical.Net.Calendar;
+using YuukoProtocol;
 
 namespace XRUIOS.Barebones
 {
@@ -20,7 +21,7 @@ namespace XRUIOS.Barebones
             string description,
             TimeZoneInfo timezone = null,
             int durationHours = 0,
-            List<Yuuko.FileRecord> attachmentsList = null)
+            List<FileRecord> attachmentsList = null)
         {
             timezone ??= TimeZoneInfo.Local;
 
@@ -43,7 +44,7 @@ namespace XRUIOS.Barebones
             if (attachmentsList != null && attachmentsList.Count > 0)
             {
                 var firstAttachment = attachmentsList[0];
-                var mediaPath = await Yuuko.Media.GetFile(firstAttachment.UUID, firstAttachment.File);
+                var mediaPath = await Media.GetFile(DataPath, firstAttachment.UUID, firstAttachment.File);
 
                 byte[] fileBytes;
                 using (var fs = new FileStream(mediaPath.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
@@ -91,7 +92,7 @@ namespace XRUIOS.Barebones
             RecurrencePattern recurrencePattern,
             TimeZoneInfo timezone = null,
             int durationHours = 0,
-            List<Yuuko.FileRecord> attachmentsList = null)
+            List<FileRecord> attachmentsList = null)
         {
             timezone ??= TimeZoneInfo.Local;
 
@@ -117,7 +118,7 @@ namespace XRUIOS.Barebones
             if (attachmentsList != null && attachmentsList.Count > 0)
             {
                 var firstAttachment = attachmentsList[0];
-                var mediaPath = await Yuuko.Media.GetFile(firstAttachment.UUID, firstAttachment.File);
+                var mediaPath = await Media.GetFile(DataPath, firstAttachment.UUID, firstAttachment.File);
 
                 byte[] fileBytes;
                 using (var fs = new FileStream(mediaPath.FullPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))

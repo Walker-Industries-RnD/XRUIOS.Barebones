@@ -1,40 +1,14 @@
 ﻿using static Pariah_Cybersecurity.DataHandler;
 using static XRUIOS.Barebones.ExperimentalAudioClass;
+using static XRUIOS.Barebones.Interfaces.ExperimentalAudioClass;
+using static XRUIOS.Barebones.Interfaces.SoundEQClass;
 using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones
 {
     public static class SoundEQClass
     {
-        public record SoundEQ
-        {
-            public string EQName;
-            public float Software;
-            public float Effects;
-            public float Voice;
-            public float Music;
-            public float Alerts;
-            public float UI;
-            public float Etc;
-            public ExperimentalAudio OtherVol;
-
-            public SoundEQ() { }
-
-            public SoundEQ(string eqname, float software, float effects, float voice, float music, float alerts, float ui, float etc, ExperimentalAudio otherVol)
-            {
-                EQName = eqname;
-                Software = software;
-                Effects = effects;
-                Voice = voice;
-                Music = music;
-                Alerts = alerts;
-                UI = ui;
-                Etc = etc;
-                OtherVol = otherVol;
-
-            }
-        }
-
+      
         internal static ObservableProperty<SoundEQ> CurrentSoundSetting;
 
         //CurrentSoundSetting (Get, Set)
@@ -207,7 +181,7 @@ namespace XRUIOS.Barebones
             var directoryPath = Path.Combine(DataPath, "EQDB");
 
             var fancyoptions = new ExperimentalAudio(false, false, 0, 0);
-            var input = new SoundEQ(default, 100, 100, 100, 100, 100, 100, 100, fancyoptions);
+            var input = new SoundEQ("Default", 100, 100, 100, 100, 100, 100, 100, fancyoptions);
 
             //Get the JSON File holding the MusicDirectory object for the user
             var FileWithSoundEQDB = await JSONDataHandler.LoadJsonFile("EQDBData", directoryPath);

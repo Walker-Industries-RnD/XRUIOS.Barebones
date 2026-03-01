@@ -1,4 +1,7 @@
-﻿namespace XRUIOS.Barebones
+﻿using YuukoProtocol;
+
+
+namespace XRUIOS.Barebones.Interfaces
 {
     public class Color
     {

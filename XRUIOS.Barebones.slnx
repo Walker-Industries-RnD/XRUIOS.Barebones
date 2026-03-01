@@ -1,3 +1,5 @@
 <Solution>
+  <Project Path="XRUIOS.Barebones.Interfaces/XRUIOS.Barebones.Interfaces.csproj" Id="b31e928e-3fae-4b8b-b114-895f40b8b2d0" />
   <Project Path="XRUIOS.Barebones/XRUIOS.Barebones.csproj" />
+  <Project Path="YuukoProtocol/YuukoProtocol.csproj" Id="cd10b287-6488-4a53-8152-6bafbe89d257" />
 </Solution>

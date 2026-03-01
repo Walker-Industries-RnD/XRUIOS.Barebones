@@ -1,12 +1,15 @@
-﻿using static XRUIOS.Barebones.Songs;
+﻿using static XRUIOS.Barebones.Interfaces.Songs;
+using Songs = XRUIOS.Barebones.Interfaces.Songs;
+using YuukoProtocol;
+using static XRUIOS.Barebones.Songs;
 
 namespace XRUIOS.Barebones
 {
     public class MusicPlayerClass
     {
 
-        internal static Songs.SongOverview? CurrentlyPlaying;
-        internal static List<Songs.SongOverview> Queue = new List<Songs.SongOverview>();
+        internal static SongOverview? CurrentlyPlaying;
+        internal static List<SongOverview> Queue = new List<SongOverview>();
 
         public static class CurrentlyPlayingClass
         {
@@ -87,7 +90,7 @@ namespace XRUIOS.Barebones
 
             public static async Task ResetQueue()
             {
-                Queue = new List<Songs.SongOverview>();
+                Queue = new List<SongOverview>();
             }
             //Helper
 
@@ -98,13 +101,13 @@ namespace XRUIOS.Barebones
         //Trying something new
         public static async Task<SongOverview> GetOrCreateOverview(string audioFile, string directoryUUID)
         {
-            var overviewTuple = await SongClass.GetSongInfo(audioFile, directoryUUID, SongClass.MusicInfoStyle.overview);
+            var overviewTuple = await Songs.SongClass.GetSongInfo(audioFile, directoryUUID, Interfaces.Songs.SongClass.MusicInfoStyle.overview);
 
             if (overviewTuple.Item1 == null)
             {
-                await SongClass.CreateSongInfo(audioFile, directoryUUID);
+                await Songs.SongClass.CreateSongInfo(audioFile, directoryUUID);
 
-                overviewTuple = await SongClass.GetSongInfo(audioFile, directoryUUID, SongClass.MusicInfoStyle.overview);
+                overviewTuple = await Songs.SongClass.GetSongInfo(audioFile, directoryUUID, Interfaces.Songs.SongClass.MusicInfoStyle.overview);
 
                 if (overviewTuple.Item1 == null)
                     throw new InvalidOperationException("The song overview could not be found or created.");
@@ -112,6 +115,8 @@ namespace XRUIOS.Barebones
 
             return (SongOverview)overviewTuple.Item1;
         }
+
+
 
 
         //Convert musicqueue to playlist

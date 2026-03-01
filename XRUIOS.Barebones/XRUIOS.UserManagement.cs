@@ -8,6 +8,7 @@ using System.Security.Principal;
 using Walker.Crypto;
 using XRUIOS.Barebones;
 using XRUIOS.Barebones.Functions;
+using YuukoProtocol;
 using static Pariah_Cybersecurity.DataHandler;
 using static Pariah_Cybersecurity.DataHandler.DataRequest;
 using static Walker.Crypto.SimpleAESEncryption;
@@ -19,9 +20,18 @@ using static XRUIOS.Barebones.Functions.NotificationClass;
 using static XRUIOS.Barebones.Functions.ThemeSystem;
 using static XRUIOS.Barebones.Functions.VolumeClass;
 using static XRUIOS.Barebones.GeoClass;
+using static XRUIOS.Barebones.Interfaces.AlarmClass;
+using static XRUIOS.Barebones.Interfaces.ExperimentalAudioClass;
+using static XRUIOS.Barebones.Interfaces.GeoClass;
+using static XRUIOS.Barebones.Interfaces.NoteClass;
+using static XRUIOS.Barebones.Interfaces.NotificationClass;
+using static XRUIOS.Barebones.Interfaces.Songs.Playlists;
+using static XRUIOS.Barebones.Interfaces.SoundEQClass;
+using static XRUIOS.Barebones.Interfaces.VolumeClass;
+using static XRUIOS.Barebones.Interfaces.WorldEventsClass;
 using static XRUIOS.Barebones.SoundEQClass;
 using static XRUIOS.Barebones.XRUIOS;
-using Alarm = XRUIOS.Barebones.AlarmClass.Alarm;
+using Alarm = XRUIOS.Barebones.Interfaces.AlarmClass.Alarm;
 using JsonObject = System.Text.Json.Nodes.JsonObject;
 
 
@@ -128,8 +138,15 @@ namespace XRUIOS_UserManager
         public static async Task InitiatMusic()
         {
             var directoryPath = Path.Combine(DataPath, "Music");
+
+            var TagsPath = Path.Combine(DataPath, "Music Metadata");
+
             Directory.CreateDirectory(directoryPath);
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+
+            Directory.CreateDirectory(TagsPath);
+
+
+            var manager = new Bindings.DirectoryManager(directoryPath);
 
             await JSONDataHandler.CreateJsonFile("MusicDirectory", directoryPath, new JsonObject());
 
@@ -143,7 +160,7 @@ namespace XRUIOS_UserManager
             await JSONDataHandler.CreateJsonFile("MusicFavorites", directoryPath, new JsonObject());
 
             var musicFavFile = await JSONDataHandler.LoadJsonFile("MusicFavorites", directoryPath);
-            musicFavFile = await JSONDataHandler.AddToJson<List<Yuuko.FileRecord>>(musicFavFile, "Data", new List<Yuuko.FileRecord>(), encryptionKey);
+            musicFavFile = await JSONDataHandler.AddToJson<List<FileRecord>>(musicFavFile, "Data", new List<FileRecord>(), encryptionKey);
 
             await JSONDataHandler.SaveJson(musicFavFile);
 
@@ -153,7 +170,7 @@ namespace XRUIOS_UserManager
             await JSONDataHandler.CreateJsonFile("MusicHistory", directoryPath, new JsonObject());
 
             var musicHistoryFile = await JSONDataHandler.LoadJsonFile("MusicHistory", directoryPath);
-            musicHistoryFile = await JSONDataHandler.AddToJson<List<Yuuko.FileRecord>>(musicHistoryFile, "Data", new List<Yuuko.FileRecord>(), encryptionKey);
+            musicHistoryFile = await JSONDataHandler.AddToJson<List<FileRecord>>(musicHistoryFile, "Data", new List<FileRecord>(), encryptionKey);
 
             await JSONDataHandler.SaveJson(musicHistoryFile);
 
@@ -164,7 +181,7 @@ namespace XRUIOS_UserManager
             await JSONDataHandler.CreateJsonFile("Playlists", directoryPath + "/Playlists", new JsonObject());
 
             var playlistsFile = await JSONDataHandler.LoadJsonFile("Playlists", directoryPath);
-            playlistsFile = await JSONDataHandler.AddToJson<List<Songs.Playlists.Playlist>>(playlistsFile, "Data", new List<Songs.Playlists.Playlist>(), encryptionKey);
+            playlistsFile = await JSONDataHandler.AddToJson<List<Playlist>>(playlistsFile, "Data", new List<Playlist>(), encryptionKey);
 
             await JSONDataHandler.SaveJson(playlistsFile);
 
@@ -177,7 +194,7 @@ namespace XRUIOS_UserManager
         {
             var directoryPath = Path.Combine(DataPath, "Alarms");
             Directory.CreateDirectory(directoryPath);
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            var manager = new Bindings.DirectoryManager(directoryPath);
 
             await JSONDataHandler.CreateJsonFile("Alarms", directoryPath, new JsonObject());
 
@@ -191,7 +208,7 @@ namespace XRUIOS_UserManager
         {
             var directoryPath = Path.Combine(DataPath, "App");
             Directory.CreateDirectory(directoryPath);
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            var manager = new Bindings.DirectoryManager(directoryPath);
 
             // Create the favorites JSON file
             await JSONDataHandler.CreateJsonFile("AppFavorites", directoryPath, new JsonObject());
@@ -200,7 +217,7 @@ namespace XRUIOS_UserManager
             var favoritesFile = await JSONDataHandler.LoadJsonFile("AppFavorites", directoryPath);
 
             // Initialize the "Data" key
-            favoritesFile = await JSONDataHandler.AddToJson<List<Yuuko.FileRecord>>(favoritesFile, "Data", new List<Yuuko.FileRecord>(), encryptionKey);
+            favoritesFile = await JSONDataHandler.AddToJson<List<FileRecord>>(favoritesFile, "Data", new List<FileRecord>(), encryptionKey);
 
             await JSONDataHandler.SaveJson(favoritesFile);
         }
@@ -210,7 +227,7 @@ namespace XRUIOS_UserManager
         {
             var directoryPath = Path.Combine(DataPath, "Chrono");
             Directory.CreateDirectory(directoryPath);
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            var manager = new Bindings.DirectoryManager(directoryPath);
 
             await JSONDataHandler.CreateJsonFile("Chrono", directoryPath, new JsonObject());
 
@@ -224,12 +241,12 @@ namespace XRUIOS_UserManager
         {
             var directoryPath = Path.Combine(DataPath, "DataSlot");
             Directory.CreateDirectory(directoryPath);
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            var manager = new Bindings.DirectoryManager(directoryPath);
 
             await JSONDataHandler.CreateJsonFile("DataSlotFavorites", directoryPath, new JsonObject());
 
             var alarmsFile = await JSONDataHandler.LoadJsonFile("DataSlotFavorites", directoryPath);
-            alarmsFile = await JSONDataHandler.AddToJson<List<Yuuko.FileRecord>>(alarmsFile, "Data", new List<Yuuko.FileRecord>(), encryptionKey);
+            alarmsFile = await JSONDataHandler.AddToJson<List<FileRecord>>(alarmsFile, "Data", new List<FileRecord>(), encryptionKey);
 
             await JSONDataHandler.SaveJson(alarmsFile);
         }
@@ -238,7 +255,7 @@ namespace XRUIOS_UserManager
         {
             var expAudioPath = Path.Combine(DataPath, "ExpAudio");
             Directory.CreateDirectory(expAudioPath);
-            var audioManager = new Yuuko.Bindings.DirectoryManager(expAudioPath);
+            var audioManager = new Bindings.DirectoryManager(expAudioPath);
 
             await JSONDataHandler.CreateJsonFile("ExpAudio", expAudioPath, new JsonObject());
 
@@ -251,7 +268,7 @@ namespace XRUIOS_UserManager
 
             var masterVolPath = Path.Combine(DataPath, "MasterVol");
             Directory.CreateDirectory(masterVolPath);
-            var volManager = new Yuuko.Bindings.DirectoryManager(masterVolPath);
+            var volManager = new Bindings.DirectoryManager(masterVolPath);
 
             await JSONDataHandler.CreateJsonFile("MasterVol", masterVolPath, new JsonObject());
 
@@ -268,7 +285,7 @@ namespace XRUIOS_UserManager
         {
             var directoryPath = Path.Combine(DataPath, "Coords");
             Directory.CreateDirectory(directoryPath);
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            var manager = new Bindings.DirectoryManager(directoryPath);
 
             await JSONDataHandler.CreateJsonFile("LocationData", directoryPath, new JsonObject());
 
@@ -282,7 +299,7 @@ namespace XRUIOS_UserManager
         {
             var directoryPath = Path.Combine(DataPath, "Coords");
             Directory.CreateDirectory(directoryPath);
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            var manager = new Bindings.DirectoryManager(directoryPath);
 
             await JSONDataHandler.CreateJsonFile("RelativeLocationData", directoryPath, new JsonObject());
 
@@ -299,12 +316,12 @@ namespace XRUIOS_UserManager
             var directoryPath = Path.Combine(DataPath, "MediaAlbum");
             Directory.CreateDirectory(directoryPath);
 
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            var manager = new Bindings.DirectoryManager(directoryPath);
 
             await JSONDataHandler.CreateJsonFile("MediaAlbumFavorites", directoryPath, new JsonObject());
 
             var relativeCoordFile = await JSONDataHandler.LoadJsonFile("MediaAlbumFavorites", directoryPath);
-            relativeCoordFile = await JSONDataHandler.AddToJson<List<Yuuko.FileRecord>>(relativeCoordFile, "Data", new List<Yuuko.FileRecord>(), encryptionKey);
+            relativeCoordFile = await JSONDataHandler.AddToJson<List<FileRecord>>(relativeCoordFile, "Data", new List<FileRecord>(), encryptionKey);
 
             await JSONDataHandler.SaveJson(relativeCoordFile);
         }
@@ -313,12 +330,12 @@ namespace XRUIOS_UserManager
         {
             var directoryPath = Path.Combine(DataPath, "Creators");
             Directory.CreateDirectory(directoryPath);
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            var manager = new Bindings.DirectoryManager(directoryPath);
 
             await JSONDataHandler.CreateJsonFile("Creators", directoryPath, new JsonObject());
 
             var relativeCoordFile = await JSONDataHandler.LoadJsonFile("Creators", directoryPath);
-            relativeCoordFile = await JSONDataHandler.AddToJson<List<Yuuko.FileRecord>>(relativeCoordFile, "Data", new List<Yuuko.FileRecord>(), encryptionKey);
+            relativeCoordFile = await JSONDataHandler.AddToJson<List<FileRecord>>(relativeCoordFile, "Data", new List<FileRecord>(), encryptionKey);
 
             await JSONDataHandler.SaveJson(relativeCoordFile);
         }
@@ -327,7 +344,7 @@ namespace XRUIOS_UserManager
         {
             var directoryPath = Path.Combine(DataPath, "Journal");
             Directory.CreateDirectory(directoryPath);
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            var manager = new Bindings.DirectoryManager(directoryPath);
 
             await JSONDataHandler.CreateJsonFile("JournalFavorites", directoryPath, new JsonObject());
 
@@ -341,7 +358,7 @@ namespace XRUIOS_UserManager
         {
             var directoryPath = Path.Combine(DataPath, "Journal");
             Directory.CreateDirectory(directoryPath);
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            var manager = new Bindings.DirectoryManager(directoryPath);
 
             await JSONDataHandler.CreateJsonFile("History", directoryPath, new JsonObject());
 
@@ -355,7 +372,7 @@ namespace XRUIOS_UserManager
         {
             var directoryPath = Path.Combine(DataPath, "NotificationHistory");
             Directory.CreateDirectory(directoryPath);
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            var manager = new Bindings.DirectoryManager(directoryPath);
 
             await JSONDataHandler.CreateJsonFile("NotificationHistory", directoryPath, new JsonObject());
 
@@ -369,12 +386,12 @@ namespace XRUIOS_UserManager
         {
             var directoryPath = Path.Combine(DataPath, "RecentlyRecorded");
             Directory.CreateDirectory(directoryPath);
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            var manager = new Bindings.DirectoryManager(directoryPath);
 
             await JSONDataHandler.CreateJsonFile("RecentlyRecorded", directoryPath, new JsonObject());
 
             var recentlyRecorded = await JSONDataHandler.LoadJsonFile("RecentlyRecorded", directoryPath);
-            recentlyRecorded = await JSONDataHandler.AddToJson<List<Yuuko.FileRecord>>(recentlyRecorded, "Data", new List<Yuuko.FileRecord>(), encryptionKey);
+            recentlyRecorded = await JSONDataHandler.AddToJson<List<FileRecord>>(recentlyRecorded, "Data", new List<FileRecord>(), encryptionKey);
 
             await JSONDataHandler.SaveJson(recentlyRecorded);
         }
@@ -383,7 +400,7 @@ namespace XRUIOS_UserManager
         {
             var directoryPath = Path.Combine(DataPath, "EQDB");
             Directory.CreateDirectory(directoryPath);
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            var manager = new Bindings.DirectoryManager(directoryPath);
 
             await JSONDataHandler.CreateJsonFile("EQDBData", directoryPath, new JsonObject());
 
@@ -401,7 +418,7 @@ namespace XRUIOS_UserManager
         {
             var directoryPath = Path.Combine(DataPath, "VolumeMixings");
             Directory.CreateDirectory(directoryPath);
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            var manager = new Bindings.DirectoryManager(directoryPath);
 
             await JSONDataHandler.CreateJsonFile("VolumeMixings", directoryPath, new JsonObject());
 
@@ -416,7 +433,7 @@ namespace XRUIOS_UserManager
         {
             var directoryPath = Path.Combine(DataPath, "Calendar");
             Directory.CreateDirectory(directoryPath);
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            var manager = new Bindings.DirectoryManager(directoryPath);
 
             await JSONDataHandler.CreateJsonFile("Calendar", directoryPath, new JsonObject());
 
@@ -430,7 +447,7 @@ namespace XRUIOS_UserManager
         {
             var directoryPath = Path.Combine(DataPath, "WorldPoint");
             Directory.CreateDirectory(directoryPath);
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            var manager = new Bindings.DirectoryManager(directoryPath);
 
             await JSONDataHandler.CreateJsonFile("WorldPoint", directoryPath, new JsonObject());
 
@@ -452,12 +469,12 @@ namespace XRUIOS_UserManager
         {
             var directoryPath = Path.Combine(DataPath, "WorldEvents");
             Directory.CreateDirectory(directoryPath);
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            var manager = new Bindings.DirectoryManager(directoryPath);
 
             await JSONDataHandler.CreateJsonFile("WorldEvents", directoryPath, new JsonObject());
 
             var recentlyRecorded = await JSONDataHandler.LoadJsonFile("WorldEvents", directoryPath);
-            recentlyRecorded = await JSONDataHandler.AddToJson<List<WorldEventsClass.WorldEvent>>(recentlyRecorded, "WorldEvents", new List<WorldEventsClass.WorldEvent>(), encryptionKey);
+            recentlyRecorded = await JSONDataHandler.AddToJson<List<WorldEvent>>(recentlyRecorded, "WorldEvents", new List<WorldEvent>(), encryptionKey);
 
             await JSONDataHandler.SaveJson(recentlyRecorded);
         }

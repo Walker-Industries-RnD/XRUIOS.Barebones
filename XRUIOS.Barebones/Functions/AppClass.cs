@@ -1,7 +1,9 @@
 ﻿using Pariah_Cybersecurity;
 using System.Text.Json.Nodes;
+using static XRUIOS.Barebones.Interfaces.AppClass;
 using static XRUIOS.Barebones.XRUIOS;
 using File = System.IO.File;
+using YuukoProtocol;
 
 
 namespace XRUIOS.Barebones.Functions
@@ -12,58 +14,7 @@ namespace XRUIOS.Barebones.Functions
 
         //Each app has an optional YuukoApp; it allows us to know what apps exist as an equivalent on other devices! Can be dev or user set
 
-        public record XRUIOSAppManifest
-        {
-            public string AppId;
-            public string Name;
-            public string Description;
-            public string Author;
-            public string Version;
-
-            public Yuuko.FileRecord? YuukoAppInfo;
-
-            public string EntryPoint;
-
-            public string Identifier;
-
-
-            public XRUIOSAppManifest() { }
-
-            public XRUIOSAppManifest(
-                string appID,
-                string name,
-                string description,
-                string author,
-                string version,
-                Yuuko.FileRecord? yuukoAppInfo,
-                string entryPoint, string? identifier)
-            {
-                AppId = appID;
-                Name = name;
-                Description = description;
-                Author = author;
-                Version = version;
-                YuukoAppInfo = yuukoAppInfo;
-                EntryPoint = entryPoint;
-                Identifier = identifier ?? Guid.NewGuid().ToString();
-            }
-        }
-
-        public record XRUIOSAppManifestPatch
-        {
-            public string? AppId { get; init; }
-            public string? Name { get; init; }
-            public string? Description { get; init; }
-            public string? Author { get; init; }
-            public string? Version { get; init; }
-            public Yuuko.FileRecord? YuukoAppInfo;
-            public string? EntryPoint;
-
-            public string? Identifier;
-        }
-
-
-        public static XRUIOSAppManifest UpdateDataSlot(XRUIOSAppManifest app, XRUIOSAppManifestPatch patch)
+        public static XRUIOSAppManifest UpdateApp(XRUIOSAppManifest app, XRUIOSAppManifestPatch patch)
         {
             return new XRUIOSAppManifest(
                 patch.AppId ?? app.AppId,
@@ -76,6 +27,7 @@ namespace XRUIOS.Barebones.Functions
                 app.Identifier // always keep original
             );
         }
+
 
 
         //C
@@ -194,13 +146,13 @@ namespace XRUIOS.Barebones.Functions
         {
             var directoryPath = Path.Combine(DataPath, "App");
 
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            var manager = new Bindings.DirectoryManager(directoryPath);
 
             await manager.LoadBindings();
 
             var favoritesFile = await DataHandler.JSONDataHandler.LoadJsonFile("AppFavorites", directoryPath);
 
-            var favorites = (List<Yuuko.FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<Yuuko.FileRecord>>(favoritesFile, "Data", encryptionKey);
+            var favorites = (List<FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<FileRecord>>(favoritesFile, "Data", encryptionKey);
             //UUID, path name, path 
 
 
@@ -208,7 +160,7 @@ namespace XRUIOS.Barebones.Functions
             {
                 //Create new record
 
-                var record = new Yuuko.FileRecord(directoryUUID, appIdentifier);
+                var record = new FileRecord(directoryUUID, appIdentifier);
 
                 favorites.Add(record);
             }
@@ -219,7 +171,7 @@ namespace XRUIOS.Barebones.Functions
             }
 
 
-            var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<Yuuko.FileRecord>>(favoritesFile, "Data", favorites, encryptionKey);
+            var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<FileRecord>>(favoritesFile, "Data", favorites, encryptionKey);
 
             await DataHandler.JSONDataHandler.SaveJson(editedJSON);
 
@@ -231,11 +183,11 @@ namespace XRUIOS.Barebones.Functions
 
             var directoryPath = Path.Combine(DataPath, "App");
 
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            var manager = new Bindings.DirectoryManager(directoryPath);
 
             var favoritesFile = await DataHandler.JSONDataHandler.LoadJsonFile("AppFavorites", directoryPath);
 
-            var favorites = (List<Yuuko.FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<Yuuko.FileRecord>>(favoritesFile, "Data", encryptionKey);
+            var favorites = (List<FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<FileRecord>>(favoritesFile, "Data", encryptionKey);
             //UUID, path name, path 
 
             //What bindings exist? Let's go through each and see
@@ -254,7 +206,7 @@ namespace XRUIOS.Barebones.Functions
                 }
                 else
                 {
-                    unresolvedFiles.Add(file.File); // or store UUID if you prefer
+                    unresolvedFiles.Add(file.File); 
                 }
             }
 
@@ -286,11 +238,11 @@ namespace XRUIOS.Barebones.Functions
         public static async Task RemoveFromFavorites(string appIdentifier, string directoryUUID)
         {
             var directoryPath = Path.Combine(DataPath, "App");
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            var manager = new Bindings.DirectoryManager(directoryPath);
             await manager.LoadBindings();
 
             var favoritesFile = await DataHandler.JSONDataHandler.LoadJsonFile("AppFavorites", directoryPath);
-            var favorites = (List<Yuuko.FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<Yuuko.FileRecord>>(favoritesFile, "Data", encryptionKey);
+            var favorites = (List<FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<FileRecord>>(favoritesFile, "Data", encryptionKey);
             var removedCount = favorites.RemoveAll(d => d.UUID == directoryUUID && d.File == appIdentifier);
 
             if (removedCount == 0)
@@ -300,7 +252,7 @@ namespace XRUIOS.Barebones.Functions
             }
 
             // Save updated list
-            var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<Yuuko.FileRecord>>(favoritesFile, "Data", favorites, encryptionKey);
+            var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<FileRecord>>(favoritesFile, "Data", favorites, encryptionKey);
             await DataHandler.JSONDataHandler.SaveJson(editedJSON);
         }
     }

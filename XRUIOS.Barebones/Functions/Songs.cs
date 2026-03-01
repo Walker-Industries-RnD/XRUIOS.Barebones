@@ -2,7 +2,15 @@
 using Pariah_Cybersecurity;
 using System.Text.Json.Nodes;
 using static Pariah_Cybersecurity.DataHandler;
+using static XRUIOS.Barebones.Interfaces.Songs;
+using static XRUIOS.Barebones.Interfaces.Songs.Playlists;
+using static XRUIOS.Barebones.Interfaces.Songs.SongClass;
+using static XRUIOS.Barebones.Interfaces.Songs.SongGetClass;
 using static XRUIOS.Barebones.XRUIOS;
+using YuukoProtocol;
+
+
+using MusicInfoStyle = XRUIOS.Barebones.Interfaces.Songs.SongClass.MusicInfoStyle;
 
 namespace XRUIOS.Barebones
 {
@@ -32,261 +40,6 @@ namespace XRUIOS.Barebones
         //we will take this image over the ones embedded (As these support gifs)
 
         //Also when updating the songoverview/detailed, we can simply use the data gathered from overview as input for detailed and use ATLDOTNET to fill in the holes
-
-        public record SongOverview
-        {
-            // Title
-            public string SongName { get; set; }
-            public string? AlbumName { get; set; }
-
-            // Artist
-            public string TrackArtist { get; set; }
-            public string? AlbumArtist { get; set; }
-
-            // Media Playback
-            public TimeSpan? Duration { get; set; }
-            public DateTime? ReleasedOn { get; set; }
-            public DateTime? LastPlayedOn { get; set; }
-
-            // Identifiers
-            public Guid? SongId { get; set; }
-            public string? ISRC { get; set; }
-
-            public string XRUUID { get; set; }
-
-            // Other Data
-            public int? TrackNumber { get; set; }
-            public bool? IsFavorite { get; set; }
-            public int PlayCount { get; set; }
-
-            public SongOverview() { }
-
-
-            // Constructor for easy initialization
-            public SongOverview(
-                string songName,
-                string trackArtist,
-                DateTime? releasedOn,
-                string? albumName = null,
-                string? albumArtist = null,
-                TimeSpan? duration = null,
-                DateTime? lastPlayedOn = null,
-                Guid? songId = null,
-                string? isrc = null,
-                int? trackNumber = null,
-                bool? isFavorite = null,
-                int playCount = 0
-            )
-            {
-                SongName = songName;
-                TrackArtist = trackArtist;
-                ReleasedOn = releasedOn;
-                AlbumName = albumName;
-                AlbumArtist = albumArtist;
-                Duration = duration;
-                LastPlayedOn = lastPlayedOn;
-                SongId = songId;
-                ISRC = isrc;
-                TrackNumber = trackNumber;
-                IsFavorite = isFavorite;
-                PlayCount = playCount;
-            }
-        }
-
-        public record SongDetailed
-        {
-
-            // Titles             
-            public string TrackTitle { get; set; }
-            public string? AlbumTitle { get; set; }
-            public string? OriginalAlbumTitle { get; set; }
-            public string? ContentGroupDescription { get; set; }
-
-
-            // People & Organizations              
-            public string TrackArtist { get; set; }
-            public string? AlbumArtist { get; set; }
-            public string? OriginalArtist { get; set; }
-            public string? Composer { get; set; }
-            public string? Conductor { get; set; }
-            public string? Lyricist { get; set; }
-            public string? Publisher { get; set; }
-            public List<string>? InvolvedPeople { get; set; } // e.g., producers, arrangers
-            public string? SeriesTitle { get; set; }
-
-
-            // Count & Indexes               
-            public int? TrackNumber { get; set; }
-            public int? TotalTracks { get; set; }
-            public int? DiscNumber { get; set; }
-            public int? TotalDiscs { get; set; }
-            public string? AlbumSortOrder { get; set; }
-            public string? AlbumArtistSortOrder { get; set; }
-            public string? ArtistSortOrder { get; set; }
-            public string? TitleSortOrder { get; set; }
-            public string? SeriesPartIndex { get; set; }
-
-
-            // Dates               
-            public DateTime? RecordingDate { get; set; }
-            public int? RecordingYear { get; set; }
-            public DateTime? OriginalReleaseDate { get; set; }
-            public int? OriginalReleaseYear { get; set; }
-            public DateTime? PublishingDate { get; set; }
-
-
-            // Identifiers               
-            public string? ISRC { get; set; }
-            public string? CatalogNumber { get; set; }
-
-
-            // Ripping & Encoding               
-            public string? EncodedBy { get; set; }
-            public string? Encoder { get; set; }
-
-
-            // URLs               
-            public string? AudioSourceUrl { get; set; }
-
-
-            // Style               
-            public string? Genre { get; set; }
-            public int? BPM { get; set; }
-
-
-            // Miscellaneous
-            public string? Comment { get; set; }
-            public string? Description { get; set; }
-            public string? LongDescription { get; set; } // Podcast description
-            public string? Language { get; set; }
-            public string? Copyright { get; set; }
-            public List<SongChapter>? Chapters { get; set; }
-            public string? UnsynchronizedLyrics { get; set; }
-            public List<LyricLine>? SynchronizedLyrics { get; set; }
-
-
-            public SongDetailed() { }
-
-            public SongDetailed(
-                string trackTitle,
-                string trackArtist,
-                DateTime? recordingDate = null,
-                string? albumTitle = null,
-                string? originalAlbumTitle = null,
-                string? contentGroupDescription = null,
-                string? albumArtist = null,
-                string? originalArtist = null,
-                string? composer = null,
-                string? conductor = null,
-                string? lyricist = null,
-                string? publisher = null,
-                List<string>? involvedPeople = null,
-                string? seriesTitle = null,
-                int? trackNumber = null,
-                int? totalTracks = null,
-                int? discNumber = null,
-                int? totalDiscs = null,
-                string? albumSortOrder = null,
-                string? albumArtistSortOrder = null,
-                string? artistSortOrder = null,
-                string? titleSortOrder = null,
-                string? seriesPartIndex = null,
-                int? recordingYear = null,
-                DateTime? originalReleaseDate = null,
-                int? originalReleaseYear = null,
-                DateTime? publishingDate = null,
-                string? isrc = null,
-                string? catalogNumber = null,
-                string? encodedBy = null,
-                string? encoder = null,
-                string? audioSourceUrl = null,
-                string? genre = null,
-                int? bpm = null,
-                string? comment = null,
-                string? description = null,
-                string? longDescription = null,
-                string? language = null,
-                string? copyright = null,
-             List<SongChapter>? chapters = null,
-             string? unsynchronizedLyrics = null,
-             List<LyricLine>? synchronizedLyrics = null
-
-            )
-            {
-                TrackTitle = trackTitle;
-                TrackArtist = trackArtist;
-                RecordingDate = recordingDate;
-                AlbumTitle = albumTitle;
-                OriginalAlbumTitle = originalAlbumTitle;
-                ContentGroupDescription = contentGroupDescription;
-                AlbumArtist = albumArtist;
-                OriginalArtist = originalArtist;
-                Composer = composer;
-                Conductor = conductor;
-                Lyricist = lyricist;
-                Publisher = publisher;
-                InvolvedPeople = involvedPeople;
-                SeriesTitle = seriesTitle;
-                TrackNumber = trackNumber;
-                TotalTracks = totalTracks;
-                DiscNumber = discNumber;
-                TotalDiscs = totalDiscs;
-                AlbumSortOrder = albumSortOrder;
-                AlbumArtistSortOrder = albumArtistSortOrder;
-                ArtistSortOrder = artistSortOrder;
-                TitleSortOrder = titleSortOrder;
-                SeriesPartIndex = seriesPartIndex;
-                RecordingYear = recordingYear;
-                OriginalReleaseDate = originalReleaseDate;
-                OriginalReleaseYear = originalReleaseYear;
-                PublishingDate = publishingDate;
-                ISRC = isrc;
-                CatalogNumber = catalogNumber;
-                EncodedBy = encodedBy;
-                Encoder = encoder;
-                AudioSourceUrl = audioSourceUrl;
-                Genre = genre;
-                BPM = bpm;
-                Comment = comment;
-                Description = description;
-                LongDescription = longDescription;
-                Language = language;
-                Copyright = copyright;
-                Chapters = chapters;
-                UnsynchronizedLyrics = unsynchronizedLyrics;
-                SynchronizedLyrics = synchronizedLyrics;
-            }
-        }
-
-        public sealed record SongChapter
-        {
-            public TimeSpan Start { get; init; }
-            public TimeSpan? End { get; init; }
-            public string Title { get; init; } = string.Empty;
-
-            public SongChapter() { }
-
-            public SongChapter(TimeSpan start, TimeSpan? end, string title)
-            {
-                Start = start;
-                End = end;
-                Title = title ?? string.Empty;
-            }
-        }
-
-        public sealed record LyricLine
-        {
-            public TimeSpan Timestamp { get; init; }
-            public string Text { get; init; } = string.Empty;
-
-            public LyricLine() { }
-
-            public LyricLine(TimeSpan timestamp, string text)
-            {
-                Timestamp = timestamp;
-                Text = text ?? string.Empty;
-            }
-        }
 
 
         private static List<SongChapter>? ExtractChapters(Track song)
@@ -433,7 +186,7 @@ namespace XRUIOS.Barebones
             public static async Task<(SongOverview, SongDetailed)> CreateSongInfo(string audioFile, string directoryUUID, bool autoTag = false)
             {
                 var directoryPath = Path.Combine(DataPath, "Music");
-                var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+                var manager = new Bindings.DirectoryManager(directoryPath);
                 await manager.LoadBindings();
                 //Does the ID being referenced exists?
                 var idDirectoryPath = await manager.GetDirectoryById(directoryUUID);
@@ -447,20 +200,24 @@ namespace XRUIOS.Barebones
                 {
                     throw new InvalidOperationException($"Song file does not exist.");
                 }
+
+                var SavePath = Path.Combine(DataPath, "Music Metadata");
+
                 //Does the meta file already exist? Both
-                var audioMetadataUrlOverview = Path.Combine(idDirectoryPath, $"{audioFile}.yuukoMusicOverview");
-                var audioMetadataUrlDetailed = Path.Combine(idDirectoryPath, $"{audioFile}.yuukoMusicDetailed");
+                var audioMetadataUrlOverview = Path.Combine(SavePath, $"{Path.GetFileNameWithoutExtension(audioFile)}.yuukoMusicDetailed");
+                var audioMetadataUrlDetailed = Path.Combine(SavePath, $"{audioFile}.yuukoMusicDetailed");
+
 
                 // ────────────── Idempotent safety: if both exist → load & return them ──────────────
                 if (File.Exists(audioMetadataUrlOverview) && File.Exists(audioMetadataUrlDetailed))
                 {
                     try
                     {
-                        var isOverviewFileLoaded = await JSONDataHandler.LoadJsonFile($"{audioFile}.yuukoMusicOverview", idDirectoryPath);
+                        var isOverviewFileLoaded = await JSONDataHandler.LoadJsonFile($"{Path.GetFileNameWithoutExtension(audioFile)}.yuukoMusicOverview", SavePath);
                         var overviewBytes = (byte[])await JSONDataHandler.GetVariable<byte[]>(isOverviewFileLoaded, "Data", encryptionKey);
                         var ourOverview = await BinaryConverter.NCByteArrayToObjectAsync<SongOverview>(overviewBytes);
 
-                        var isDetailedFileLoaded = await JSONDataHandler.LoadJsonFile($"{audioFile}.yuukoMusicDetailed", idDirectoryPath);
+                        var isDetailedFileLoaded = await JSONDataHandler.LoadJsonFile($"{Path.GetFileNameWithoutExtension(audioFile)}.yuukoMusicDetailed", SavePath);
                         var detailedBytes = (byte[])await JSONDataHandler.GetVariable<byte[]>(isDetailedFileLoaded, "Data", encryptionKey);
                         var ourDetailed = await BinaryConverter.NCByteArrayToObjectAsync<SongDetailed>(detailedBytes);
 
@@ -599,26 +356,47 @@ namespace XRUIOS.Barebones
                 //Save file
                 var overviewData = await BinaryConverter.NCObjectToByteArrayAsync<SongOverview>(overview);
                 var detailedData = await BinaryConverter.NCObjectToByteArrayAsync<SongDetailed>(detailed);
-                await DataHandler.JSONDataHandler.CreateJsonFile($"{audioFile}.yuukoMusicOverview", idDirectoryPath, new JsonObject());
-                var overviewFileLoaded = await JSONDataHandler.LoadJsonFile($"{audioFile}.yuukoMusicOverview", idDirectoryPath);
-                overviewFileLoaded = await JSONDataHandler.AddToJson<byte[]>(overviewFileLoaded, "Data", overviewData, encryptionKey);
-                await JSONDataHandler.SaveJson(overviewFileLoaded);
-                await DataHandler.JSONDataHandler.CreateJsonFile($"{audioFile}.yuukoMusicDetailed", idDirectoryPath, new JsonObject());
-                var detailedFileLoaded = await JSONDataHandler.LoadJsonFile($"{audioFile}.yuukoMusicDetailed", idDirectoryPath);
-                detailedFileLoaded = await JSONDataHandler.AddToJson<byte[]>(detailedFileLoaded, "Data", detailedData, encryptionKey);
-                await JSONDataHandler.SaveJson(detailedFileLoaded);
+
+                string baseFileName = Path.GetFileNameWithoutExtension(audioFile);
+
+                try
+                {
+                    await DataHandler.JSONDataHandler.CreateJsonFile($"{baseFileName}.yuukoMusicOverview", SavePath, new JsonObject());
+                    var overviewFileLoaded = await JSONDataHandler.LoadJsonFile($"{baseFileName}.yuukoMusicOverview", SavePath);
+                    overviewFileLoaded = await JSONDataHandler.AddToJson<byte[]>(overviewFileLoaded, "Data", overviewData, encryptionKey);
+                    await JSONDataHandler.SaveJson(overviewFileLoaded);
+                    Console.WriteLine($"Overview saved for {baseFileName}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Overview error: {ex.Message}");
+                }
+
+                try
+                {
+                    // FIX: Use baseFileName for BOTH creation AND loading
+                    await DataHandler.JSONDataHandler.CreateJsonFile($"{baseFileName}.yuukoMusicDetailed", SavePath, new JsonObject());
+                    var detailedFileLoaded = await JSONDataHandler.LoadJsonFile($"{baseFileName}.yuukoMusicDetailed", SavePath); // FIXED - use baseFileName
+                    detailedFileLoaded = await JSONDataHandler.AddToJson<byte[]>(detailedFileLoaded, "Data", detailedData, encryptionKey);
+                    await JSONDataHandler.SaveJson(detailedFileLoaded);
+                    Console.WriteLine($"Detailed saved for {baseFileName}");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Detailed error: {ex.Message}");
+                }
+
                 return (overview, detailed);
             }
             //R
-            public enum MusicInfoStyle { overview, detailed, both };
             public static async Task<(SongOverview?, SongDetailed?)> GetSongInfo(
-          string audioFile,
-          string directoryUUID,
-          MusicInfoStyle getData,
-          bool autoCreateIfMissing = true)  
+                string audioFile,
+                string directoryUUID,
+                MusicInfoStyle getData,
+                bool autoCreateIfMissing = true, bool autoTagIfMissing = true)
             {
                 var directoryPath = Path.Combine(DataPath, "Music");
-                var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+                var manager = new Bindings.DirectoryManager(directoryPath);
                 await manager.LoadBindings();
 
                 var idDirectoryPath = await manager.GetDirectoryById(directoryUUID);
@@ -629,17 +407,21 @@ namespace XRUIOS.Barebones
                 if (!File.Exists(audioSourceUrl))
                     throw new InvalidOperationException($"Song file does not exist.");
 
-                var overviewPath = Path.Combine(idDirectoryPath, $"{audioFile}.yuukoMusicOverview");
-                var detailedPath = Path.Combine(idDirectoryPath, $"{audioFile}.yuukoMusicDetailed");
+                var SavePath = Path.Combine(DataPath, "Music Metadata");
+
+                // FIX: Use filename WITHOUT extension for BOTH files
+                string baseFileName = Path.GetFileNameWithoutExtension(audioFile);
+                var overviewPath = Path.Combine(SavePath, $"{baseFileName}.yuukoMusicOverview");
+                var detailedPath = Path.Combine(SavePath, $"{baseFileName}.yuukoMusicDetailed"); 
 
                 bool overviewExists = File.Exists(overviewPath);
                 bool detailedExists = File.Exists(detailedPath);
 
-                //  Auto-create if missing and allowed
+                // Auto-create if missing and allowed
                 if (autoCreateIfMissing && (!overviewExists || !detailedExists))
                 {
                     // We create both 
-                    await SongClass.CreateSongInfo(audioFile, directoryUUID, autoTag: true);
+                    await SongClass.CreateSongInfo(audioFile, directoryUUID, autoTagIfMissing);
 
                     // Re-check 
                     overviewExists = File.Exists(overviewPath);
@@ -662,25 +444,25 @@ namespace XRUIOS.Barebones
                 switch (getData)
                 {
                     case MusicInfoStyle.overview:
-                        var ovJson = await JSONDataHandler.LoadJsonFile(idDirectoryPath, $"{audioFile}.yuukoMusicOverview");
+                        var ovJson = await JSONDataHandler.LoadJsonFile($"{baseFileName}.yuukoMusicOverview", SavePath);
                         var ovBytes = (byte[])await JSONDataHandler.GetVariable<byte[]>(ovJson, "Data", encryptionKey);
                         songOverview = await BinaryConverter.NCByteArrayToObjectAsync<SongOverview>(ovBytes);
                         break;
 
                     case MusicInfoStyle.detailed:
-                        var detJson = await JSONDataHandler.LoadJsonFile(idDirectoryPath, $"{audioFile}.yuukoMusicDetailed");
+                        var detJson = await JSONDataHandler.LoadJsonFile($"{baseFileName}.yuukoMusicDetailed", SavePath); // FIXED
                         var detBytes = (byte[])await JSONDataHandler.GetVariable<byte[]>(detJson, "Data", encryptionKey);
                         songDetailed = await BinaryConverter.NCByteArrayToObjectAsync<SongDetailed>(detBytes);
                         break;
 
                     case MusicInfoStyle.both:
                         // overview
-                        var ovJson2 = await JSONDataHandler.LoadJsonFile(idDirectoryPath, $"{audioFile}.yuukoMusicOverview");
+                        var ovJson2 = await JSONDataHandler.LoadJsonFile($"{baseFileName}.yuukoMusicOverview", SavePath);
                         var ovBytes2 = (byte[])await JSONDataHandler.GetVariable<byte[]>(ovJson2, "Data", encryptionKey);
                         songOverview = await BinaryConverter.NCByteArrayToObjectAsync<SongOverview>(ovBytes2);
 
                         // detailed
-                        var detJson2 = await JSONDataHandler.LoadJsonFile(idDirectoryPath, $"{audioFile}.yuukoMusicDetailed");
+                        var detJson2 = await JSONDataHandler.LoadJsonFile($"{baseFileName}.yuukoMusicDetailed", SavePath); // FIXED
                         var detBytes2 = (byte[])await JSONDataHandler.GetVariable<byte[]>(detJson2, "Data", encryptionKey);
                         songDetailed = await BinaryConverter.NCByteArrayToObjectAsync<SongDetailed>(detBytes2);
                         break;
@@ -688,73 +470,17 @@ namespace XRUIOS.Barebones
 
                 return (songOverview, songDetailed);
             }
+
             //U 
-            public sealed class SongInfoPatch
-            {
-                // ───── Shared / Overview ─────
-                public string? SongName { get; init; }
-                public string? AlbumName { get; init; }
-                public string? TrackArtist { get; init; }
-                public string? AlbumArtist { get; init; }
-                public TimeSpan? Duration { get; init; }
-                public DateTime? ReleasedOn { get; init; }
-                public DateTime? LastPlayedOn { get; init; }
-                public Guid? SongId { get; init; }
-                public string? ISRC { get; init; }
-                public int? TrackNumber { get; init; }
-                public bool? IsFavorite { get; init; }
-                public int? PlayCount { get; init; }
-
-                // ───── Detailed-only ─────
-                public string? OriginalAlbumTitle { get; init; }
-                public string? ContentGroupDescription { get; init; }
-                public string? OriginalArtist { get; init; }
-                public string? Composer { get; init; }
-                public string? Conductor { get; init; }
-                public string? Lyricist { get; init; }
-                public string? Publisher { get; init; }
-                public List<string>? InvolvedPeople { get; init; }
-                public string? SeriesTitle { get; init; }
-
-                public int? TotalTracks { get; init; }
-                public int? DiscNumber { get; init; }
-                public int? TotalDiscs { get; init; }
-
-                public string? AlbumSortOrder { get; init; }
-                public string? AlbumArtistSortOrder { get; init; }
-                public string? ArtistSortOrder { get; init; }
-                public string? TitleSortOrder { get; init; }
-                public string? SeriesPartIndex { get; init; }
-
-                public DateTime? RecordingDate { get; init; }
-                public int? RecordingYear { get; init; }
-                public DateTime? OriginalReleaseDate { get; init; }
-                public int? OriginalReleaseYear { get; init; }
-                public DateTime? PublishingDate { get; init; }
-
-                public string? CatalogNumber { get; init; }
-                public string? EncodedBy { get; init; }
-                public string? Encoder { get; init; }
-                public string? AudioSourceUrl { get; init; }
-                public string? Genre { get; init; }
-                public int? BPM { get; init; }
-
-                public string? Comment { get; init; }
-                public string? Description { get; init; }
-                public string? LongDescription { get; init; }
-                public string? Language { get; init; }
-                public string? Copyright { get; init; }
-
-                public List<SongChapter>? Chapters { get; init; }
-                public string? UnsynchronizedLyrics { get; init; }
-                public List<LyricLine>? SynchronizedLyrics { get; init; }
-            }
 
             public static async Task UpdateSongInfo(string audioFile, string directoryUUID, SongInfoPatch patch,
                 MusicInfoStyle mode = MusicInfoStyle.both, bool forceReParseFromAudio = false)
             {
+
+                var SavePath = Path.Combine(DataPath, "Music Metadata");
+
                 var directoryPath = Path.Combine(DataPath, "Music");
-                var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+                var manager = new Bindings.DirectoryManager(directoryPath);
                 await manager.LoadBindings();
 
                 var idDirectoryPath = await manager.GetDirectoryById(directoryUUID);
@@ -765,8 +491,8 @@ namespace XRUIOS.Barebones
                 if (!File.Exists(audioSourceUrl))
                     throw new InvalidOperationException("Song file does not exist.");
 
-                var overviewPath = Path.Combine(idDirectoryPath, $"{audioFile}.yuukoMusicOverview");
-                var detailedPath = Path.Combine(idDirectoryPath, $"{audioFile}.yuukoMusicDetailed");
+                var overviewPath = Path.Combine(SavePath, $"{Path.GetFileNameWithoutExtension(audioFile)}.yuukoMusicOverview");
+                var detailedPath = Path.Combine(SavePath, $"{audioFile}.yuukoMusicDetailed");
 
                 // Check existence based on requested mode
                 if ((mode == MusicInfoStyle.overview || mode == MusicInfoStyle.both) && !File.Exists(overviewPath))
@@ -780,14 +506,14 @@ namespace XRUIOS.Barebones
                 // Load existing data
                 if (mode == MusicInfoStyle.overview || mode == MusicInfoStyle.both)
                 {
-                    var overviewJson = await JSONDataHandler.LoadJsonFile(idDirectoryPath, $"{audioFile}.yuukoMusicOverview");
+                    var overviewJson = await JSONDataHandler.LoadJsonFile($"{Path.GetFileNameWithoutExtension(audioFile)}.yuukoMusicOverview", SavePath);
                     var overviewBytes = (byte[])await JSONDataHandler.GetVariable<byte[]>(overviewJson, "Data", encryptionKey);
                     overview = await BinaryConverter.NCByteArrayToObjectAsync<SongOverview>(overviewBytes);
                 }
 
                 if (mode == MusicInfoStyle.detailed || mode == MusicInfoStyle.both)
                 {
-                    var detailedJson = await JSONDataHandler.LoadJsonFile(idDirectoryPath, $"{audioFile}.yuukoMusicDetailed");
+                    var detailedJson = await JSONDataHandler.LoadJsonFile($"{Path.GetFileNameWithoutExtension(audioFile)}.yuukoMusicDetailed", SavePath);
                     var detailedBytes = (byte[])await JSONDataHandler.GetVariable<byte[]>(detailedJson, "Data", encryptionKey);
                     detailed = await BinaryConverter.NCByteArrayToObjectAsync<SongDetailed>(detailedBytes);
                 }
@@ -862,7 +588,7 @@ namespace XRUIOS.Barebones
                 if (overview != null && (mode == MusicInfoStyle.overview || mode == MusicInfoStyle.both))
                 {
                     var overviewData = await BinaryConverter.NCObjectToByteArrayAsync(overview);
-                    var overviewJson = await JSONDataHandler.LoadJsonFile(idDirectoryPath, $"{audioFile}.yuukoMusicOverview");
+                    var overviewJson = await JSONDataHandler.LoadJsonFile($"{Path.GetFileNameWithoutExtension(audioFile)}.yuukoMusicOverview", SavePath);
                     overviewJson = await JSONDataHandler.UpdateJson<byte[]>(overviewJson, "Data", overviewData, encryptionKey);
                     await JSONDataHandler.SaveJson(overviewJson);
                 }
@@ -870,284 +596,15 @@ namespace XRUIOS.Barebones
                 if (detailed != null && (mode == MusicInfoStyle.detailed || mode == MusicInfoStyle.both))
                 {
                     var detailedData = await BinaryConverter.NCObjectToByteArrayAsync(detailed);
-                    var detailedJson = await JSONDataHandler.LoadJsonFile(idDirectoryPath, $"{audioFile}.yuukoMusicDetailed");
+                    var detailedJson = await JSONDataHandler.LoadJsonFile($"{Path.GetFileNameWithoutExtension(audioFile)}.yuukoMusicDetailed", SavePath);
                     detailedJson = await JSONDataHandler.UpdateJson<byte[]>(detailedJson, "Data", detailedData, encryptionKey);
                     await JSONDataHandler.SaveJson(detailedJson);
                 }
             }
 
-            #region Utilities
-            private static bool PatchTouchesOverview(SongInfoPatch p) =>
-    p.SongName != null ||
-    p.AlbumName != null ||
-    p.TrackArtist != null ||
-    p.AlbumArtist != null ||
-    p.Duration != null ||
-    p.ReleasedOn != null ||
-    p.LastPlayedOn != null ||
-    p.SongId != null ||
-    p.ISRC != null ||
-    p.TrackNumber != null ||
-    p.IsFavorite != null ||
-    p.PlayCount != null;
-
-            private static bool PatchTouchesDetailed(SongInfoPatch p) =>
-                p.OriginalAlbumTitle != null ||
-                p.ContentGroupDescription != null ||
-                p.OriginalArtist != null ||
-                p.Composer != null ||
-                p.Lyricist != null ||
-                p.Publisher != null ||
-                p.InvolvedPeople != null ||
-                p.Chapters != null ||
-                p.SynchronizedLyrics != null ||
-                p.UnsynchronizedLyrics != null ||
-                p.Genre != null ||
-                p.BPM != null;
-
-            [Flags]
-            public enum AudioTagCapability
-            {
-                None = 0,
-
-                // Core
-                Title = 1 << 0,
-                Album = 1 << 1,
-                Artist = 1 << 2,
-                AlbumArtist = 1 << 3,
-                TrackNumber = 1 << 4,
-                TotalTracks = 1 << 5,
-                DiscNumber = 1 << 6,
-                TotalDiscs = 1 << 7,
-
-                // Sorting
-                SortTitle = 1 << 8,
-                SortAlbum = 1 << 9,
-                SortArtist = 1 << 10,
-                SortAlbumArtist = 1 << 11,
-
-                // IDs
-                ISRC = 1 << 12,
-                CatalogNumber = 1 << 13,
-
-                // Dates
-                RecordingDate = 1 << 14,
-                RecordingYear = 1 << 15,
-                OriginalReleaseDate = 1 << 16,
-                OriginalReleaseYear = 1 << 17,
-                PublishingDate = 1 << 18,
-
-                // People
-                Composer = 1 << 19,
-                Conductor = 1 << 20,
-                Lyricist = 1 << 21,
-                Publisher = 1 << 22,
-                InvolvedPeople = 1 << 23,
-
-                // Style
-                Genre = 1 << 24,
-                BPM = 1 << 25,
-                Language = 1 << 26,
-
-                // Text blobs
-                Comment = 1 << 27,
-                Description = 1 << 28,
-                LongDescription = 1 << 29,
-
-                // Lyrics / structure
-                UnsyncedLyrics = 1 << 30,
-                SyncedLyrics = 1 << 31,
-                Chapters = 1 << 32
-            }
-
-            private static readonly Dictionary<string, AudioTagCapability> TagCapabilities =
-    new(StringComparer.OrdinalIgnoreCase)
-    {
-        // ───────── MP3 (ID3v2.4) ─────────
-        [".mp3"] =
-        AudioTagCapability.Title |
-        AudioTagCapability.Album |
-        AudioTagCapability.Artist |
-        AudioTagCapability.AlbumArtist |
-        AudioTagCapability.TrackNumber |
-        AudioTagCapability.TotalTracks |
-        AudioTagCapability.DiscNumber |
-        AudioTagCapability.TotalDiscs |
-        AudioTagCapability.SortTitle |
-        AudioTagCapability.SortAlbum |
-        AudioTagCapability.SortArtist |
-        AudioTagCapability.SortAlbumArtist |
-        AudioTagCapability.ISRC |
-        AudioTagCapability.CatalogNumber |
-        AudioTagCapability.RecordingDate |
-        AudioTagCapability.RecordingYear |
-        AudioTagCapability.OriginalReleaseDate |
-        AudioTagCapability.OriginalReleaseYear |
-        AudioTagCapability.PublishingDate |
-        AudioTagCapability.Composer |
-        AudioTagCapability.Conductor |
-        AudioTagCapability.Lyricist |
-        AudioTagCapability.Publisher |
-        AudioTagCapability.InvolvedPeople |
-        AudioTagCapability.Genre |
-        AudioTagCapability.BPM |
-        AudioTagCapability.Language |
-        AudioTagCapability.Comment |
-        AudioTagCapability.UnsyncedLyrics |
-        AudioTagCapability.SyncedLyrics |
-        AudioTagCapability.Chapters,
-
-        // ───────── FLAC (Vorbis comments) ─────────
-        [".flac"] =
-        AudioTagCapability.Title |
-        AudioTagCapability.Album |
-        AudioTagCapability.Artist |
-        AudioTagCapability.AlbumArtist |
-        AudioTagCapability.TrackNumber |
-        AudioTagCapability.TotalTracks |
-        AudioTagCapability.DiscNumber |
-        AudioTagCapability.TotalDiscs |
-        AudioTagCapability.SortTitle |
-        AudioTagCapability.SortAlbum |
-        AudioTagCapability.SortArtist |
-        AudioTagCapability.SortAlbumArtist |
-        AudioTagCapability.ISRC |
-        AudioTagCapability.CatalogNumber |
-        AudioTagCapability.RecordingDate |
-        AudioTagCapability.RecordingYear |
-        AudioTagCapability.OriginalReleaseDate |
-        AudioTagCapability.Composer |
-        AudioTagCapability.Lyricist |
-        AudioTagCapability.Publisher |
-        AudioTagCapability.InvolvedPeople |
-        AudioTagCapability.Genre |
-        AudioTagCapability.BPM |
-        AudioTagCapability.Language |
-        AudioTagCapability.Comment |
-        AudioTagCapability.UnsyncedLyrics,
-
-        // ───────── OGG / OPUS ─────────
-        [".ogg"] =
-                AudioTagCapability.Title |
-        AudioTagCapability.Album |
-        AudioTagCapability.Artist |
-        AudioTagCapability.AlbumArtist |
-        AudioTagCapability.TrackNumber |
-        AudioTagCapability.TotalTracks |
-        AudioTagCapability.DiscNumber |
-        AudioTagCapability.TotalDiscs |
-        AudioTagCapability.Composer |
-        AudioTagCapability.Lyricist |
-        AudioTagCapability.InvolvedPeople |
-        AudioTagCapability.Genre |
-        AudioTagCapability.Language |
-        AudioTagCapability.Comment |
-        AudioTagCapability.UnsyncedLyrics,
-
-        [".opus"] =
-        AudioTagCapability.Title |
-        AudioTagCapability.Album |
-        AudioTagCapability.Artist |
-        AudioTagCapability.AlbumArtist |
-        AudioTagCapability.TrackNumber |
-        AudioTagCapability.TotalTracks |
-        AudioTagCapability.DiscNumber |
-        AudioTagCapability.TotalDiscs |
-        AudioTagCapability.Composer |
-        AudioTagCapability.Lyricist |
-        AudioTagCapability.InvolvedPeople |
-        AudioTagCapability.Genre |
-        AudioTagCapability.Language |
-        AudioTagCapability.Comment |
-        AudioTagCapability.UnsyncedLyrics,
-
-        // ───────── M4A / MP4 ─────────
-        [".m4a"] =
-        AudioTagCapability.Title |
-        AudioTagCapability.Album |
-        AudioTagCapability.Artist |
-        AudioTagCapability.AlbumArtist |
-        AudioTagCapability.TrackNumber |
-        AudioTagCapability.DiscNumber |
-        AudioTagCapability.Genre |
-        AudioTagCapability.Comment |
-        AudioTagCapability.Composer |
-        AudioTagCapability.Language,
-        [".mp4"] =
-        AudioTagCapability.Title |
-        AudioTagCapability.Album |
-        AudioTagCapability.Artist |
-        AudioTagCapability.AlbumArtist |
-        AudioTagCapability.TrackNumber |
-        AudioTagCapability.DiscNumber |
-        AudioTagCapability.Genre |
-        AudioTagCapability.Comment |
-        AudioTagCapability.Composer |
-        AudioTagCapability.Language
-    };
-
-            private static AudioTagCapability GetRequiredCapabilities(SongInfoPatch p)
-            {
-                AudioTagCapability c = AudioTagCapability.None;
-
-                if (p.SongName != null) c |= AudioTagCapability.Title;
-                if (p.AlbumName != null) c |= AudioTagCapability.Album;
-                if (p.TrackArtist != null) c |= AudioTagCapability.Artist;
-                if (p.AlbumArtist != null) c |= AudioTagCapability.AlbumArtist;
-
-                if (p.TrackNumber != null) c |= AudioTagCapability.TrackNumber;
-                if (p.TotalTracks != null) c |= AudioTagCapability.TotalTracks;
-                if (p.DiscNumber != null) c |= AudioTagCapability.DiscNumber;
-                if (p.TotalDiscs != null) c |= AudioTagCapability.TotalDiscs;
-
-                if (p.ISRC != null) c |= AudioTagCapability.ISRC;
-                if (p.CatalogNumber != null) c |= AudioTagCapability.CatalogNumber;
-
-                if (p.RecordingDate != null) c |= AudioTagCapability.RecordingDate;
-                if (p.RecordingYear != null) c |= AudioTagCapability.RecordingYear;
-                if (p.OriginalReleaseDate != null) c |= AudioTagCapability.OriginalReleaseDate;
-                if (p.OriginalReleaseYear != null) c |= AudioTagCapability.OriginalReleaseYear;
-                if (p.PublishingDate != null) c |= AudioTagCapability.PublishingDate;
-
-                if (p.Composer != null) c |= AudioTagCapability.Composer;
-                if (p.Conductor != null) c |= AudioTagCapability.Conductor;
-                if (p.Lyricist != null) c |= AudioTagCapability.Lyricist;
-                if (p.Publisher != null) c |= AudioTagCapability.Publisher;
-                if (p.InvolvedPeople != null) c |= AudioTagCapability.InvolvedPeople;
-
-                if (p.Genre != null) c |= AudioTagCapability.Genre;
-                if (p.BPM != null) c |= AudioTagCapability.BPM;
-                if (p.Language != null) c |= AudioTagCapability.Language;
-
-                if (p.Comment != null) c |= AudioTagCapability.Comment;
-                if (p.Description != null) c |= AudioTagCapability.Description;
-                if (p.LongDescription != null) c |= AudioTagCapability.LongDescription;
-
-                if (p.UnsynchronizedLyrics != null) c |= AudioTagCapability.UnsyncedLyrics;
-                if (p.SynchronizedLyrics != null) c |= AudioTagCapability.SyncedLyrics;
-                if (p.Chapters != null) c |= AudioTagCapability.Chapters;
-
-                return c;
-            }
-
-            private static AudioTagCapability GetWritableCapabilities(
-    string audioPath,
-    SongInfoPatch patch)
-            {
-                var ext = Path.GetExtension(audioPath);
-
-                if (!TagCapabilities.TryGetValue(ext, out var supported))
-                    return AudioTagCapability.None;
-
-                var required = GetRequiredCapabilities(patch);
-
-                // Return only what CAN be written
-                return supported & required;
-            }
 
 
 
-            #endregion
 
 
             //D
@@ -1157,7 +614,7 @@ namespace XRUIOS.Barebones
 
                 var directoryPath = Path.Combine(DataPath, "Music");
 
-                var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+                var manager = new Bindings.DirectoryManager(directoryPath);
 
                 await manager.LoadBindings();
 
@@ -1173,7 +630,7 @@ namespace XRUIOS.Barebones
 
                 //Does the meta file already exist? Both
 
-                var audioMetadataUrlOverview = Path.Combine(idDirectoryPath, $"{audioFile}.yuukoMusicOverview");
+                var audioMetadataUrlOverview = Path.Combine(idDirectoryPath, $"{Path.GetFileNameWithoutExtension(audioFile)}.yuukoMusicDetailed");
                 var audioMetadataUrlDetailed = Path.Combine(idDirectoryPath, $"{audioFile}.yuukoMusicDetailed");
 
 
@@ -1213,7 +670,7 @@ namespace XRUIOS.Barebones
             {
                 var directoryPath = Path.Combine(DataPath, "Music");
 
-                var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+                var manager = new Bindings.DirectoryManager(directoryPath);
 
                 await manager.LoadBindings();
 
@@ -1252,7 +709,7 @@ namespace XRUIOS.Barebones
 
                 var directoryPath = Path.Combine(DataPath, "Music");
 
-                var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+                var manager = new Bindings.DirectoryManager(directoryPath);
 
                 var directoryFile = await DataHandler.JSONDataHandler.LoadJsonFile("MusicDirectory", directoryPath);
 
@@ -1295,7 +752,7 @@ namespace XRUIOS.Barebones
             public static async Task UpdateSongDirectory(string uuid, string newDirectory, string newDirectoryName)
             {
                 var directoryPath = Path.Combine(DataPath, "Music");
-                var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+                var manager = new Bindings.DirectoryManager(directoryPath);
 
                 await manager.LoadBindings();
 
@@ -1322,7 +779,7 @@ namespace XRUIOS.Barebones
                     }
 
                     // 2. Update the binding in the manager
-                    var newResolution = new Yuuko.Bindings.DirectoryResolution(newDirectory, verified: true);
+                    var newResolution = new Bindings.DirectoryResolution(newDirectory, verified: true);
                     bool updated = await manager.UpdateBinding(uuid, newResolution);
 
                     if (!updated)
@@ -1344,7 +801,7 @@ namespace XRUIOS.Barebones
             {
                 var directoryPath = Path.Combine(DataPath, "Music");
 
-                var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+                var manager = new Bindings.DirectoryManager(directoryPath);
 
                 await manager.LoadBindings();
 
@@ -1391,13 +848,13 @@ namespace XRUIOS.Barebones
             {
                 var directoryPath = Path.Combine(DataPath, "Music");
 
-                var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+                var manager = new Bindings.DirectoryManager(directoryPath);
 
                 await manager.LoadBindings();
 
                 var favoritesFile = await DataHandler.JSONDataHandler.LoadJsonFile("MusicFavorites", directoryPath);
 
-                var favorites = (List<Yuuko.FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<Yuuko.FileRecord>>(favoritesFile, "Data", encryptionKey);
+                var favorites = (List<FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<FileRecord>>(favoritesFile, "Data", encryptionKey);
                 //UUID, path name, path 
 
 
@@ -1405,7 +862,7 @@ namespace XRUIOS.Barebones
                 {
                     //Create new record
 
-                    var record = new Yuuko.FileRecord(directoryUUID, audioFileName);
+                    var record = new FileRecord(directoryUUID, audioFileName);
 
                     favorites.Add(record);
                 }
@@ -1416,7 +873,7 @@ namespace XRUIOS.Barebones
                 }
 
 
-                var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<Yuuko.FileRecord>>(favoritesFile, "Data", favorites, encryptionKey);
+                var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<FileRecord>>(favoritesFile, "Data", favorites, encryptionKey);
 
                 await DataHandler.JSONDataHandler.SaveJson(editedJSON);
 
@@ -1426,11 +883,11 @@ namespace XRUIOS.Barebones
             public static async Task<(List<string>, List<string>)> GetFavorites()
             {
                 var directoryPath = Path.Combine(DataPath, "Music");
-                var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+                var manager = new Bindings.DirectoryManager(directoryPath);
                 await manager.LoadBindings();
 
                 var favoritesFile = await DataHandler.JSONDataHandler.LoadJsonFile("MusicFavorites", directoryPath);
-                var favorites = (List<Yuuko.FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<Yuuko.FileRecord>>(favoritesFile, "Data", encryptionKey);
+                var favorites = (List<FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<FileRecord>>(favoritesFile, "Data", encryptionKey);
 
                 List<string> resolvedFiles = new List<string>();
                 List<string> unresolvedFiles = new List<string>();
@@ -1478,11 +935,11 @@ namespace XRUIOS.Barebones
             public static async Task RemoveFromFavorites(string audioFileName, string directoryUUID)
             {
                 var directoryPath = Path.Combine(DataPath, "Music");
-                var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+                var manager = new Bindings.DirectoryManager(directoryPath);
                 await manager.LoadBindings();
 
                 var favoritesFile = await DataHandler.JSONDataHandler.LoadJsonFile("MusicFavorites", directoryPath);
-                var favorites = (List<Yuuko.FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<Yuuko.FileRecord>>(favoritesFile, "Data", encryptionKey);
+                var favorites = (List<FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<FileRecord>>(favoritesFile, "Data", encryptionKey);
                 var removedCount = favorites.RemoveAll(d => d.UUID == directoryUUID && d.File == audioFileName);
 
                 if (removedCount == 0)
@@ -1492,7 +949,7 @@ namespace XRUIOS.Barebones
                 }
 
                 // Save updated list
-                var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<Yuuko.FileRecord>>(favoritesFile, "Data", favorites, encryptionKey);
+                var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<FileRecord>>(favoritesFile, "Data", favorites, encryptionKey);
                 await DataHandler.JSONDataHandler.SaveJson(editedJSON);
             }
         }
@@ -1508,7 +965,7 @@ namespace XRUIOS.Barebones
                 bool onlyFavorites = false)
             {
                 var directoryPath = Path.Combine(DataPath, "Music");
-                var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+                var manager = new Bindings.DirectoryManager(directoryPath);
                 await manager.LoadBindings();
 
                 HashSet<(string UUID, string File)> selectedFiles;
@@ -1516,7 +973,7 @@ namespace XRUIOS.Barebones
                 if (onlyFavorites)
                 {
                     var favoritesFile = await JSONDataHandler.LoadJsonFile("MusicFavorites", directoryPath);
-                    var favorites = (List<Yuuko.FileRecord>)await JSONDataHandler.GetVariable<List<Yuuko.FileRecord>>(favoritesFile, "Data", encryptionKey);
+                    var favorites = (List<FileRecord>)await JSONDataHandler.GetVariable<List<FileRecord>>(favoritesFile, "Data", encryptionKey);
                     selectedFiles = favorites
                         .Select(f => (f.UUID, f.File))
                         .ToHashSet();
@@ -1589,11 +1046,10 @@ namespace XRUIOS.Barebones
             }
 
 
-            public static async Task<(List<string> ResolvedSongs, List<string> UnresolvedSongs)>
-            GetSongsInDirectoryAsync(string directoryUUID, bool onlyFavorites = false)
+            public static async Task<(List<string> ResolvedSongs, List<string> UnresolvedSongs)> GetSongsInDirectoryAsync(string directoryUUID, bool onlyFavorites = false)
             {
                 var directoryPath = Path.Combine(DataPath, "Music");
-                var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+                var manager = new Bindings.DirectoryManager(directoryPath);
                 await manager.LoadBindings();
 
                 var dirPath = await manager.GetDirectoryById(directoryUUID);
@@ -1605,7 +1061,7 @@ namespace XRUIOS.Barebones
                 if (onlyFavorites)
                 {
                     var favFile = await JSONDataHandler.LoadJsonFile("MusicFavorites", directoryPath);
-                    var favorites = (List<Yuuko.FileRecord>)await JSONDataHandler.GetVariable<List<Yuuko.FileRecord>>(favFile, "Data", encryptionKey);
+                    var favorites = (List<FileRecord>)await JSONDataHandler.GetVariable<List<FileRecord>>(favFile, "Data", encryptionKey);
 
                     favoriteFiles = favorites
                         .Where(f => f.UUID == directoryUUID)
@@ -1651,17 +1107,7 @@ namespace XRUIOS.Barebones
                     .ToList();
             }
 
-            public enum SongSearchField
-            {
-                SongName,
-                AlbumName,
-                TrackArtist,
-                AlbumArtist,
-                Genre,
-                ISRC,
-                Comment,
-                // can add more later, for now this works
-            }
+
 
             public static async Task<List<string>> GetSongsByTag(
                 SongSearchField field,
@@ -1670,7 +1116,7 @@ namespace XRUIOS.Barebones
                 bool onlyFavorites = false)
             {
                 var directoryPath = Path.Combine(DataPath, "Music");
-                var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+                var manager = new Bindings.DirectoryManager(directoryPath);
                 await manager.LoadBindings();
 
                 HashSet<(string UUID, string File)> selectedFiles;
@@ -1678,8 +1124,8 @@ namespace XRUIOS.Barebones
                 if (onlyFavorites)
                 {
                     var favoritesFile = await JSONDataHandler.LoadJsonFile("MusicFavorites", directoryPath);
-                    var favorites = (List<Yuuko.FileRecord>)await JSONDataHandler
-                        .GetVariable<List<Yuuko.FileRecord>>(favoritesFile, "Data", encryptionKey);
+                    var favorites = (List<FileRecord>)await JSONDataHandler
+                        .GetVariable<List<FileRecord>>(favoritesFile, "Data", encryptionKey);
 
                     selectedFiles = favorites
                         .Select(f => (f.UUID, f.File))
@@ -1728,7 +1174,7 @@ namespace XRUIOS.Barebones
                     try
                     {
                         var fileName = Path.GetFileName(fullPath);
-                        var (overview, detailed) = await SongClass.GetSongInfo(fileName, uuid, SongClass.MusicInfoStyle.both);
+                        var (overview, detailed) = await SongClass.GetSongInfo(fileName, uuid, MusicInfoStyle.both);
 
                         bool match = field switch
                         {
@@ -1766,13 +1212,13 @@ namespace XRUIOS.Barebones
             {
                 var directoryPath = Path.Combine(DataPath, "Music");
 
-                var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+                var manager = new Bindings.DirectoryManager(directoryPath);
 
                 await manager.LoadBindings();
 
                 var historyFile = await DataHandler.JSONDataHandler.LoadJsonFile("MusicHistory", directoryPath);
 
-                var history = (List<Yuuko.FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<Yuuko.FileRecord>>(historyFile, "Data", encryptionKey);
+                var history = (List<FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<FileRecord>>(historyFile, "Data", encryptionKey);
                 //UUID, path name, path 
 
 
@@ -1780,7 +1226,7 @@ namespace XRUIOS.Barebones
                 {
                     //Create new record
 
-                    var record = new Yuuko.FileRecord(directoryUUID, audioFileName);
+                    var record = new FileRecord(directoryUUID, audioFileName);
 
                     history.Add(record);
                 }
@@ -1791,7 +1237,7 @@ namespace XRUIOS.Barebones
                 }
 
 
-                var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<Yuuko.FileRecord>>(historyFile, "Data", history, encryptionKey);
+                var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<FileRecord>>(historyFile, "Data", history, encryptionKey);
 
                 await DataHandler.JSONDataHandler.SaveJson(editedJSON);
 
@@ -1801,11 +1247,11 @@ namespace XRUIOS.Barebones
             public static async Task<(List<string>, List<string>)> GetPlayHistory()
             {
                 var directoryPath = Path.Combine(DataPath, "Music");
-                var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+                var manager = new Bindings.DirectoryManager(directoryPath);
                 await manager.LoadBindings();
 
                 var historyFile = await DataHandler.JSONDataHandler.LoadJsonFile("MusicHistory", directoryPath);
-                var history = (List<Yuuko.FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<Yuuko.FileRecord>>(historyFile, "Data", encryptionKey);
+                var history = (List<FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<FileRecord>>(historyFile, "Data", encryptionKey);
 
                 List<string> resolvedFiles = new List<string>();
                 List<string> unresolvedFiles = new List<string>();
@@ -1841,14 +1287,14 @@ namespace XRUIOS.Barebones
             public static async Task ClearPlayHIstory(string audioFileName, string directoryUUID)
             {
                 var directoryPath = Path.Combine(DataPath, "Music");
-                var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+                var manager = new Bindings.DirectoryManager(directoryPath);
                 await manager.LoadBindings();
 
                 var historyFile = await DataHandler.JSONDataHandler.LoadJsonFile("MusicHistory", directoryPath);
-                var overwriteData = new List<Yuuko.FileRecord>();
+                var overwriteData = new List<FileRecord>();
 
                 // Save updated list
-                var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<Yuuko.FileRecord>>(historyFile, "Data", overwriteData, encryptionKey);
+                var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<FileRecord>>(historyFile, "Data", overwriteData, encryptionKey);
                 await DataHandler.JSONDataHandler.SaveJson(editedJSON);
             }
 
@@ -1863,70 +1309,7 @@ namespace XRUIOS.Barebones
             private const int MaxPlaylists = 100;
             private const int MaxSongsPerPlaylist = 1000;
 
-
-            // PLAYLIST RECORD - Follows your pattern!
-
-            public record Playlist
-            {
-                public string PlaylistId { get; init; }
-                public string PlaylistName { get; set; }
-                public string? Description { get; set; }
-                public DateTime CreatedAt { get; init; }
-                public DateTime? LastModified { get; set; }
-                public List<PlaylistEntry> Songs { get; set; }
-                public string? CoverImagePath { get; set; }
-                public bool IsFavorite { get; set; }
-                public int PlayCount { get; set; }
-                public TimeSpan? TotalDuration { get; set; }
-
-                // Parameterless constructor for serialization
-                public Playlist()
-                {
-                    PlaylistId = Guid.NewGuid().ToString();
-                    PlaylistName = string.Empty;
-                    Songs = new List<PlaylistEntry>();
-                    CreatedAt = DateTime.UtcNow;
-                }
-
-                // Main constructor
-                public Playlist(
-                    string playlistName,
-                    string? description = null,
-                    string? coverImagePath = null,
-                    List<PlaylistEntry>? songs = null,
-                    string? playlistId = null)
-                {
-                    PlaylistId = playlistId ?? Guid.NewGuid().ToString();
-                    PlaylistName = playlistName;
-                    Description = description;
-                    CoverImagePath = coverImagePath;
-                    Songs = songs ?? new List<PlaylistEntry>();
-                    CreatedAt = DateTime.UtcNow;
-                    LastModified = DateTime.UtcNow;
-                    IsFavorite = false;
-                    PlayCount = 0;
-                }
-            }
-
-            public record PlaylistEntry
-            {
-                public string SongFileName { get; init; }      // e.g., "song.mp3"
-                public string DirectoryUUID { get; init; }      // Points to the directory
-                public DateTime AddedAt { get; init; }
-                public int TrackNumber { get; set; }            // Position in playlist
-                public string? SongOverview { get; set; }       // Cached song name for quick display
-
-                public PlaylistEntry() { }
-
-                public PlaylistEntry(string songFileName, string directoryUUID, int trackNumber)
-                {
-                    SongFileName = songFileName;
-                    DirectoryUUID = directoryUUID;
-                    AddedAt = DateTime.UtcNow;
-                    TrackNumber = trackNumber;
-                }
-            }
-
+   
 
             // CREATE - Add a new playlist (like RecentlyRecorded pattern)
 
@@ -2040,7 +1423,7 @@ namespace XRUIOS.Barebones
                 string? songName = null;
                 try
                 {
-                    var (overview, _) = await SongClass.GetSongInfo(songFileName, directoryUUID, SongClass.MusicInfoStyle.overview);
+                    var (overview, _) = await SongClass.GetSongInfo(songFileName, directoryUUID, MusicInfoStyle.overview);
                     songName = overview?.SongName;
                 }
                 catch { /* Use filename if metadata fails */ }
@@ -2125,7 +1508,7 @@ namespace XRUIOS.Barebones
                         var (overview, _) = await SongClass.GetSongInfo(
                             song.SongFileName,
                             song.DirectoryUUID,
-                            SongClass.MusicInfoStyle.overview);
+                            MusicInfoStyle.overview);
 
                         if (overview?.Duration.HasValue == true)
                             total = total.Add(overview.Duration.Value);
@@ -2160,7 +1543,7 @@ namespace XRUIOS.Barebones
                     throw new InvalidOperationException($"Playlist {playlistId} not found!");
 
                 var directoryPath = Path.Combine(DataPath, "Music");
-                var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+                var manager = new Bindings.DirectoryManager(directoryPath);
                 await manager.LoadBindings();
 
                 var resolvedPaths = new List<string>();

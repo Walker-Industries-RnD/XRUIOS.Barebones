@@ -1,65 +1,14 @@
 ﻿using Pariah_Cybersecurity;
 using System.Text.Json.Nodes;
+using static XRUIOS.Barebones.Interfaces.MediaAlbumClass;
 using static XRUIOS.Barebones.XRUIOS;
+using YuukoProtocol;
 
 namespace XRUIOS.Barebones.Functions
 {
     public static class MediaAlbumClass
     {
-        public record AlbumMedia
-        {
-            public string AlbumName;
-            public string AlbumDescription;
-            public bool IsFavorite;
-            public Color UIColor;
-            public Color UIColorAlt;
-            public string CoverImageFilePath;
-            public List<Yuuko.FileRecord> MediaPaths;
-            public string Identifier;
-
-            public AlbumMedia(string AlbumName, string AlbumDescription, bool IsFavorite, Color UIColor, Color UIColorAlt, string CoverImageFilePath, List<Yuuko.FileRecord> mediaPaths)
-            {
-                this.AlbumName = AlbumName;
-                this.AlbumDescription = AlbumDescription;
-                this.IsFavorite = IsFavorite;
-                this.UIColor = UIColor;
-                this.UIColorAlt = UIColorAlt;
-                this.CoverImageFilePath = CoverImageFilePath;
-                this.MediaPaths = mediaPaths;
-                Identifier = Guid.NewGuid().ToString();
-            }
-
-            public AlbumMedia() { }
-        }
-
-        public sealed record AlbumMediaPatch
-        {
-            public string? AlbumName { get; init; }
-            public string? AlbumDescription { get; init; }
-            public bool? IsFavorite { get; init; }
-            public Color? UIColor { get; init; }
-            public Color? UIColorAlt { get; init; }
-            public string? CoverImageFilePath { get; init; }
-            public List<Yuuko.FileRecord>? MediaPaths { get; init; }
-        }
-
-        public static class AlbumMediaPatcher
-        {
-            public static AlbumMedia Apply(AlbumMedia original, AlbumMediaPatch patch)
-            {
-                return original with
-                {
-                    AlbumName = patch.AlbumName ?? original.AlbumName,
-                    AlbumDescription = patch.AlbumDescription ?? original.AlbumDescription,
-                    IsFavorite = patch.IsFavorite ?? original.IsFavorite,
-                    UIColor = patch.UIColor ?? original.UIColor,
-                    UIColorAlt = patch.UIColorAlt ?? original.UIColorAlt,
-                    CoverImageFilePath = patch.CoverImageFilePath ?? original.CoverImageFilePath,
-                    MediaPaths = patch.MediaPaths ?? original.MediaPaths,
-                    Identifier = original.Identifier
-                };
-            }
-        }
+    
 
         public static async Task AddMediaAlbum(AlbumMedia MediaAlbum)
         {
@@ -176,24 +125,24 @@ namespace XRUIOS.Barebones.Functions
             var directoryPath = Path.Combine(DataPath, "MediaAlbum");
             Directory.CreateDirectory(directoryPath);
 
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            var manager = new Bindings.DirectoryManager(directoryPath);
             await manager.LoadBindings();
 
             var favoritesFile = await DataHandler.JSONDataHandler.LoadJsonFile("MediaAlbumFavorites", directoryPath);
 
-            List<Yuuko.FileRecord> favorites;
+            List<FileRecord> favorites;
             try
             {
-                favorites = (List<Yuuko.FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<Yuuko.FileRecord>>(favoritesFile, "Data", encryptionKey);
+                favorites = (List<FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<FileRecord>>(favoritesFile, "Data", encryptionKey);
             }
             catch
             {
-                favorites = new List<Yuuko.FileRecord>();
+                favorites = new List<FileRecord>();
             }
 
             if (!favorites.Any(d => d.UUID == directoryUUID && d.File == MediaAlbumIdentifier))
             {
-                var record = new Yuuko.FileRecord(directoryUUID, MediaAlbumIdentifier);
+                var record = new FileRecord(directoryUUID, MediaAlbumIdentifier);
                 favorites.Add(record);
             }
             else
@@ -201,7 +150,7 @@ namespace XRUIOS.Barebones.Functions
                 throw new InvalidOperationException($"Song already favorited.");
             }
 
-            var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<Yuuko.FileRecord>>(favoritesFile, "Data", favorites, encryptionKey);
+            var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<FileRecord>>(favoritesFile, "Data", favorites, encryptionKey);
             await DataHandler.JSONDataHandler.SaveJson(editedJSON);
         }
 
@@ -210,15 +159,15 @@ namespace XRUIOS.Barebones.Functions
             var directoryPath = Path.Combine(DataPath, "MediaAlbum");
             Directory.CreateDirectory(directoryPath);
 
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            var manager = new Bindings.DirectoryManager(directoryPath);
             await manager.LoadBindings();
 
             var favoritesFile = await DataHandler.JSONDataHandler.LoadJsonFile("MediaAlbumFavorites", directoryPath);
 
-            List<Yuuko.FileRecord> favorites;
+            List<FileRecord> favorites;
             try
             {
-                favorites = (List<Yuuko.FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<Yuuko.FileRecord>>(favoritesFile, "Data", encryptionKey);
+                favorites = (List<FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<FileRecord>>(favoritesFile, "Data", encryptionKey);
             }
             catch
             {
@@ -265,15 +214,15 @@ namespace XRUIOS.Barebones.Functions
             var directoryPath = Path.Combine(DataPath, "MediaAlbum");
             Directory.CreateDirectory(directoryPath);
 
-            var manager = new Yuuko.Bindings.DirectoryManager(directoryPath);
+            var manager = new Bindings.DirectoryManager(directoryPath);
             await manager.LoadBindings();
 
             var favoritesFile = await DataHandler.JSONDataHandler.LoadJsonFile("MediaAlbumFavorites", directoryPath);
 
-            List<Yuuko.FileRecord> favorites;
+            List<FileRecord> favorites;
             try
             {
-                favorites = (List<Yuuko.FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<Yuuko.FileRecord>>(favoritesFile, "Data", encryptionKey);
+                favorites = (List<FileRecord>)await DataHandler.JSONDataHandler.GetVariable<List<FileRecord>>(favoritesFile, "Data", encryptionKey);
             }
             catch
             {
@@ -288,7 +237,7 @@ namespace XRUIOS.Barebones.Functions
                 return;
             }
 
-            var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<Yuuko.FileRecord>>(favoritesFile, "Data", favorites, encryptionKey);
+            var editedJSON = await DataHandler.JSONDataHandler.UpdateJson<List<FileRecord>>(favoritesFile, "Data", favorites, encryptionKey);
             await DataHandler.JSONDataHandler.SaveJson(editedJSON);
         }
     }
