@@ -202,10 +202,13 @@ namespace XRUIOS.Barebones
                 }
 
                 var SavePath = Path.Combine(DataPath, "Music Metadata");
+                Directory.CreateDirectory(SavePath);
 
-                //Does the meta file already exist? Both
-                var audioMetadataUrlOverview = Path.Combine(SavePath, $"{Path.GetFileNameWithoutExtension(audioFile)}.yuukoMusicDetailed");
-                var audioMetadataUrlDetailed = Path.Combine(SavePath, $"{audioFile}.yuukoMusicDetailed");
+                string baseFileName = Path.GetFileNameWithoutExtension(audioFile);
+
+                // Does the meta file already exist? Both
+                var audioMetadataUrlOverview = Path.Combine(SavePath, $"{baseFileName}.yuukoMusicOverview.json");
+                var audioMetadataUrlDetailed = Path.Combine(SavePath, $"{baseFileName}.yuukoMusicDetailed.json");
 
 
                 // ────────────── Idempotent safety: if both exist → load & return them ──────────────
@@ -357,8 +360,6 @@ namespace XRUIOS.Barebones
                 var overviewData = await BinaryConverter.NCObjectToByteArrayAsync<SongOverview>(overview);
                 var detailedData = await BinaryConverter.NCObjectToByteArrayAsync<SongDetailed>(detailed);
 
-                string baseFileName = Path.GetFileNameWithoutExtension(audioFile);
-
                 try
                 {
                     await DataHandler.JSONDataHandler.CreateJsonFile($"{baseFileName}.yuukoMusicOverview", SavePath, new JsonObject());
@@ -411,8 +412,8 @@ namespace XRUIOS.Barebones
 
                 // FIX: Use filename WITHOUT extension for BOTH files
                 string baseFileName = Path.GetFileNameWithoutExtension(audioFile);
-                var overviewPath = Path.Combine(SavePath, $"{baseFileName}.yuukoMusicOverview");
-                var detailedPath = Path.Combine(SavePath, $"{baseFileName}.yuukoMusicDetailed"); 
+                var overviewPath = Path.Combine(SavePath, $"{baseFileName}.yuukoMusicOverview.json");
+                var detailedPath = Path.Combine(SavePath, $"{baseFileName}.yuukoMusicDetailed.json"); 
 
                 bool overviewExists = File.Exists(overviewPath);
                 bool detailedExists = File.Exists(detailedPath);
@@ -630,8 +631,8 @@ namespace XRUIOS.Barebones
 
                 //Does the meta file already exist? Both
 
-                var audioMetadataUrlOverview = Path.Combine(idDirectoryPath, $"{Path.GetFileNameWithoutExtension(audioFile)}.yuukoMusicDetailed");
-                var audioMetadataUrlDetailed = Path.Combine(idDirectoryPath, $"{audioFile}.yuukoMusicDetailed");
+                var audioMetadataUrlOverview = Path.Combine(idDirectoryPath, $"{Path.GetFileNameWithoutExtension(audioFile)}.yuukoMusicOverview.json");
+                var audioMetadataUrlDetailed = Path.Combine(idDirectoryPath, $"{audioFile}.yuukoMusicDetailed.json");
 
 
                 if (File.Exists(audioMetadataUrlOverview))
