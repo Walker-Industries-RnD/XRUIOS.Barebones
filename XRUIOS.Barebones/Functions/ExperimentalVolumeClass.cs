@@ -51,7 +51,12 @@ namespace XRUIOS.Barebones
             {
                 var directoryPath = Path.Combine(DataPath, "ExpAudio");
 
-                if (!File.Exists(Path.Combine(directoryPath, "ExpAudio.JSON")))
+                if (!Directory.Exists(directoryPath))
+                {
+                    Directory.CreateDirectory(directoryPath);   
+                }
+
+                if (!File.Exists(Path.Combine(directoryPath, "ExpAudio.json")))
                 {
                     await JSONDataHandler.CreateJsonFile(directoryPath, "ExpAudio", new JsonObject());
                 }
@@ -103,7 +108,7 @@ namespace XRUIOS.Barebones
             {
                 var directoryPath = Path.Combine(DataPath, "MasterVol");
 
-                if (!File.Exists(Path.Combine(directoryPath, "MasterVol.JSON")))
+                if (!File.Exists(Path.Combine(directoryPath, "MasterVol.json")))
                 {
                     await JSONDataHandler.CreateJsonFile(directoryPath, "MasterVol", new JsonObject());
                 }
