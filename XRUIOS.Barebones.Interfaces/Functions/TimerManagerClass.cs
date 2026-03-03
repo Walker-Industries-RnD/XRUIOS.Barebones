@@ -10,7 +10,8 @@ namespace XRUIOS.Barebones.Interfaces
             public bool IsRunning;
             public TimeSpan Duration;
             public Action? OnFinish;
-            public string? HangfireJobId; // store actual Hangfire job ID
+            public string? HangfireJobId;
+            public TimeSpan? PausedRemaining;
 
             public TimerRecord(string timerName, TimeSpan duration, Action? onFinish = null)
             {

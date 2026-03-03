@@ -18,7 +18,16 @@ namespace XRUIOS.Barebones.Interfaces
             }
         }
 
+        public record StopwatchEntry
+        {
+            public string Name { get; set; }
+            public long SegmentStartTimestamp { get; set; }
+            public TimeSpan AccumulatedTime { get; set; }
+            public bool IsRunning { get; set; }
+            public List<StopwatchRecord> Laps { get; set; }
 
+            public StopwatchEntry() { }
+        }
 
 
     }

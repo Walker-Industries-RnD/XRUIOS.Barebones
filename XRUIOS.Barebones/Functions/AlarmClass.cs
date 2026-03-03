@@ -88,6 +88,43 @@ namespace XRUIOS.Barebones
             return existingAlarm;
         }
 
+        // Convenience constructor — builds and schedules an alarm in one call
+        public static async Task CreateAlarm(string alarmName, DateTime alarmTime, bool isRecurring, List<DayOfWeek> recurringDays, FileRecord soundFilePath, int volume)
+        {
+            var alarm = new Alarm(alarmName, alarmTime, isRecurring, recurringDays, soundFilePath, volume, true);
+            await AddAlarm(alarm);
+        }
+
+        // Get full details of a single alarm by name (null if not found)
+        public static Alarm? GetAlarmDetails(string alarmName)
+        {
+            return Alarms.FirstOrDefault(a => a.AlarmName == alarmName);
+        }
+
+        // Search alarms by partial name match (case-insensitive)
+        public static List<Alarm> SearchAlarms(string query)
+        {
+            return Alarms.Where(a => a.AlarmName.Contains(query, StringComparison.OrdinalIgnoreCase)).ToList();
+        }
+
+        // Get current XRUIOS time (long and short format)
+        public static (string LongTime, string ShortTime) GetCurrentTime()
+        {
+            return ChronoClass.GetTime();
+        }
+
+        // Get current XRUIOS timezone ID
+        public static string GetCurrentTimezone()
+        {
+            return ChronoClass.GetTimezone(string.Empty);
+        }
+
+        // Set XRUIOS timezone by system timezone ID
+        public static void SetTimezone(string timezone)
+        {
+            ChronoClass.SetTimezone(timezone);
+        }
+
         // D
         public static async Task DeleteAlarm(Alarm alarm)
         {

@@ -1,4 +1,4 @@
-﻿using CsvHelper;
+using CsvHelper;
 using System.Diagnostics;
 using System.Globalization;
 using static XRUIOS.Barebones.Interfaces.StopwatchClass;
@@ -9,26 +9,73 @@ namespace XRUIOS.Barebones
     public static class StopwatchClass
     {
 
-     
-
-
-        public static Dictionary<string, (long, List<StopwatchRecord>)> StopWatches = new Dictionary<string, (long, List<StopwatchRecord>)>();
+        public static Dictionary<string, StopwatchEntry> StopWatches = new Dictionary<string, StopwatchEntry>();
 
         public static string CreateStopwatch()
         {
+            return CreateStopwatch(string.Empty);
+        }
+
+        public static string CreateStopwatch(string name)
+        {
             string id = Guid.NewGuid().ToString("N");
 
-            StopWatches.Add(id, (Stopwatch.GetTimestamp(), new List<StopwatchRecord>()));
+            StopWatches.Add(id, new StopwatchEntry
+            {
+                Name = name,
+                SegmentStartTimestamp = Stopwatch.GetTimestamp(),
+                AccumulatedTime = TimeSpan.Zero,
+                IsRunning = true,
+                Laps = new List<StopwatchRecord>()
+            });
 
             return id;
+        }
+
+        public static (int Count, List<string> IDs) GetActiveStopwatches()
+        {
+            var ids = new List<string>(StopWatches.Keys);
+            return (ids.Count, ids);
         }
 
         public static TimeSpan GetTimeElapsed(string id)
         {
             try
             {
-                var val = StopWatches[id].Item1;
-                return Stopwatch.GetElapsedTime(val);
+                var entry = StopWatches[id];
+                if (entry.IsRunning)
+                    return entry.AccumulatedTime + Stopwatch.GetElapsedTime(entry.SegmentStartTimestamp);
+                return entry.AccumulatedTime;
+            }
+            catch
+            {
+                throw new InvalidOperationException("A Stopwatch with this ID does not exist.");
+            }
+        }
+
+        public static void PauseStopwatch(string id)
+        {
+            var entry = StopWatches[id];
+            if (!entry.IsRunning) return;
+
+            entry.AccumulatedTime += Stopwatch.GetElapsedTime(entry.SegmentStartTimestamp);
+            entry.IsRunning = false;
+        }
+
+        public static void ResumeStopwatch(string id)
+        {
+            var entry = StopWatches[id];
+            if (entry.IsRunning) return;
+
+            entry.SegmentStartTimestamp = Stopwatch.GetTimestamp();
+            entry.IsRunning = true;
+        }
+
+        public static bool IsStopwatchRunning(string id)
+        {
+            try
+            {
+                return StopWatches[id].IsRunning;
             }
             catch
             {
@@ -38,27 +85,24 @@ namespace XRUIOS.Barebones
 
         public static StopwatchRecord CreateLap(string id)
         {
-            var elapsedLaps = StopWatches[id].Item2.Count;
+            var entry = StopWatches[id];
+            var lapCount = entry.Laps.Count;
+            var currentTime = (int)GetTimeElapsed(id).TotalSeconds;
 
-            var currentTime = GetTimeElapsed(id).Seconds;
+            var newStopwatchRecord = new StopwatchRecord(lapCount, currentTime);
 
-            var newStopwatchRecord = new StopwatchRecord(elapsedLaps, currentTime);
-
-            StopWatches[id].Item2.Add(newStopwatchRecord);
+            entry.Laps.Add(newStopwatchRecord);
 
             return newStopwatchRecord;
-
         }
 
         public static List<StopwatchRecord> DestroyStopwatch(string id)
         {
-            var records = StopWatches[id].Item2;
+            var records = StopWatches[id].Laps;
             StopWatches.Remove(id);
             return records;
-
         }
 
-        //Create Later
         public static void SaveStopwatchValuesAsSheet(List<StopwatchRecord> Values, DateTime RecordedOn, string FileName)
         {
             var directoryPath = Path.Combine(DataPath, $"{FileName}____RecordedOn_{RecordedOn:yyyy-MM-dd_HH-mm-ss}.csv");

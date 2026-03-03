@@ -74,6 +74,45 @@ namespace XRUIOS.Barebones
             timer.HangfireJobId = BackgroundJob.Schedule(() => FireTimer(timer.TimerName), delay);
         }
 
+        // Create and immediately start a timer
+        public static void CreateTimer(string name, TimeSpan duration, Action? onFinish = null)
+        {
+            var timer = new TimerRecord(name, duration, onFinish);
+            StartTimer(timer);
+        }
+
+        // Pause a running timer, preserving remaining time
+        public static void PauseTimer(string timerName)
+        {
+            if (!Timers.TryGetValue(timerName, out var timer) || !timer.IsRunning) return;
+
+            var remaining = timer.EndTime - DateTime.Now;
+            timer.PausedRemaining = remaining > TimeSpan.Zero ? remaining : TimeSpan.Zero;
+
+            if (!string.IsNullOrEmpty(timer.HangfireJobId))
+                BackgroundJob.Delete(timer.HangfireJobId);
+
+            timer.IsRunning = false;
+        }
+
+        // Resume a paused timer from where it left off
+        public static void ResumeTimer(string timerName)
+        {
+            if (!Timers.TryGetValue(timerName, out var timer) || timer.IsRunning || timer.PausedRemaining is null) return;
+
+            timer.EndTime = DateTime.Now + timer.PausedRemaining.Value;
+            timer.PausedRemaining = null;
+            timer.IsRunning = true;
+
+            ScheduleTimerJob(timer);
+        }
+
+        // Check if a timer is currently running
+        public static bool IsTimerRunning(string timerName)
+        {
+            return Timers.TryGetValue(timerName, out var timer) && timer.IsRunning;
+        }
+
         // Fire timer callback
         public static void FireTimer(string timerName)
         {
