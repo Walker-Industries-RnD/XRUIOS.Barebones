@@ -1,4 +1,5 @@
-﻿using XRUIOS.Barebones;
+﻿using EclipseProject;
+using XRUIOS.Barebones;
 using Microsoft.Maui.Storage;
 using System.Text.Json.Nodes;
 using static Pariah_Cybersecurity.DataHandler;
@@ -21,6 +22,7 @@ namespace XRUIOS.Barebones.Functions
         //C
         //Remember to create a folder with the same name in the directory containing all the assets!
 
+        [SeaOfDirac("ThemeSystem.SaveTheme", new[] { "theme" }, typeof(Task), typeof(XRUIOSTheme))]
         public static async Task SaveTheme(XRUIOSTheme theme)
         {
             var directoryPath = Path.Combine(DataPath, "Themes");
@@ -41,6 +43,7 @@ namespace XRUIOS.Barebones.Functions
         }
 
         //R
+        [SeaOfDirac("ThemeSystem.GetAllXRUIOSThemes", null, typeof(Task<List<XRUIOSTheme>>))]
         public static async Task<List<XRUIOSTheme>> GetAllXRUIOSThemes()
         {
             List<XRUIOSTheme> Themes = new List<XRUIOSTheme>();
@@ -62,6 +65,7 @@ namespace XRUIOS.Barebones.Functions
             return Themes;
         }
 
+        [SeaOfDirac("ThemeSystem.GetXRUIOSTheme", new[] { "FileName" }, typeof(Task<XRUIOSTheme>), typeof(string))]
         public static async Task<XRUIOSTheme> GetXRUIOSTheme(string FileName)
         {
 
@@ -74,6 +78,7 @@ namespace XRUIOS.Barebones.Functions
             return themeFile;
         }
 
+        [SeaOfDirac("ThemeSystem.GetCurrentTheme", new[] { "FileName" }, typeof(Task<XRUIOSTheme>), typeof(string))]
         public static async Task<XRUIOSTheme> GetCurrentTheme(string FileName)
         {
             return CurrentTheme;
@@ -82,6 +87,7 @@ namespace XRUIOS.Barebones.Functions
         //U
 
         //Remember to put Identity.Version up
+        [SeaOfDirac("ThemeSystem.UpdateTheme", new[] { "theme", "newTheme" }, typeof(Task), typeof(XRUIOSTheme), typeof(XRUIOSTheme))]
         public static async Task UpdateTheme(XRUIOSTheme theme, XRUIOSTheme newTheme)
         {
             var directoryPath = Path.Combine(DataPath, "Themes");
@@ -99,6 +105,7 @@ namespace XRUIOS.Barebones.Functions
             await JSONDataHandler.SaveJson(json);
         }
 
+        [SeaOfDirac("ThemeSystem.SetTheme", new[] { "FileName" }, typeof(Task), typeof(string))]
         public static async Task SetTheme(string FileName)
         {
             CurrentTheme.Set(await GetXRUIOSTheme(FileName));
@@ -107,6 +114,7 @@ namespace XRUIOS.Barebones.Functions
 
 
         //D
+        [SeaOfDirac("ThemeSystem.DeleteXRUIOSTheme", new[] { "FileName" }, typeof(Task), typeof(string))]
         public static async Task DeleteXRUIOSTheme(string FileName)
         {
             var directoryPath = Path.Combine(DataPath, "Themes");

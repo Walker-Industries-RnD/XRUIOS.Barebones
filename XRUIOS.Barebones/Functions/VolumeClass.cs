@@ -1,4 +1,5 @@
-﻿using XRUIOS.Barebones;
+﻿using EclipseProject;
+using XRUIOS.Barebones;
 using static Pariah_Cybersecurity.DataHandler;
 using static XRUIOS.Barebones.Interfaces.VolumeClass;
 using static XRUIOS.Barebones.XRUIOS;
@@ -25,11 +26,13 @@ namespace XRUIOS.Barebones.Functions
         internal static ObservableProperty<VolumeSetting> VolumeSettings;
 
         //CurrentSoundSetting (Get, Set)
+        [SeaOfDirac("VolumeClass.GetCurrentVolumeSettings", null, typeof(Task<VolumeSetting>))]
         public static async Task<VolumeSetting> GetCurrentVolumeSettings()
         {
             return VolumeSettings;
         }
 
+        [SeaOfDirac("VolumeClass.SetCurrentVolumeSettings", new[] { "soundSetting" }, typeof(Task), typeof(VolumeSetting))]
         public static async Task SetCurrentVolumeSettings(VolumeSetting soundSetting)
         {
             VolumeSettings.Set(soundSetting);
@@ -37,6 +40,7 @@ namespace XRUIOS.Barebones.Functions
 
         //Volume Settings (CRUD)
         //C
+        [SeaOfDirac("VolumeClass.AddVolumeSettings", new[] { "VolumeMixings" }, typeof(Task), typeof(VolumeSetting))]
         public static async Task AddVolumeSettings(VolumeSetting VolumeMixings)
         {
             var directoryPath = Path.Combine(DataPath, "VolumeMixings");
@@ -59,6 +63,7 @@ namespace XRUIOS.Barebones.Functions
         }
 
         //R
+        [SeaOfDirac("VolumeClass.GetVolumeSettings", null, typeof(Task<List<VolumeSetting>>))]
         public static async Task<List<VolumeSetting>> GetVolumeSettings()
         {
             var directoryPath = Path.Combine(DataPath, "VolumeMixings");
@@ -70,6 +75,7 @@ namespace XRUIOS.Barebones.Functions
             return loaded;
         }
 
+        [SeaOfDirac("VolumeClass.GetVolumeSetting", new[] { "volumeSettingName" }, typeof(Task<VolumeSetting>), typeof(string))]
         public static async Task<VolumeSetting> GetVolumeSetting(string volumeSettingName)
         {
             var directoryPath = Path.Combine(DataPath, "VolumeMixings");
@@ -82,6 +88,7 @@ namespace XRUIOS.Barebones.Functions
         }
 
         //App name and stuff/int for this device
+        [SeaOfDirac("VolumeClass.GetVolumeSettingsForThisDevice", null, typeof(Task<List<ValueTuple<string, int>>>))]
         public static async Task<List<(string, int)>> GetVolumeSettingsForThisDevice()
         {
 
@@ -102,6 +109,7 @@ namespace XRUIOS.Barebones.Functions
         }
 
         //U
+        [SeaOfDirac("VolumeClass.UpdateVolumeSettingDB", new[] { "originalData", "newData" }, typeof(Task), typeof(VolumeSetting), typeof(VolumeSetting))]
         public static async Task UpdateVolumeSettingDB(VolumeSetting originalData, VolumeSetting newData)
         {
             var directoryPath = Path.Combine(DataPath, "VolumeMixings");
@@ -128,6 +136,7 @@ namespace XRUIOS.Barebones.Functions
 
 
         //D
+        [SeaOfDirac("VolumeClass.DeleteVolumeSettingDB", new[] { "deletedData" }, typeof(Task), typeof(VolumeSetting))]
         public static async Task DeleteVolumeSettingDB(VolumeSetting deletedData)
         {
             var directoryPath = Path.Combine(DataPath, "VolumeMixings");
@@ -151,6 +160,7 @@ namespace XRUIOS.Barebones.Functions
             await JSONDataHandler.SaveJson(FileWithVolumeSettingDB);
         }
 
+        [SeaOfDirac("VolumeClass.ClearEQDB", null, typeof(Task))]
         public static async Task ClearEQDB()
         {
             var directoryPath = Path.Combine(DataPath, "VolumeMixings");

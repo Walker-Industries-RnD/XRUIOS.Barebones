@@ -1,4 +1,5 @@
-﻿using XRUIOS.Barebones;
+﻿using EclipseProject;
+using XRUIOS.Barebones;
 using Pariah_Cybersecurity;
 using System.Text.Json.Nodes;
 using static XRUIOS.Barebones.Interfaces.MediaAlbumClass;
@@ -13,6 +14,7 @@ namespace XRUIOS.Barebones.Functions
         public static readonly MediaAlbumClass Instance = new();
         private MediaAlbumClass() { }
 
+        [SeaOfDirac("MediaAlbumClass.AddMediaAlbum", new[] { "MediaAlbum" }, typeof(Task), typeof(AlbumMedia))]
         public static async Task AddMediaAlbum(AlbumMedia MediaAlbum)
         {
             var directoryPath = Path.Combine(DataPath, "MediaAlbum");
@@ -34,6 +36,7 @@ namespace XRUIOS.Barebones.Functions
             await DataHandler.JSONDataHandler.SaveJson(jsonFile);
         }
 
+        [SeaOfDirac("MediaAlbumClass.GetMediaAlbums", null, typeof(Task<List<AlbumMedia>>))]
         public static async Task<List<AlbumMedia>> GetMediaAlbums()
         {
             var basePath = Path.Combine(DataPath, "MediaAlbum");
@@ -74,6 +77,7 @@ namespace XRUIOS.Barebones.Functions
             return MediaAlbums;
         }
 
+        [SeaOfDirac("MediaAlbumClass.GetMediaAlbum", new[] { "identifier" }, typeof(Task<AlbumMedia>), typeof(string))]
         public static async Task<AlbumMedia> GetMediaAlbum(string identifier)
         {
             var directoryPath = Path.Combine(DataPath, "MediaAlbum");
@@ -95,6 +99,7 @@ namespace XRUIOS.Barebones.Functions
             throw new InvalidOperationException("MediaAlbum data is not in the expected format.");
         }
 
+        [SeaOfDirac("MediaAlbumClass.UpdateMediaAlbum", new[] { "MediaAlbum" }, typeof(Task), typeof(AlbumMedia))]
         public static async Task UpdateMediaAlbum(AlbumMedia MediaAlbum)
         {
             var directoryPath = Path.Combine(DataPath, "MediaAlbum");
@@ -110,6 +115,7 @@ namespace XRUIOS.Barebones.Functions
             await DataHandler.JSONDataHandler.SaveJson(jsonFile);
         }
 
+        [SeaOfDirac("MediaAlbumClass.DeleteMediaAlbum", new[] { "identifier" }, typeof(void), typeof(string))]
         public static void DeleteMediaAlbum(string identifier)
         {
             var filePath = Path.Combine(DataPath, "MediaAlbum", identifier + ".json");
@@ -123,6 +129,7 @@ namespace XRUIOS.Barebones.Functions
 
     public class MediaAlbumFavoritesClass
     {
+        [SeaOfDirac("MediaAlbumFavoritesClass.AddToFavorites", new[] { "MediaAlbumIdentifier", "directoryUUID" }, typeof(Task), typeof(string), typeof(string))]
         public static async Task AddToFavorites(string MediaAlbumIdentifier, string directoryUUID)
         {
             var directoryPath = Path.Combine(DataPath, "MediaAlbum");
@@ -157,6 +164,7 @@ namespace XRUIOS.Barebones.Functions
             await DataHandler.JSONDataHandler.SaveJson(editedJSON);
         }
 
+        [SeaOfDirac("MediaAlbumFavoritesClass.GetFavorites", null, typeof(Task<ValueTuple<List<string>, List<string>>>))]
         public static async Task<(List<string>, List<string>)> GetFavorites()
         {
             var directoryPath = Path.Combine(DataPath, "MediaAlbum");
@@ -200,6 +208,7 @@ namespace XRUIOS.Barebones.Functions
             return (resolvedFiles, unresolvedFiles);
         }
 
+        [SeaOfDirac("MediaAlbumFavoritesClass.GetFavoritePathsAsync", new[] { "onlyResolved" }, typeof(Task<List<string>>), typeof(bool))]
         public static async Task<List<string>> GetFavoritePathsAsync(bool onlyResolved = true)
         {
             var (resolved, unresolved) = await GetFavorites();
@@ -212,6 +221,7 @@ namespace XRUIOS.Barebones.Functions
             return all;
         }
 
+        [SeaOfDirac("MediaAlbumFavoritesClass.RemoveFromFavorites", new[] { "MediaAlbumIdentifier", "directoryUUID" }, typeof(Task), typeof(string), typeof(string))]
         public static async Task RemoveFromFavorites(string MediaAlbumIdentifier, string directoryUUID)
         {
             var directoryPath = Path.Combine(DataPath, "MediaAlbum");

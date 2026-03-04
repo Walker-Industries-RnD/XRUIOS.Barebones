@@ -1,4 +1,5 @@
-﻿using XRUIOS.Barebones;
+﻿using EclipseProject;
+using XRUIOS.Barebones;
 using Microsoft.Maui.Storage;
 using Pariah_Cybersecurity;
 using System.Text.Json.Nodes;
@@ -18,6 +19,7 @@ namespace XRUIOS.Barebones.Functions
         //C
         //Remember to create a folder with the same name in the directory containing all the assets!
 
+        [SeaOfDirac("NoteClass.SaveJournal", new[] { "journal" }, typeof(Task), typeof(Journal))]
         public static async Task SaveJournal(Journal journal)
         {
             var directoryPath = Path.Combine(DataPath, "Journals");
@@ -41,6 +43,7 @@ namespace XRUIOS.Barebones.Functions
         }
 
         //R
+        [SeaOfDirac("NoteClass.GetAllJournals", null, typeof(Task<List<Journal>>))]
         public static async Task<List<Journal>> GetAllJournals()
         {
             List<Journal> Journals = new List<Journal>();
@@ -62,6 +65,7 @@ namespace XRUIOS.Barebones.Functions
             return Journals;
         }
 
+        [SeaOfDirac("NoteClass.GetJournal", new[] { "FileName" }, typeof(Task<Journal>), typeof(string))]
         public static async Task<Journal> GetJournal(string FileName)
         {
 
@@ -75,6 +79,7 @@ namespace XRUIOS.Barebones.Functions
         }
 
 
+        [SeaOfDirac("NoteClass.GetCategory", new[] { "JournalName", "CategoryName" }, typeof(Task<Category>), typeof(string), typeof(string))]
         public static async Task<Category> GetCategory(string JournalName, string CategoryName)
         {
             var funcjournal = await GetJournal(JournalName);
@@ -93,6 +98,7 @@ namespace XRUIOS.Barebones.Functions
         //U
 
         //Remember to put Identity.Version up
+        [SeaOfDirac("NoteClass.UpdateJournal", new[] { "journal", "newJournal" }, typeof(Task<string>), typeof(Journal), typeof(Journal))]
         public static async Task<string> UpdateJournal(Journal journal, Journal newJournal)
         {
             var directoryPath = Path.Combine(DataPath, "Journals");
@@ -149,6 +155,7 @@ namespace XRUIOS.Barebones.Functions
 
 
         //D
+        [SeaOfDirac("NoteClass.DeleteJournal", new[] { "fileName" }, typeof(Task), typeof(string))]
         public static async Task DeleteJournal(string fileName)
         {
             var directoryPath = Path.Combine(DataPath, "Journals");
@@ -172,6 +179,7 @@ namespace XRUIOS.Barebones.Functions
         //Favorites
 
         // C
+        [SeaOfDirac("NoteClass.AddJournalToFavorites", new[] { "journalId" }, typeof(Task), typeof(string))]
         public static async Task AddJournalToFavorites(string journalId)
         {
             var dir = Path.Combine(DataPath, "Journals");
@@ -215,6 +223,7 @@ namespace XRUIOS.Barebones.Functions
 
 
         // R
+        [SeaOfDirac("NoteClass.GetJournalFavorites", null, typeof(Task<ValueTuple<List<string>, List<string>>>))]
         public static async Task<(List<string> resolved, List<string> unresolved)> GetJournalFavorites()
         {
             var directoryPath = Path.Combine(DataPath, "Journals");
@@ -242,6 +251,7 @@ namespace XRUIOS.Barebones.Functions
             return (resolved, unresolved);
         }
 
+        [SeaOfDirac("NoteClass.GetFavoriteJournalIdsAsync", new[] { "onlyResolved" }, typeof(Task<List<string>>), typeof(bool))]
         public static async Task<List<string>> GetFavoriteJournalIdsAsync(bool onlyResolved = true)
         {
             var (resolved, unresolved) = await GetJournalFavorites();
@@ -255,6 +265,7 @@ namespace XRUIOS.Barebones.Functions
         }
 
         // D
+        [SeaOfDirac("NoteClass.RemoveJournalFromFavorites", new[] { "JournalId" }, typeof(Task), typeof(string))]
         public static async Task RemoveJournalFromFavorites(string JournalId)
         {
             var directoryPath = Path.Combine(DataPath, "Journals");
@@ -280,6 +291,7 @@ namespace XRUIOS.Barebones.Functions
   
 
         //C
+        [SeaOfDirac("NoteClass.AddHistoryEntry", new[] { "TargetType", "Action", "TargetID", "Meta" }, typeof(Task), typeof(string), typeof(string), typeof(string), typeof(Dictionary<string, string>))]
         public static async Task AddHistoryEntry(
             string TargetType,
             string Action,
@@ -316,6 +328,7 @@ namespace XRUIOS.Barebones.Functions
         }
 
         //R
+        [SeaOfDirac("NoteClass.GetHistory", new[] { "TargetType", "TargetID" }, typeof(Task<List<HistoryEntry>>), typeof(string), typeof(string))]
         public static async Task<List<HistoryEntry>> GetHistory(
             string TargetType,
             string? TargetID = null)

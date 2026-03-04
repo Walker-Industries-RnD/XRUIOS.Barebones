@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using EclipseProject;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -17,7 +18,7 @@ namespace XRUIOS.Barebones
         private const int MaxProcessHistory = 100;
         private static readonly TimeSpan CpuSampleInterval = TimeSpan.FromMilliseconds(500);
 
-     
+        [SeaOfDirac("ProcessesClass.GetCurrentProcesses", new[] { "includeCpu" }, typeof(List<ProcessInfo>), typeof(bool))]
         public static List<ProcessInfo> GetCurrentProcesses(bool includeCpu = true)
         {
             var processes = new List<ProcessInfo>();
@@ -103,6 +104,7 @@ namespace XRUIOS.Barebones
             try { return action(); } catch { return defaultValue; }
         }
 
+        [SeaOfDirac("ProcessesClass.SaveProcessSnapshot", new[] { "snapshotName" }, typeof(Task<string>), typeof(string))]
         public static async Task<string> SaveProcessSnapshot(string? snapshotName = null)
         {
             var procs = GetCurrentProcesses(includeCpu: true);
@@ -124,6 +126,7 @@ namespace XRUIOS.Barebones
             return path;
         }
 
+        [SeaOfDirac("ProcessesClass.GetSavedSnapshots", null, typeof(List<string>))]
         public static List<string> GetSavedSnapshots()
         {
             var dir = Path.Combine(DataPath, "ProcessSnapshots");
@@ -132,6 +135,7 @@ namespace XRUIOS.Barebones
                 : new List<string>();
         }
 
+        [SeaOfDirac("ProcessesClass.LoadProcessSnapshot", new[] { "snapshotFileName" }, typeof(Task<ProcessSnapshot>), typeof(string))]
         public static async Task<ProcessSnapshot?> LoadProcessSnapshot(string snapshotFileName)
         {
             var path = Path.Combine(DataPath, "ProcessSnapshots", $"{snapshotFileName}.json"); // Fixed: add .json if missing
@@ -175,6 +179,7 @@ namespace XRUIOS.Barebones
 
 
 
+        [SeaOfDirac("ProcessesClass.GetProcessesByType", null, typeof(Dictionary<string, List<ProcessInfo>>))]
         public static Dictionary<string, List<ProcessInfo>> GetProcessesByType()
         {
             var processes = GetCurrentProcesses();
@@ -186,6 +191,7 @@ namespace XRUIOS.Barebones
 
 
 
+        [SeaOfDirac("ProcessesClass.KillProcess", new[] { "processId", "processName" }, typeof(Task<bool>), typeof(int), typeof(string))]
         public static async Task<bool> KillProcess(int processId, string processName)
         {
             try

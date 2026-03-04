@@ -1,4 +1,5 @@
-﻿using XRUIOS.Barebones;
+﻿using EclipseProject;
+using XRUIOS.Barebones;
 using Pariah_Cybersecurity;
 using System.Numerics;
 using System.Text.Json.Nodes;
@@ -243,6 +244,7 @@ namespace XRUIOS.Barebones.Functions
 
         //Update Functions
 
+        [SeaOfDirac("Area Manager.UpdateWorldPoint", new[] { "wp", "patch" }, typeof(WorldPoint), typeof(WorldPoint), typeof(WorldPointPatch))]
         public static WorldPoint UpdateWorldPoint(
         WorldPoint wp,
         WorldPointPatch patch)
@@ -263,6 +265,7 @@ namespace XRUIOS.Barebones.Functions
         }
 
 
+        [SeaOfDirac("Area Manager.UpdateStaticObject", new[] { "obj", "patch" }, typeof(StaticObject), typeof(StaticObject), typeof(StaticObjectPatch))]
         public static StaticObject UpdateStaticObject(
             StaticObject obj,
             StaticObjectPatch patch)
@@ -279,6 +282,7 @@ namespace XRUIOS.Barebones.Functions
         }
 
 
+        [SeaOfDirac("Area Manager.UpdateApp", new[] { "obj", "patch" }, typeof(App), typeof(App), typeof(AppPatch))]
         public static App UpdateApp(
        App obj,
        AppPatch patch)
@@ -293,6 +297,7 @@ namespace XRUIOS.Barebones.Functions
             };
         }
 
+        [SeaOfDirac("Area Manager.UpdateDesktopScreen", new[] { "obj", "patch" }, typeof(DesktopScreen), typeof(DesktopScreen), typeof(DesktopScreenPatch))]
         public static DesktopScreen UpdateDesktopScreen(
      DesktopScreen obj,
      DesktopScreenPatch patch)
@@ -307,6 +312,7 @@ namespace XRUIOS.Barebones.Functions
             };
         }
 
+        [SeaOfDirac("Area Manager.UpdateStaciaItems", new[] { "obj", "patch" }, typeof(StaciaItems), typeof(StaciaItems), typeof(StaciaItemsPatch))]
         public static StaciaItems UpdateStaciaItems(
       StaciaItems obj,
       StaciaItemsPatch patch)
@@ -325,6 +331,7 @@ namespace XRUIOS.Barebones.Functions
 
 
         //C
+        [SeaOfDirac("Area Manager.AddWorldPoint", new[] { "worldPoint" }, typeof(Task), typeof(WorldPoint))]
         public static async Task AddWorldPoint(WorldPoint worldPoint)
         {
             var directoryPath = Path.Combine(DataPath, "WorldPoint");
@@ -344,6 +351,7 @@ namespace XRUIOS.Barebones.Functions
 
 
         //R
+        [SeaOfDirac("Area Manager.GetWorldPoints", null, typeof(List<string>))]
         public static List<string> GetWorldPoints()
         {
             var directoryPath = Path.Combine(DataPath, "WorldPoint");
@@ -357,6 +365,7 @@ namespace XRUIOS.Barebones.Functions
         }
 
 
+        [SeaOfDirac("Area Manager.GetWorldPoint", new[] { "identifier" }, typeof(Task<WorldPoint>), typeof(string))]
         public static async Task<WorldPoint> GetWorldPoint(string identifier)
         {
             var directoryPath = Path.Combine(DataPath, "WorldPoint");
@@ -378,6 +387,7 @@ namespace XRUIOS.Barebones.Functions
         }
 
         //U
+        [SeaOfDirac("Area Manager.UpdateWorldPoint", new[] { "worldPoint" }, typeof(Task), typeof(WorldPoint))]
         public static async Task UpdateWorldPoint(WorldPoint worldPoint)
         {
             var directoryPath = Path.Combine(DataPath, "WorldPoint");
@@ -395,6 +405,7 @@ namespace XRUIOS.Barebones.Functions
         }
         //D
         // WorldPoint
+        [SeaOfDirac("Area Manager.DeleteWorldPoint", new[] { "identifier" }, typeof(void), typeof(string))]
         public static void DeleteWorldPoint(string identifier)
         {
             var filePath = Path.Combine(DataPath, "WorldPoint", identifier + ".json");

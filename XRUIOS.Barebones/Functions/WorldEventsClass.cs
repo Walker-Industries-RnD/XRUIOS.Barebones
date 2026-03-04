@@ -1,4 +1,5 @@
-﻿using static Pariah_Cybersecurity.DataHandler;
+﻿using EclipseProject;
+using static Pariah_Cybersecurity.DataHandler;
 using static XRUIOS.Barebones.Interfaces.WorldEventsClass;
 using static XRUIOS.Barebones.ProcessesClass;
 using static XRUIOS.Barebones.XRUIOS;
@@ -13,7 +14,7 @@ namespace XRUIOS.Barebones
 
         private const int MaxEvents = 1000;
 
-      
+        [SeaOfDirac("WorldEventsClass.GetWorldEvents", null, typeof(Task<List<WorldEvent>>))]
         public static async Task<List<WorldEvent>> GetWorldEvents()
         {
             var directoryPath = Path.Combine(DataPath, "WorldEvents");
@@ -22,6 +23,7 @@ namespace XRUIOS.Barebones
             return loaded;
         }
 
+        [SeaOfDirac("WorldEventsClass.AddWorldEvent", new[] { "newEvent" }, typeof(Task), typeof(WorldEvent))]
         public static async Task AddWorldEvent(WorldEvent newEvent)
         {
             var directoryPath = Path.Combine(DataPath, "WorldEvents");
@@ -50,6 +52,7 @@ namespace XRUIOS.Barebones
             await JSONDataHandler.SaveJson(updatedJSON);
         }
 
+        [SeaOfDirac("WorldEventsClass.DeleteWorldEvent", new[] { "deletedEvent" }, typeof(Task), typeof(WorldEvent))]
         public static async Task DeleteWorldEvent(WorldEvent deletedEvent)
         {
             var directoryPath = Path.Combine(DataPath, "WorldEvents");
@@ -66,6 +69,7 @@ namespace XRUIOS.Barebones
             await JSONDataHandler.SaveJson(updatedJSON);
         }
 
+        [SeaOfDirac("WorldEventsClass.ClearWorldEvents", null, typeof(Task))]
         public static async Task ClearWorldEvents()
         {
             var directoryPath = Path.Combine(DataPath, "WorldEvents");

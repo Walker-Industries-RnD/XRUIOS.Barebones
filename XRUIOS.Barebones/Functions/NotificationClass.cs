@@ -1,4 +1,5 @@
-﻿using XRUIOS.Barebones;
+﻿using EclipseProject;
+using XRUIOS.Barebones;
 using Pariah_Cybersecurity;
 using static XRUIOS.Barebones.Interfaces.NotificationClass;
 using static XRUIOS.Barebones.XRUIOS;
@@ -33,6 +34,7 @@ namespace XRUIOS.Barebones.Functions
         }
 
         // C
+        [SeaOfDirac("NotificationClass.AddNotification", new[] { "notification" }, typeof(Task), typeof(NotificationContent))]
         public static async Task AddNotification(NotificationContent notification)
         {
             var notifications = await LoadAllAsync();
@@ -45,6 +47,7 @@ namespace XRUIOS.Barebones.Functions
         }
 
         // R
+        [SeaOfDirac("NotificationClass.GetNotifications", new[] { "includeExpired" }, typeof(Task<List<NotificationContent>>), typeof(bool))]
         public static async Task<List<NotificationContent>> GetNotifications(bool includeExpired = false)
         {
             var notifications = await LoadAllAsync();
@@ -54,6 +57,7 @@ namespace XRUIOS.Barebones.Functions
         }
 
         // D
+        [SeaOfDirac("NotificationClass.RemoveNotification", new[] { "tag", "group" }, typeof(Task), typeof(string), typeof(string))]
         public static async Task RemoveNotification(string tag, string group)
         {
             var notifications = await LoadAllAsync();
@@ -61,6 +65,7 @@ namespace XRUIOS.Barebones.Functions
             await SaveAllAsync(notifications);
         }
 
+        [SeaOfDirac("NotificationClass.ClearAllNotifications", null, typeof(Task))]
         public static async Task ClearAllNotifications()
         {
             await SaveAllAsync(new List<NotificationContent>());

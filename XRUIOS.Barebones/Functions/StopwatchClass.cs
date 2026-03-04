@@ -1,3 +1,4 @@
+using EclipseProject;
 using CsvHelper;
 using System.Diagnostics;
 using System.Globalization;
@@ -14,11 +15,13 @@ namespace XRUIOS.Barebones
 
         public static Dictionary<string, StopwatchEntry> StopWatches = new Dictionary<string, StopwatchEntry>();
 
+        [SeaOfDirac("StopwatchClass.CreateStopwatch", null, typeof(string))]
         public static string CreateStopwatch()
         {
             return CreateStopwatch(string.Empty);
         }
 
+        [SeaOfDirac("StopwatchClass.CreateStopwatch", new[] { "name" }, typeof(string), typeof(string))]
         public static string CreateStopwatch(string name)
         {
             string id = Guid.NewGuid().ToString("N");
@@ -35,12 +38,14 @@ namespace XRUIOS.Barebones
             return id;
         }
 
+        [SeaOfDirac("StopwatchClass.GetActiveStopwatches", null, typeof(ValueTuple<int, List<string>>))]
         public static (int Count, List<string> IDs) GetActiveStopwatches()
         {
             var ids = new List<string>(StopWatches.Keys);
             return (ids.Count, ids);
         }
 
+        [SeaOfDirac("StopwatchClass.GetTimeElapsed", new[] { "id" }, typeof(TimeSpan), typeof(string))]
         public static TimeSpan GetTimeElapsed(string id)
         {
             try
@@ -56,6 +61,7 @@ namespace XRUIOS.Barebones
             }
         }
 
+        [SeaOfDirac("StopwatchClass.PauseStopwatch", new[] { "id" }, typeof(void), typeof(string))]
         public static void PauseStopwatch(string id)
         {
             var entry = StopWatches[id];
@@ -65,6 +71,7 @@ namespace XRUIOS.Barebones
             entry.IsRunning = false;
         }
 
+        [SeaOfDirac("StopwatchClass.ResumeStopwatch", new[] { "id" }, typeof(void), typeof(string))]
         public static void ResumeStopwatch(string id)
         {
             var entry = StopWatches[id];
@@ -74,6 +81,7 @@ namespace XRUIOS.Barebones
             entry.IsRunning = true;
         }
 
+        [SeaOfDirac("StopwatchClass.IsStopwatchRunning", new[] { "id" }, typeof(bool), typeof(string))]
         public static bool IsStopwatchRunning(string id)
         {
             try
@@ -86,6 +94,7 @@ namespace XRUIOS.Barebones
             }
         }
 
+        [SeaOfDirac("StopwatchClass.CreateLap", new[] { "id" }, typeof(StopwatchRecord), typeof(string))]
         public static StopwatchRecord CreateLap(string id)
         {
             var entry = StopWatches[id];
@@ -99,6 +108,7 @@ namespace XRUIOS.Barebones
             return newStopwatchRecord;
         }
 
+        [SeaOfDirac("StopwatchClass.DestroyStopwatch", new[] { "id" }, typeof(List<StopwatchRecord>), typeof(string))]
         public static List<StopwatchRecord> DestroyStopwatch(string id)
         {
             var records = StopWatches[id].Laps;
@@ -106,6 +116,7 @@ namespace XRUIOS.Barebones
             return records;
         }
 
+        [SeaOfDirac("StopwatchClass.SaveStopwatchValuesAsSheet", new[] { "Values", "RecordedOn", "FileName" }, typeof(void), typeof(List<StopwatchRecord>), typeof(DateTime), typeof(string))]
         public static void SaveStopwatchValuesAsSheet(List<StopwatchRecord> Values, DateTime RecordedOn, string FileName)
         {
             var directoryPath = Path.Combine(DataPath, $"{FileName}____RecordedOn_{RecordedOn:yyyy-MM-dd_HH-mm-ss}.csv");

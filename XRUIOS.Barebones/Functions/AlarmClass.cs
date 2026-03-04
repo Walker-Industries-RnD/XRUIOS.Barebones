@@ -1,4 +1,5 @@
-﻿using Hangfire;
+﻿using EclipseProject;
+using Hangfire;
 using Hangfire.MemoryStorage;
 using System.Collections.ObjectModel;
 using static Pariah_Cybersecurity.DataHandler;
@@ -17,6 +18,7 @@ namespace XRUIOS.Barebones
         public static ObservableCollection<Alarm> Alarms = new();
 
         // C
+        [SeaOfDirac("Alarm.AddAlarm", new[] { "newAlarm" }, typeof(Task), typeof(Alarm))]
         public static async Task AddAlarm(Alarm newAlarm)
         {
             Alarms.Add(newAlarm);
@@ -36,6 +38,7 @@ namespace XRUIOS.Barebones
         }
 
         // R
+        [SeaOfDirac("Alarm.LoadAlarms", null, typeof(Task))]
         public static async Task LoadAlarms()
         {
             var directoryPath = Path.Combine(DataPath, "Alarms");
@@ -48,6 +51,7 @@ namespace XRUIOS.Barebones
         }
 
         // U
+        [SeaOfDirac("Alarm.UpdateAlarm", new[] { "existingAlarm", "updateAction" }, typeof(Task<Alarm>), typeof(Alarm), typeof(Action<Alarm>))]
         public static async Task<Alarm?> UpdateAlarm(Alarm existingAlarm, Action<Alarm> updateAction)
         {
             if (!Alarms.Contains(existingAlarm))
@@ -91,6 +95,7 @@ namespace XRUIOS.Barebones
         }
 
         // Convenience constructor — builds and schedules an alarm in one call
+        [SeaOfDirac("Alarm.CreateAlarm", new[] { "alarmName", "alarmTime", "isRecurring", "recurringDays", "soundFilePath", "volume" }, typeof(Task), typeof(string), typeof(DateTime), typeof(bool), typeof(List<DayOfWeek>), typeof(FileRecord), typeof(int))]
         public static async Task CreateAlarm(string alarmName, DateTime alarmTime, bool isRecurring, List<DayOfWeek> recurringDays, FileRecord soundFilePath, int volume)
         {
             var alarm = new Alarm(alarmName, alarmTime, isRecurring, recurringDays, soundFilePath, volume, true);
@@ -98,36 +103,42 @@ namespace XRUIOS.Barebones
         }
 
         // Get full details of a single alarm by name (null if not found)
+        [SeaOfDirac("Alarm.GetAlarmDetails", new[] { "alarmName" }, typeof(Alarm), typeof(string))]
         public static Alarm? GetAlarmDetails(string alarmName)
         {
             return Alarms.FirstOrDefault(a => a.AlarmName == alarmName);
         }
 
         // Search alarms by partial name match (case-insensitive)
+        [SeaOfDirac("Alarm.SearchAlarms", new[] { "query" }, typeof(List<Alarm>), typeof(string))]
         public static List<Alarm> SearchAlarms(string query)
         {
             return Alarms.Where(a => a.AlarmName.Contains(query, StringComparison.OrdinalIgnoreCase)).ToList();
         }
 
         // Get current XRUIOS time (long and short format)
+        [SeaOfDirac("Alarm.GetCurrentTime", null, typeof(ValueTuple<string, string>))]
         public static (string LongTime, string ShortTime) GetCurrentTime()
         {
             return ChronoClass.GetTime();
         }
 
         // Get current XRUIOS timezone ID
+        [SeaOfDirac("Alarm.GetCurrentTimezone", null, typeof(string))]
         public static string GetCurrentTimezone()
         {
             return ChronoClass.GetTimezone(string.Empty);
         }
 
         // Set XRUIOS timezone by system timezone ID
+        [SeaOfDirac("Alarm.SetTimezone", new[] { "timezone" }, typeof(void), typeof(string))]
         public static void SetTimezone(string timezone)
         {
             ChronoClass.SetTimezone(timezone);
         }
 
         // D
+        [SeaOfDirac("Alarm.DeleteAlarm", new[] { "alarm" }, typeof(Task), typeof(Alarm))]
         public static async Task DeleteAlarm(Alarm alarm)
         {
             foreach (var id in alarm.JobIds)

@@ -1,4 +1,5 @@
-﻿using static Pariah_Cybersecurity.DataHandler;
+﻿using EclipseProject;
+using static Pariah_Cybersecurity.DataHandler;
 using static XRUIOS.Barebones.ExperimentalAudioClass;
 using static XRUIOS.Barebones.Interfaces.ExperimentalAudioClass;
 using static XRUIOS.Barebones.Interfaces.SoundEQClass;
@@ -15,11 +16,13 @@ namespace XRUIOS.Barebones
         internal static ObservableProperty<SoundEQ> CurrentSoundSetting;
 
         //CurrentSoundSetting (Get, Set)
+        [SeaOfDirac("SoundEQClass.GetCurrentEQ", null, typeof(Task<SoundEQ>))]
         public static async Task<SoundEQ> GetCurrentEQ()
         {
             return CurrentSoundSetting;
         }
 
+        [SeaOfDirac("SoundEQClass.SetCurrentEQ", new[] { "soundSetting" }, typeof(Task), typeof(SoundEQ))]
         public static async Task SetCurrentEQ(SoundEQ soundSetting)
         {
             CurrentSoundSetting.Set(soundSetting);
@@ -29,6 +32,7 @@ namespace XRUIOS.Barebones
 
         //General EQDB Info
         //C
+        [SeaOfDirac("SoundEQClass.AddSoundEQDBs", new[] { "EQDBData" }, typeof(Task), typeof(SoundEQ))]
         public static async Task AddSoundEQDBs(SoundEQ EQDBData)
         {
             var directoryPath = Path.Combine(DataPath, "EQDB");
@@ -57,6 +61,7 @@ namespace XRUIOS.Barebones
         }
 
         //R
+        [SeaOfDirac("SoundEQClass.GetSoundEQDBs", null, typeof(Task<List<SoundEQ>>))]
         public static async Task<List<SoundEQ>> GetSoundEQDBs()
         {
             var directoryPath = Path.Combine(DataPath, "EQDB");
@@ -69,6 +74,7 @@ namespace XRUIOS.Barebones
         }
 
 
+        [SeaOfDirac("SoundEQClass.GetSoundEQDB", new[] { "eqDBName" }, typeof(Task<SoundEQ>), typeof(string))]
         public static async Task<SoundEQ> GetSoundEQDB(string eqDBName)
         {
             var directoryPath = Path.Combine(DataPath, "EQDB");
@@ -83,6 +89,7 @@ namespace XRUIOS.Barebones
 
 
         //U
+        [SeaOfDirac("SoundEQClass.UpdateSoundEQDB", new[] { "originalData", "newData" }, typeof(Task), typeof(SoundEQ), typeof(SoundEQ))]
         public static async Task UpdateSoundEQDB(SoundEQ originalData, SoundEQ newData)
         {
             var directoryPath = Path.Combine(DataPath, "EQDB");
@@ -108,6 +115,7 @@ namespace XRUIOS.Barebones
 
 
         //D
+        [SeaOfDirac("SoundEQClass.DeleteSoundEQDB", new[] { "deletedData" }, typeof(Task), typeof(SoundEQ))]
         public static async Task DeleteSoundEQDB(SoundEQ deletedData)
         {
             var directoryPath = Path.Combine(DataPath, "EQDB");
@@ -131,6 +139,7 @@ namespace XRUIOS.Barebones
             await JSONDataHandler.SaveJson(FileWithSoundEQDB);
         }
 
+        [SeaOfDirac("SoundEQClass.ClearEQDB", null, typeof(Task))]
         public static async Task ClearEQDB()
         {
             var directoryPath = Path.Combine(DataPath, "EQDB");
@@ -151,6 +160,7 @@ namespace XRUIOS.Barebones
         //Default EQDB Info (Get/Set)
 
         //Set
+        [SeaOfDirac("SoundEQClass.SetDefaultEQDB", new[] { "EQDBData" }, typeof(Task), typeof(SoundEQ))]
         public static async Task SetDefaultEQDB(SoundEQ EQDBData)
         {
             var directoryPath = Path.Combine(DataPath, "EQDB");
@@ -166,6 +176,7 @@ namespace XRUIOS.Barebones
         }
 
         //Get
+        [SeaOfDirac("SoundEQClass.GetDefaultEQDB", null, typeof(Task<SoundEQ>))]
         public static async Task<SoundEQ> GetDefaultEQDB()
         {
             var directoryPath = Path.Combine(DataPath, "EQDB");
@@ -179,6 +190,7 @@ namespace XRUIOS.Barebones
 
         //Reset
 
+        [SeaOfDirac("SoundEQClass.ResetDefaultEQDB", null, typeof(Task))]
         public static async Task ResetDefaultEQDB()
         {
             var directoryPath = Path.Combine(DataPath, "EQDB");

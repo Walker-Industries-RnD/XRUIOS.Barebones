@@ -1,4 +1,5 @@
-﻿using static XRUIOS.Barebones.Interfaces.Songs;
+﻿using EclipseProject;
+using static XRUIOS.Barebones.Interfaces.Songs;
 using Songs = XRUIOS.Barebones.Interfaces.Songs;
 using YuukoProtocol;
 using static XRUIOS.Barebones.Songs;
@@ -102,6 +103,7 @@ namespace XRUIOS.Barebones
         }
 
         //Trying something new
+        [SeaOfDirac("MusicPlayerClass.GetOrCreateOverview", new[] { "audioFile", "directoryUUID" }, typeof(Task<SongOverview>), typeof(string), typeof(string))]
         public static async Task<SongOverview> GetOrCreateOverview(string audioFile, string directoryUUID)
         {
             var overviewTuple = await Songs.SongClass.GetSongInfo(audioFile, directoryUUID, Interfaces.Songs.SongClass.MusicInfoStyle.overview);

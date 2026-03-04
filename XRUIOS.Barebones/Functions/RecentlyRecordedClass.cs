@@ -1,4 +1,5 @@
-﻿using static Pariah_Cybersecurity.DataHandler;
+﻿using EclipseProject;
+using static Pariah_Cybersecurity.DataHandler;
 using static XRUIOS.Barebones.XRUIOS;
 using YuukoProtocol;
 
@@ -13,6 +14,7 @@ namespace XRUIOS.Barebones
 
         private const int MaxRecent = 30;
 
+        [SeaOfDirac("RecentlyRecordedClass.GetRecentlyRecorded", null, typeof(Task<List<FileRecord>>))]
         public static async Task<List<FileRecord>> GetRecentlyRecorded()
         {
             var directoryPath = Path.Combine(DataPath, "RecentlyRecorded");
@@ -21,6 +23,7 @@ namespace XRUIOS.Barebones
             return loaded;
         }
 
+        [SeaOfDirac("RecentlyRecordedClass.AddToRecentlyRecorded", new[] { "newlyRecorded" }, typeof(Task), typeof(FileRecord))]
         public static async Task AddToRecentlyRecorded(FileRecord newlyRecorded)
         {
             var directoryPath = Path.Combine(DataPath, "RecentlyRecorded");
@@ -37,6 +40,7 @@ namespace XRUIOS.Barebones
             await JSONDataHandler.SaveJson(updatedJSON);
         }
 
+        [SeaOfDirac("RecentlyRecordedClass.DeleteSoundRecentlyRecorded", new[] { "deletedData" }, typeof(Task), typeof(FileRecord))]
         public static async Task DeleteSoundRecentlyRecorded(FileRecord deletedData)
         {
             var directoryPath = Path.Combine(DataPath, "RecentlyRecorded");
@@ -53,6 +57,7 @@ namespace XRUIOS.Barebones
             await JSONDataHandler.SaveJson(updatedJSON);
         }
 
+        [SeaOfDirac("RecentlyRecordedClass.ClearRecentlyRecorded", null, typeof(Task))]
         public static async Task ClearRecentlyRecorded()
         {
             var directoryPath = Path.Combine(DataPath, "RecentlyRecorded");

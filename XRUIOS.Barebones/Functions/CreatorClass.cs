@@ -1,4 +1,5 @@
-﻿using Pariah_Cybersecurity;
+﻿using EclipseProject;
+using Pariah_Cybersecurity;
 using System.Text.Json.Nodes;
 using static Pariah_Cybersecurity.DataHandler;
 using static XRUIOS.Barebones.XRUIOS;
@@ -40,6 +41,7 @@ namespace XRUIOS.Barebones
 
             //IMPORTANT, PFP and Files use Media, not Yuuko Bindings (Although they're connected)
 
+            [SeaOfDirac("CreatorClass.CreatorFileClass.CreateCreator", new[] { "CreatorName", "Description", "PFPPath", "FilePaths", "CreatorType" }, typeof(Task), typeof(string), typeof(string), typeof(string), typeof(List<string>), typeof(string))]
             public static async Task CreateCreator(string CreatorName, string? Description, string? PFPPath, List<string> FilePaths, string CreatorType)
             {
                 var directoryPath = Path.Combine(DataPath, "Creators", CreatorType);
@@ -104,6 +106,7 @@ namespace XRUIOS.Barebones
             }
 
             //R
+            [SeaOfDirac("CreatorClass.CreatorFileClass.GetCreator", new[] { "CreatorName", "CreatorType" }, typeof(Task<Creator>), typeof(string), typeof(string))]
             public static async Task<Creator> GetCreator(string CreatorName, string CreatorType)
             {
 
@@ -128,6 +131,7 @@ namespace XRUIOS.Barebones
 
             }
 
+            [SeaOfDirac("CreatorClass.CreatorFileClass.GetCreatorOverview", new[] { "CreatorName", "CreatorType" }, typeof(Task<ValueTuple<string, string>>), typeof(string), typeof(string))]
             public static async Task<(string, string)> GetCreatorOverview(string CreatorName, string CreatorType)
             {
 
@@ -152,6 +156,7 @@ namespace XRUIOS.Barebones
 
             }
 
+            [SeaOfDirac("CreatorClass.CreatorFileClass.GetCreatorFiles", new[] { "CreatorName", "CreatorType" }, typeof(Task<List<FileRecord>>), typeof(string), typeof(string))]
             public static async Task<List<FileRecord>> GetCreatorFiles(string CreatorName, string CreatorType)
             {
 
@@ -179,6 +184,7 @@ namespace XRUIOS.Barebones
             //U
             //(You can't edit the name)
 
+            [SeaOfDirac("CreatorClass.CreatorFileClass.AddFile", new[] { "CreatorName", "CreatorType", "FilePaths" }, typeof(Task), typeof(string), typeof(string), typeof(List<string>))]
             public static async Task AddFile(string CreatorName, string CreatorType, List<string> FilePaths)
             {
                 var CreatorFile = await GetCreator(CreatorName, CreatorType);
@@ -202,6 +208,7 @@ namespace XRUIOS.Barebones
 
             }
 
+            [SeaOfDirac("CreatorClass.CreatorFileClass.SetDescription", new[] { "CreatorName", "CreatorType", "Description" }, typeof(Task), typeof(string), typeof(string), typeof(string))]
             public static async Task SetDescription(string CreatorName, string CreatorType, string Description)
             {
                 var CreatorFile = await GetCreator(CreatorName, CreatorType);
@@ -223,6 +230,7 @@ namespace XRUIOS.Barebones
 
 
             //D
+            [SeaOfDirac("CreatorClass.CreatorFileClass.RemoveFiles", new[] { "CreatorName", "CreatorType", "filesToRemove" }, typeof(Task), typeof(string), typeof(string), typeof(List<FileRecord>))]
             public static async Task RemoveFiles(string CreatorName, string CreatorType, List<FileRecord> filesToRemove)
             {
                 var creator = await GetCreator(CreatorName, CreatorType);
@@ -255,6 +263,7 @@ namespace XRUIOS.Barebones
 
 
             //C
+            [SeaOfDirac("CreatorClass.CreatorFavoritesClass.AddToFavorites", new[] { "CreatorName", "CreatorType" }, typeof(Task), typeof(string), typeof(string))]
             public static async Task AddToFavorites(string CreatorName, string CreatorType)
             {
                 var directoryPath = Path.Combine(DataPath, "Creators", CreatorType);
@@ -297,6 +306,7 @@ namespace XRUIOS.Barebones
             }
 
             //R
+            [SeaOfDirac("CreatorClass.CreatorFavoritesClass.GetFavorites", new[] { "CreatorType" }, typeof(Task<ValueTuple<List<string>, List<string>>>), typeof(string))]
             public static async Task<(List<string>, List<string>)> GetFavorites(string CreatorType)
             {
                 var directoryPath = Path.Combine(DataPath, "Creators", CreatorType);
@@ -327,6 +337,7 @@ namespace XRUIOS.Barebones
 
                 return (resolvedPaths, unresolvedNames);
             }
+            [SeaOfDirac("CreatorClass.CreatorFavoritesClass.GetFavoritePathsAsync", new[] { "CreatorType", "onlyResolved" }, typeof(Task<List<string>>), typeof(string), typeof(bool))]
             public static async Task<List<string>> GetFavoritePathsAsync(string CreatorType, bool onlyResolved = true)
             {
                 var (resolved, unresolved) = await GetFavorites(CreatorType);
@@ -342,6 +353,7 @@ namespace XRUIOS.Barebones
             }
 
             //D
+            [SeaOfDirac("CreatorClass.CreatorFavoritesClass.RemoveFromFavorites", new[] { "CreatorName", "CreatorType" }, typeof(Task), typeof(string), typeof(string))]
             public static async Task RemoveFromFavorites(string CreatorName, string CreatorType)
             {
                 var directoryPath = Path.Combine(DataPath, "Creators", CreatorType);
@@ -389,6 +401,7 @@ namespace XRUIOS.Barebones
         //Dictionary CreatorName, List<string> tags
 
         //Auto init when you create qa new creator class
+        [SeaOfDirac("CreatorClass.InitiateCreatorClass", new[] { "CreatorType" }, typeof(Task), typeof(string))]
         public static async Task InitiateCreatorClass(string CreatorType)
         {
             var directoryPath = Path.Combine(DataPath, "Creators", CreatorType); 

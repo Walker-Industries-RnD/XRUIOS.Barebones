@@ -1,4 +1,5 @@
-﻿using Hangfire;
+﻿using EclipseProject;
+using Hangfire;
 using Ical.Net.CalendarComponents;
 using Ical.Net.DataTypes;
 using Ical.Net.Serialization;
@@ -19,6 +20,7 @@ namespace XRUIOS.Barebones
         //To keep things simple, we will attach media here as byte[] (Is what i'd like to tell myself)
 
         //C
+        [SeaOfDirac("Calendar.CreateSimpleEvent", new[] { "eventDate", "summary", "description", "timezone", "durationHours", "attachmentsList" }, typeof(Task<string>), typeof(DateTime), typeof(string), typeof(string), typeof(TimeZoneInfo), typeof(int), typeof(List<FileRecord>))]
         public static async Task<string> CreateSimpleEvent(
             DateTime eventDate,
             string summary,
@@ -89,6 +91,7 @@ namespace XRUIOS.Barebones
 
         }
 
+        [SeaOfDirac("Calendar.CreateRecurringEvent", new[] { "eventDate", "summary", "description", "recurrencePattern", "timezone", "durationHours", "attachmentsList" }, typeof(Task<string>), typeof(DateTime), typeof(string), typeof(string), typeof(RecurrencePattern), typeof(TimeZoneInfo), typeof(int), typeof(List<FileRecord>))]
         public static async Task<string> CreateRecurringEvent(
             DateTime eventDate,
             string summary,
@@ -164,6 +167,7 @@ namespace XRUIOS.Barebones
         }
 
         //R
+        [SeaOfDirac("Calendar.LoadAllEvents", null, typeof(List<CalendarEvent>))]
         public static List<CalendarEvent> LoadAllEvents()
         {
             var directoryPath = Path.Combine(DataPath, "Calendar");
@@ -184,6 +188,7 @@ namespace XRUIOS.Barebones
         }
 
         // Get all events on a specific day (local time)
+        [SeaOfDirac("Calendar.GetEventsForDay", new[] { "day" }, typeof(List<CalendarEvent>), typeof(DateTime))]
         public static List<CalendarEvent> GetEventsForDay(DateTime day)
         {
             var allEvents = CalendarClass.LoadAllEvents();
@@ -202,6 +207,7 @@ namespace XRUIOS.Barebones
         }
 
         // Get all events within a specific timespan (inclusive)
+        [SeaOfDirac("Calendar.GetEventsInRange", new[] { "start", "end" }, typeof(List<CalendarEvent>), typeof(DateTime), typeof(DateTime))]
         public static List<CalendarEvent> GetEventsInRange(DateTime start, DateTime end)
         {
             if (start > end) throw new ArgumentException("Start cannot be after end.");
@@ -220,6 +226,7 @@ namespace XRUIOS.Barebones
         }
 
 
+        [SeaOfDirac("Calendar.GetEventByUid", new[] { "uid" }, typeof(CalendarEvent), typeof(string))]
         public static CalendarEvent? GetEventByUid(string uid)
         {
             var directoryPath = Path.Combine(DataPath, "Calendar");
@@ -238,6 +245,7 @@ namespace XRUIOS.Barebones
         //Get events by date/range
 
         // U
+        [SeaOfDirac("Calendar.UpdateEventByUid", new[] { "uid", "updateAction" }, typeof(Task<CalendarEvent>), typeof(string), typeof(Action<CalendarEvent>))]
         public static async Task<CalendarEvent?> UpdateEventByUid(
         string uid,
         Action<CalendarEvent> updateAction)
@@ -270,6 +278,7 @@ namespace XRUIOS.Barebones
         }
 
         // D
+        [SeaOfDirac("Calendar.DeleteEventByUid", new[] { "uid" }, typeof(void), typeof(string))]
         public static void DeleteEventByUid(string uid)
         {
             BackgroundJob.Delete($"calendar:{uid}:*");
@@ -315,6 +324,7 @@ namespace XRUIOS.Barebones
             }
         }
 
+        [SeaOfDirac("Calendar.ScheduleUpcomingOccurrences", new[] { "upcomingOccurrences", "lookaheadWindow" }, typeof(void), typeof(IEnumerable<Occurrence>), typeof(TimeSpan))]
         public static void ScheduleUpcomingOccurrences(
             IEnumerable<Occurrence> upcomingOccurrences,
             TimeSpan lookaheadWindow)

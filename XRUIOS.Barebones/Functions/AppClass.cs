@@ -1,4 +1,5 @@
-﻿using XRUIOS.Barebones;
+﻿using EclipseProject;
+using XRUIOS.Barebones;
 using Pariah_Cybersecurity;
 using System.Text.Json.Nodes;
 using static XRUIOS.Barebones.Interfaces.AppClass;
@@ -17,6 +18,7 @@ namespace XRUIOS.Barebones.Functions
 
         //Each app has an optional YuukoApp; it allows us to know what apps exist as an equivalent on other devices! Can be dev or user set
 
+        [SeaOfDirac("App.UpdateApp", new[] { "app", "patch" }, typeof(XRUIOSAppManifest), typeof(XRUIOSAppManifest), typeof(XRUIOSAppManifestPatch))]
         public static XRUIOSAppManifest UpdateApp(XRUIOSAppManifest app, XRUIOSAppManifestPatch patch)
         {
             return new XRUIOSAppManifest(
@@ -34,6 +36,7 @@ namespace XRUIOS.Barebones.Functions
 
 
         //C
+        [SeaOfDirac("App.AddApp", new[] { "App" }, typeof(Task), typeof(XRUIOSAppManifest))]
         public static async Task AddApp(XRUIOSAppManifest App)
         {
             var directoryPath = Path.Combine(DataPath, "App");
@@ -49,6 +52,7 @@ namespace XRUIOS.Barebones.Functions
 
         }
         //R
+        [SeaOfDirac("App.GetApp", null, typeof(Task<List<XRUIOSAppManifest>>))]
         public static async Task<List<XRUIOSAppManifest>> GetApp()
         {
             var basePath = Path.Combine(DataPath, "App");
@@ -73,6 +77,7 @@ namespace XRUIOS.Barebones.Functions
         }
 
 
+        [SeaOfDirac("App.GetApp", new[] { "identifier" }, typeof(Task<XRUIOSAppManifest>), typeof(string))]
         public static async Task<XRUIOSAppManifest> GetApp(string identifier)
         {
             var directoryPath = Path.Combine(DataPath, "App");
@@ -95,6 +100,7 @@ namespace XRUIOS.Barebones.Functions
 
 
         //U
+        [SeaOfDirac("App.UpdateApp", new[] { "App" }, typeof(Task), typeof(XRUIOSAppManifest))]
         public static async Task UpdateApp(XRUIOSAppManifest App)
         {
             var directoryPath = Path.Combine(DataPath, "App");
@@ -126,6 +132,7 @@ namespace XRUIOS.Barebones.Functions
 
         }
         //D
+        [SeaOfDirac("App.DeleteApp", new[] { "identifier" }, typeof(void), typeof(string))]
         public static void DeleteApp(string identifier)
         {
             var directoryPath = Path.Combine(DataPath, "App");

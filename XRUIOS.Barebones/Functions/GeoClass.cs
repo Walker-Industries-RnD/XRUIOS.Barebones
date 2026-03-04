@@ -1,4 +1,5 @@
-﻿using GeoCoordinatePortable;
+﻿using EclipseProject;
+using GeoCoordinatePortable;
 using Microsoft.Maui.Devices.Sensors;
 using System.Text.Json.Nodes;
 using YuukoProtocol;
@@ -16,6 +17,7 @@ namespace XRUIOS.Barebones
         private GeoClass() { }
 
         //Use GeoClue on Linux
+        [SeaOfDirac("GeoClass.GetExactCoordinates", null, typeof(Task<Coordinate>))]
         public static async Task<Coordinate> GetExactCoordinates()
         {
             try
@@ -71,6 +73,7 @@ namespace XRUIOS.Barebones
             await JSONDataHandler.SaveJson(json);
         }
 
+        [SeaOfDirac("GeoClass.GetRecentLocations", null, typeof(Task<List<LocationPoint>>))]
         public static async Task<List<LocationPoint>> GetRecentLocations()
         {
             var directoryPath = Path.Combine(DataPath, "Coords");
@@ -82,6 +85,7 @@ namespace XRUIOS.Barebones
             return locationHistory;
         }
 
+        [SeaOfDirac("GeoClass.ClearLocationHistory", new[] { "newLocation" }, typeof(Task), typeof(LocationPoint))]
         public static async Task ClearLocationHistory(LocationPoint newLocation)
         {
             var directoryPath = Path.Combine(DataPath, "Coords");
@@ -102,6 +106,7 @@ namespace XRUIOS.Barebones
         private static readonly Random _rng = new Random();
 
 
+        [SeaOfDirac("GeoClass.GetRelativeCoordinates", null, typeof(Task<RelativePoint>))]
         public static async Task<RelativePoint> GetRelativeCoordinates()
         {
             try
@@ -143,6 +148,7 @@ namespace XRUIOS.Barebones
         }
 
 
+        [SeaOfDirac("GeoClass.ConvertToRelativeCoordinates", new[] { "latitude", "longitude" }, typeof(Task<RelativePoint>), typeof(double), typeof(double))]
         public static async Task<RelativePoint> ConvertToRelativeCoordinates(double latitude, double longitude)
         {
             try
@@ -204,6 +210,7 @@ namespace XRUIOS.Barebones
 
         }
 
+        [SeaOfDirac("GeoClass.GetRecentRelativeLocations", null, typeof(Task<List<RelativeLocationPoint>>))]
         public static async Task<List<RelativeLocationPoint>> GetRecentRelativeLocations()
         {
             var directoryPath = Path.Combine(DataPath, "Coords");
@@ -215,6 +222,7 @@ namespace XRUIOS.Barebones
             return locationHistory;
         }
 
+        [SeaOfDirac("GeoClass.ClearRelativeLocationHistory", new[] { "newLocation" }, typeof(Task), typeof(RelativeLocationPoint))]
         public static async Task ClearRelativeLocationHistory(RelativeLocationPoint newLocation)
         {
             var directoryPath = Path.Combine(DataPath, "Coords");
@@ -228,6 +236,7 @@ namespace XRUIOS.Barebones
         }
 
 
+        [SeaOfDirac("GeoClass.AddVirtualPoint", new[] { "latitude", "longitude", "virtualLocation" }, typeof(Task), typeof(double), typeof(double), typeof(string))]
         public static async Task AddVirtualPoint(
 double latitude,
 double longitude,
@@ -277,6 +286,7 @@ string virtualLocation)
 
         }
 
+        [SeaOfDirac("GeoClass.GetVirtualRelativeLocations", new[] { "virtualLocation" }, typeof(Task<List<LocationPoint>>), typeof(string))]
         public static async Task<List<LocationPoint>> GetVirtualRelativeLocations(string virtualLocation)
         {
             var directoryPath = Path.Combine(DataPath, "Coords", virtualLocation);
@@ -288,6 +298,7 @@ string virtualLocation)
             return locationHistory;
         }
 
+        [SeaOfDirac("GeoClass.ClearVirtualLocationHistory", new[] { "newLocation", "virtualLocation" }, typeof(Task), typeof(LocationPoint), typeof(string))]
         public static async Task ClearVirtualLocationHistory(LocationPoint newLocation, string virtualLocation)
         {
             var directoryPath = Path.Combine(DataPath, "Coords", virtualLocation);

@@ -1,4 +1,5 @@
-﻿using Pariah_Cybersecurity;
+﻿using EclipseProject;
+using Pariah_Cybersecurity;
 using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones
@@ -75,6 +76,7 @@ namespace XRUIOS.Barebones
 );
 
         // Simple setter function
+        [SeaOfDirac("Chrono.SetCurrentDate", new[] { "newDate" }, typeof(void), typeof(DateData))]
         public static void SetCurrentDate(DateData newDate)
         {
             if (newDate == null) throw new ArgumentNullException(nameof(newDate));
@@ -82,11 +84,13 @@ namespace XRUIOS.Barebones
         }
 
         // Optional getter if you need it
+        [SeaOfDirac("Chrono.GetCurrentDate", null, typeof(DateData))]
         public static DateData GetCurrentDate()
         {
             return currentDate;
         }
 
+        [SeaOfDirac("Chrono.SaveDateData", null, typeof(Task))]
         public static async Task SaveDateData()
         {
 
@@ -101,6 +105,7 @@ namespace XRUIOS.Barebones
 
         }
 
+        [SeaOfDirac("Chrono.LoadDateData", null, typeof(Task))]
         public static async Task LoadDateData()
         {
 
@@ -120,12 +125,14 @@ namespace XRUIOS.Barebones
         //Timezone
 
         //G
+        [SeaOfDirac("Chrono.GetTimezone", new[] { "Timezone" }, typeof(string), typeof(string))]
         public static string GetTimezone(string Timezone)
         {
             return currentDate.TimeZone;
         }
 
         //S
+        [SeaOfDirac("Chrono.SetTimezone", new[] { "Timezone" }, typeof(void), typeof(string))]
         public static void SetTimezone(string Timezone)
         {
             TimeZoneInfo easternZone = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
@@ -164,6 +171,7 @@ namespace XRUIOS.Barebones
 
         //G
 
+        [SeaOfDirac("Chrono.GetDate", null, typeof(ValueTuple<string, string>))]
         public static (string, string) GetDate()
         {
 
@@ -231,8 +239,9 @@ namespace XRUIOS.Barebones
 
         }
 
-        //S 
+        //S
 
+        [SeaOfDirac("Chrono.SetDate", new[] { "shortDateFormat", "longDateFormat" }, typeof(Task), typeof(ShortDate), typeof(LongDate))]
         public static async Task SetDate(ShortDate shortDateFormat, LongDate longDateFormat)
         {
 
@@ -248,6 +257,7 @@ namespace XRUIOS.Barebones
 
         //G
 
+        [SeaOfDirac("Chrono.GetTime", null, typeof(ValueTuple<string, string>))]
         public static (string, string) GetTime()
         {
 
@@ -329,6 +339,7 @@ namespace XRUIOS.Barebones
         }
 
         //S
+        [SeaOfDirac("Chrono.SetTime", new[] { "shortTimeFormat", "longTimeFormat" }, typeof(Task), typeof(ShortTime), typeof(LongTime))]
         public static async Task SetTime(ShortTime shortTimeFormat, LongTime longTimeFormat)
         {
 
@@ -344,18 +355,21 @@ namespace XRUIOS.Barebones
         //World Time
 
         //C
+        [SeaOfDirac("Chrono.AddWorldTime", new[] { "worldTime" }, typeof(void), typeof(string))]
         public static void AddWorldTime(string worldTime)
         {
             currentDate.WorldTimes.Add(worldTime);
         }
 
         //R
+        [SeaOfDirac("Chrono.GetWorldTimezoneCollection", null, typeof(List<string>))]
         public static List<string> GetWorldTimezoneCollection()
         {
             return currentDate.WorldTimes;
         }
 
 
+        [SeaOfDirac("Chrono.GetWorldTimes", null, typeof(List<Dictionary<string, ValueTuple<string, string, string, string>>>))]
         public static List<Dictionary<string, (string, string, string, string)>> GetWorldTimes()
         {
             var resultList = new List<Dictionary<string, (string, string, string, string)>>();
@@ -374,6 +388,7 @@ namespace XRUIOS.Barebones
         }
 
 
+        [SeaOfDirac("Chrono.GetTimeInTimezone", new[] { "timeZoneData" }, typeof(ValueTuple<string, string, string, string>), typeof(string))]
         public static (string, string, string, string) GetTimeInTimezone(string timeZoneData)
         {
             // Get the time zone information
@@ -509,6 +524,7 @@ namespace XRUIOS.Barebones
 
 
         //D
+        [SeaOfDirac("Chrono.DeleteWorldTime", new[] { "worldTime" }, typeof(void), typeof(string))]
         public static void DeleteWorldTime(string worldTime)
         {
             currentDate.WorldTimes.Remove(worldTime);
@@ -531,6 +547,7 @@ namespace XRUIOS.Barebones
 
             //From https://github.com/ardimh7/unity-convert-number-to-words/blob/master/NumberConvert.cs
 
+            [SeaOfDirac("Chrono.NumberConvert.NumberToWords", new[] { "number" }, typeof(string), typeof(long))]
             public static string NumberToWords(long number)
             {
                 if (number == 0)
@@ -590,6 +607,7 @@ namespace XRUIOS.Barebones
         public class MonthConverter
         {
             // Function to convert a numerical month to a worded month
+            [SeaOfDirac("Chrono.MonthConverter.ConvertToWordedMonth", new[] { "monthNumber" }, typeof(string), typeof(int))]
             public static string ConvertToWordedMonth(int monthNumber)
             {
                 string[] monthNames = { "January", "February", "March", "April", "May", "June",
