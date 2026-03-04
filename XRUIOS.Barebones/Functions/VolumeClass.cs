@@ -1,11 +1,15 @@
-﻿using static Pariah_Cybersecurity.DataHandler;
+﻿using XRUIOS.Barebones;
+using static Pariah_Cybersecurity.DataHandler;
 using static XRUIOS.Barebones.Interfaces.VolumeClass;
 using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones.Functions
 {
-    public static class VolumeClass
+    public class VolumeClass : XRUIOSFunction
     {
+        public override string FunctionName => "Volume";
+        public static readonly VolumeClass Instance = new();
+        private VolumeClass() { }
 
         //AudioGroupClass deleted, this is pretty much that but better tbh
         //Remember we use te master volume in SoundEQ as a main volume switch!

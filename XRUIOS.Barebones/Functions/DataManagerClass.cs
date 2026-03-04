@@ -1,4 +1,5 @@
-﻿using Pariah_Cybersecurity;
+﻿using XRUIOS.Barebones;
+using Pariah_Cybersecurity;
 using System.Text.Json.Nodes;
 using static Pariah_Cybersecurity.DataHandler;
 using static XRUIOS.Barebones.XRUIOS;
@@ -6,8 +7,11 @@ using YuukoProtocol;
 
 namespace XRUIOS.Barebones.Functions
 {
-    public static class DataManagerClass
+    public class DataManagerClass : XRUIOSFunction
     {
+        public override string FunctionName => "Data Manager";
+        public static readonly DataManagerClass Instance = new();
+        private DataManagerClass() { }
 
         //Worldpoints are data handling all things from console to 2D to 3D
 

@@ -5,8 +5,11 @@ using static XRUIOS.Barebones.Songs;
 
 namespace XRUIOS.Barebones
 {
-    public class MusicPlayerClass
+    public class MusicPlayerClass : XRUIOSFunction
     {
+        public override string FunctionName => "Music Player";
+        public static readonly MusicPlayerClass Instance = new();
+        private MusicPlayerClass() { }
 
         internal static SongOverview? CurrentlyPlaying;
         internal static List<SongOverview> Queue = new List<SongOverview>();

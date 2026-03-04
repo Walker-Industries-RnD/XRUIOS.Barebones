@@ -6,9 +6,12 @@ using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones
 {
-    public static class SoundEQClass
+    public class SoundEQClass : XRUIOSFunction
     {
-      
+        public override string FunctionName => "Sound EQ";
+        public static readonly SoundEQClass Instance = new();
+        private SoundEQClass() { }
+
         internal static ObservableProperty<SoundEQ> CurrentSoundSetting;
 
         //CurrentSoundSetting (Get, Set)

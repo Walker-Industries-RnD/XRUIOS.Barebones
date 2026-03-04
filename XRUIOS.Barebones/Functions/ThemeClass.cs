@@ -1,4 +1,5 @@
-﻿using Microsoft.Maui.Storage;
+﻿using XRUIOS.Barebones;
+using Microsoft.Maui.Storage;
 using System.Text.Json.Nodes;
 using static Pariah_Cybersecurity.DataHandler;
 using static XRUIOS.Barebones.Interfaces.ThemeSystem;
@@ -7,9 +8,11 @@ using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones.Functions
 {
-    public static class ThemeSystem
+    public class ThemeSystem : XRUIOSFunction
     {
-
+        public override string FunctionName => "Theme";
+        public static readonly ThemeSystem Instance = new();
+        private ThemeSystem() { }
 
         public static ObservableProperty<XRUIOSTheme> CurrentTheme { get; private set; }
         //Keep in mind a XRUIOS theme might completely ignore the values from the themes or ignore them partly

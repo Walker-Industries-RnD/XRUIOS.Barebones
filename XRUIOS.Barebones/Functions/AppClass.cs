@@ -1,4 +1,5 @@
-﻿using Pariah_Cybersecurity;
+﻿using XRUIOS.Barebones;
+using Pariah_Cybersecurity;
 using System.Text.Json.Nodes;
 using static XRUIOS.Barebones.Interfaces.AppClass;
 using static XRUIOS.Barebones.XRUIOS;
@@ -8,9 +9,11 @@ using YuukoProtocol;
 
 namespace XRUIOS.Barebones.Functions
 {
-    public static class AppClass
+    public class AppClass : XRUIOSFunction
     {
-
+        public override string FunctionName => "App";
+        public static readonly AppClass Instance = new();
+        private AppClass() { }
 
         //Each app has an optional YuukoApp; it allows us to know what apps exist as an equivalent on other devices! Can be dev or user set
 

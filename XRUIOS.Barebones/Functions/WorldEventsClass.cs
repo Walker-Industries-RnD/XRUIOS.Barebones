@@ -5,8 +5,12 @@ using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones
 {
-    public static class WorldEventsClass
+    public class WorldEventsClass : XRUIOSFunction
     {
+        public override string FunctionName => "World Events";
+        public static readonly WorldEventsClass Instance = new();
+        private WorldEventsClass() { }
+
         private const int MaxEvents = 1000;
 
       

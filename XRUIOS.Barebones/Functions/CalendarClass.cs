@@ -9,8 +9,12 @@ using YuukoProtocol;
 
 namespace XRUIOS.Barebones
 {
-    public static class CalendarClass
+    public class CalendarClass : XRUIOSFunction
     {
+        public override string FunctionName => "Calendar";
+        public static readonly CalendarClass Instance = new();
+        private CalendarClass() { }
+
         //We keep our XRUIOS events simple with three kinds of things
         //To keep things simple, we will attach media here as byte[] (Is what i'd like to tell myself)
 

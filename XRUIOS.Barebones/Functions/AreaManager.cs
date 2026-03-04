@@ -1,4 +1,5 @@
-﻿using Pariah_Cybersecurity;
+﻿using XRUIOS.Barebones;
+using Pariah_Cybersecurity;
 using System.Numerics;
 using System.Text.Json.Nodes;
 using static XRUIOS.Barebones.XRUIOS;
@@ -6,9 +7,11 @@ using YuukoProtocol;
 
 namespace XRUIOS.Barebones.Functions
 {
-    public static class AreaManagerClass
+    public class AreaManagerClass : XRUIOSFunction
     {
-
+        public override string FunctionName => "Area Manager";
+        public static readonly AreaManagerClass Instance = new();
+        private AreaManagerClass() { }
 
         public enum PositionalTrackingMode { Follow, Anchored, FollowingExternal }
         public enum RotationalTrackingMode { Static, LAM }

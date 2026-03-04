@@ -9,11 +9,12 @@ using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones
 {
-    public static class GeoClass
+    public class GeoClass : XRUIOSFunction
     {
+        public override string FunctionName => "Geo";
+        public static readonly GeoClass Instance = new();
+        private GeoClass() { }
 
-
-   
         //Use GeoClue on Linux
         public static async Task<Coordinate> GetExactCoordinates()
         {

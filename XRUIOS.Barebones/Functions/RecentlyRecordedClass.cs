@@ -5,8 +5,12 @@ using YuukoProtocol;
 
 namespace XRUIOS.Barebones
 {
-    public static class RecentlyRecordedClass
+    public class RecentlyRecordedClass : XRUIOSFunction
     {
+        public override string FunctionName => "Recently Recorded";
+        public static readonly RecentlyRecordedClass Instance = new();
+        private RecentlyRecordedClass() { }
+
         private const int MaxRecent = 30;
 
         public static async Task<List<FileRecord>> GetRecentlyRecorded()

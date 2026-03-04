@@ -1,4 +1,5 @@
-﻿using Microsoft.Maui.Storage;
+﻿using XRUIOS.Barebones;
+using Microsoft.Maui.Storage;
 using Pariah_Cybersecurity;
 using System.Text.Json.Nodes;
 using static Pariah_Cybersecurity.DataHandler;
@@ -8,10 +9,12 @@ using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones.Functions
 {
-    public static class NoteClass
+    public class NoteClass : XRUIOSFunction
     {
+        public override string FunctionName => "Note";
+        public static readonly NoteClass Instance = new();
+        private NoteClass() { }
 
- 
         //C
         //Remember to create a folder with the same name in the directory containing all the assets!
 

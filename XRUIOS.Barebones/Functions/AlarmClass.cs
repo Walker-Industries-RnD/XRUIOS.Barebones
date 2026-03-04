@@ -8,9 +8,11 @@ using YuukoProtocol;
 
 namespace XRUIOS.Barebones
 {
-    public class AlarmClass
+    public class AlarmClass : XRUIOSFunction
     {
-     
+        public override string FunctionName => "Alarm";
+        public static readonly AlarmClass Instance = new();
+        private AlarmClass() { }
 
         public static ObservableCollection<Alarm> Alarms = new();
 

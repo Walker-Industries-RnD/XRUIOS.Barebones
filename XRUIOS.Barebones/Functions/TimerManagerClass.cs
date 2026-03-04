@@ -3,9 +3,11 @@ using static XRUIOS.Barebones.Interfaces.TimerManagerClass;
 
 namespace XRUIOS.Barebones
 {
-    public static class TimerManagerClass
+    public class TimerManagerClass : XRUIOSFunction
     {
-   
+        public override string FunctionName => "Timer Manager";
+        public static readonly TimerManagerClass Instance = new();
+        private TimerManagerClass() { }
 
         public static Dictionary<string, TimerRecord> Timers = new Dictionary<string, TimerRecord>();
 

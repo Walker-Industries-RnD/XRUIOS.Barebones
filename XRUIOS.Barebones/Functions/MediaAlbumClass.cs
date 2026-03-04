@@ -1,4 +1,5 @@
-﻿using Pariah_Cybersecurity;
+﻿using XRUIOS.Barebones;
+using Pariah_Cybersecurity;
 using System.Text.Json.Nodes;
 using static XRUIOS.Barebones.Interfaces.MediaAlbumClass;
 using static XRUIOS.Barebones.XRUIOS;
@@ -6,9 +7,11 @@ using YuukoProtocol;
 
 namespace XRUIOS.Barebones.Functions
 {
-    public static class MediaAlbumClass
+    public class MediaAlbumClass : XRUIOSFunction
     {
-    
+        public override string FunctionName => "Media Album";
+        public static readonly MediaAlbumClass Instance = new();
+        private MediaAlbumClass() { }
 
         public static async Task AddMediaAlbum(AlbumMedia MediaAlbum)
         {

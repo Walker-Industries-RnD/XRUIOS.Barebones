@@ -1,12 +1,16 @@
-﻿using Pariah_Cybersecurity;
+﻿using XRUIOS.Barebones;
+using Pariah_Cybersecurity;
 using static XRUIOS.Barebones.Interfaces.NotificationClass;
 using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones.Functions
 {
-    public static class NotificationClass
+    public class NotificationClass : XRUIOSFunction
     {
-   
+        public override string FunctionName => "Notification";
+        public static readonly NotificationClass Instance = new();
+        private NotificationClass() { }
+
         public static event Action<List<NotificationContent>>? OnNotificationsUpdated;
 
         //LLet's try something a little different

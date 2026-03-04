@@ -3,8 +3,11 @@ using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones
 {
-    public class ChronoClass
+    public class ChronoClass : XRUIOSFunction
     {
+        public override string FunctionName => "Chrono";
+        public static readonly ChronoClass Instance = new();
+        private ChronoClass() { }
 
         public enum TimeFormat { TwelveHour, TwentyFourHour }
 

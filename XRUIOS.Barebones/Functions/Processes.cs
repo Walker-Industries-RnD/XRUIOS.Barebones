@@ -8,8 +8,12 @@ using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones
 {
-    public static class ProcessesClass
+    public class ProcessesClass : XRUIOSFunction
     {
+        public override string FunctionName => "Processes";
+        public static readonly ProcessesClass Instance = new();
+        private ProcessesClass() { }
+
         private const int MaxProcessHistory = 100;
         private static readonly TimeSpan CpuSampleInterval = TimeSpan.FromMilliseconds(500);
 
@@ -90,11 +94,11 @@ namespace XRUIOS.Barebones
             }
         }
 
-        private static string? GetMainWindowTitle(Process p) => p.Safe(() => string.IsNullOrEmpty(p.MainWindowTitle) ? null : p.MainWindowTitle);
-        private static DateTime GetProcessStartTime(Process p) => p.Safe(() => p.StartTime.ToUniversalTime(), DateTime.UtcNow);
-        private static string? GetExecutablePath(Process p) => p.Safe(() => p.MainModule?.FileName);
+        private static string? GetMainWindowTitle(Process p) => Safe(() => string.IsNullOrEmpty(p.MainWindowTitle) ? null : p.MainWindowTitle);
+        private static DateTime GetProcessStartTime(Process p) => Safe(() => p.StartTime.ToUniversalTime(), DateTime.UtcNow);
+        private static string? GetExecutablePath(Process p) => Safe(() => p.MainModule?.FileName);
 
-        private static T Safe<T>(this Process p, Func<T> action, T defaultValue = default!)
+        private static T Safe<T>(Func<T> action, T defaultValue = default!)
         {
             try { return action(); } catch { return defaultValue; }
         }

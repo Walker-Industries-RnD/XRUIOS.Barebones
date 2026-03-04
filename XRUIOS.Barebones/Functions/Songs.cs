@@ -14,8 +14,11 @@ using MusicInfoStyle = XRUIOS.Barebones.Interfaces.Songs.SongClass.MusicInfoStyl
 
 namespace XRUIOS.Barebones
 {
-    public class Songs
+    public class Songs : XRUIOSFunction
     {
+        public override string FunctionName => "Songs";
+        public static readonly Songs Instance = new();
+        private Songs() { }
 
         //Add music playlist support later
 

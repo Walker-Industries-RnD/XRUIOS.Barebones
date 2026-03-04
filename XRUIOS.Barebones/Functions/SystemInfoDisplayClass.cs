@@ -1,12 +1,16 @@
-﻿using System.Management;
+﻿using XRUIOS.Barebones;
+using System.Management;
 using System.Text.Json.Nodes;
 using static XRUIOS.Barebones.Interfaces.SystemInfoDisplayClass;
 using static XRUIOS.Barebones.Interfaces.SystemInfoDisplayClass.SystemInfoDisplayWindows;
 
 namespace XRUIOS.Barebones.Functions
 {
-    public static class SystemInfoDisplayClass
+    public class SystemInfoDisplayClass : XRUIOSFunction
     {
+        public override string FunctionName => "System Info Display";
+        public static readonly SystemInfoDisplayClass Instance = new();
+        private SystemInfoDisplayClass() { }
 
         public static class SystemInfoDisplayWindows
         {
