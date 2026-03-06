@@ -2,9 +2,9 @@
 
 namespace XRUIOS.Barebones
 {
-    public class ClipboardClass : XRUIOSFunction
+    public class ClipboardClass 
     {
-        public override string FunctionName => "Clipboard";
+         
         public static readonly ClipboardClass Instance = new();
         private ClipboardClass() { }
 

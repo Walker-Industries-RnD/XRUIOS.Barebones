@@ -9,9 +9,9 @@ using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones.Functions
 {
-    public class ThemeSystem : XRUIOSFunction
+    public class ThemeSystem 
     {
-        public override string FunctionName => "Theme";
+         
         public static readonly ThemeSystem Instance = new();
         private ThemeSystem() { }
 

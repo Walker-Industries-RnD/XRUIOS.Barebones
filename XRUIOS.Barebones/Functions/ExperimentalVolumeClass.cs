@@ -7,9 +7,9 @@ using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones
 {
-    public class ExperimentalAudioClass : XRUIOSFunction
+    public class ExperimentalAudioClass 
     {
-        public override string FunctionName => "Experimental Audio";
+         
         public static readonly ExperimentalAudioClass Instance = new();
         private ExperimentalAudioClass() { }
 

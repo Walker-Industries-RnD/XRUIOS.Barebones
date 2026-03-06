@@ -8,9 +8,9 @@ using YuukoProtocol;
 
 namespace XRUIOS.Barebones.Functions
 {
-    public class AreaManagerClass : XRUIOSFunction
+    public class AreaManagerClass 
     {
-        public override string FunctionName => "Area Manager";
+         
         public static readonly AreaManagerClass Instance = new();
         private AreaManagerClass() { }
 

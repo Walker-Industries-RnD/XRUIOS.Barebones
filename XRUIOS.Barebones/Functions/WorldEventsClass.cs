@@ -6,9 +6,9 @@ using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones
 {
-    public class WorldEventsClass : XRUIOSFunction
+    public class WorldEventsClass 
     {
-        public override string FunctionName => "World Events";
+         
         public static readonly WorldEventsClass Instance = new();
         private WorldEventsClass() { }
 

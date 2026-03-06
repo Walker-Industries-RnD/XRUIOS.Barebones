@@ -9,9 +9,9 @@ using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones
 {
-    public class ProcessesClass : XRUIOSFunction
+    public class ProcessesClass 
     {
-        public override string FunctionName => "Processes";
+         
         public static readonly ProcessesClass Instance = new();
         private ProcessesClass() { }
 

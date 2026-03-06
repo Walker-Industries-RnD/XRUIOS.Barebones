@@ -8,9 +8,9 @@ using YuukoProtocol;
 
 namespace XRUIOS.Barebones.Functions
 {
-    public class MediaAlbumClass : XRUIOSFunction
+    public class MediaAlbumClass 
     {
-        public override string FunctionName => "Media Album";
+         
         public static readonly MediaAlbumClass Instance = new();
         private MediaAlbumClass() { }
 

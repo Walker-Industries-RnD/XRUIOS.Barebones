@@ -10,9 +10,9 @@ using YuukoProtocol;
 
 namespace XRUIOS.Barebones.Functions
 {
-    public class AppClass : XRUIOSFunction
+    public class AppClass 
     {
-        public override string FunctionName => "App";
+         
         public static readonly AppClass Instance = new();
         private AppClass() { }
 

@@ -7,9 +7,9 @@ using YuukoProtocol;
 
 namespace XRUIOS.Barebones.Functions
 {
-    public class DataManagerClass : XRUIOSFunction
+    public class DataManagerClass 
     {
-        public override string FunctionName => "Data Manager";
+         
         public static readonly DataManagerClass Instance = new();
         private DataManagerClass() { }
 

@@ -7,17 +7,47 @@ namespace EclipseLCL
 
     [MessagePackObject(keyAsPropertyName: true)]
     [DataContract]
-    public class DiracRequest
+    public class DiracPackage
     {
-        [DataMember] public string FunctionName; //The function we wish to call within this app
-        [DataMember] public Dictionary<string, object> Parameters; //The parameters for the function,  handled with PackData
+        // Single object members
+        [DataMember] public string? UUID;
+        [DataMember] public Type? ObjType;
+        [DataMember] public Dictionary<string, object?>? Fields;
+        // Collection members — only one of these will be set
+        [DataMember] public List<DiracPackage>? Collection;
+        [DataMember] public Dictionary<string, DiracPackage>? Map;
 
-        public DiracRequest(string functionName, Dictionary<string, object?> parameters)
+        public DiracPackage(string uuid, Type objType, Dictionary<string, object?> fields)
+        {
+            UUID = uuid;
+            ObjType = objType;
+            Fields = fields;
+        }
+        public DiracPackage(List<DiracPackage> collection) => Collection = collection;
+        public DiracPackage(Dictionary<string, DiracPackage> map) => Map = map;
+    }
+
+    [MessagePackObject(keyAsPropertyName: true)]
+    public class FunctionParameter
+    {
+        public string Name { get; set; } = "";
+        public string Type { get; set; } = "";
+    }
+
+    [MessagePackObject(keyAsPropertyName: true)]
+    [DataContract]
+    public class DiracFunction
+    {
+        public string FunctionName;
+        public List<FunctionParameter> Parameters;
+        public string? ReturnType;
+
+        public DiracFunction(string functionName, List<FunctionParameter> parameters, string? returnType)
         {
             FunctionName = functionName;
             Parameters = parameters;
+            ReturnType = returnType;
         }
-
     }
 
     [MessagePackObject(keyAsPropertyName: true)]

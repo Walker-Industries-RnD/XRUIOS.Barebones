@@ -10,9 +10,9 @@ namespace XRUIOS.Barebones
 
 
     //Originally made for music, it's pretty expandable!
-    public class CreatorClass : XRUIOSFunction
+    public class CreatorClass 
     {
-        public override string FunctionName => "Creator";
+         
         public static readonly CreatorClass Instance = new();
         private CreatorClass() { }
 

@@ -9,9 +9,9 @@ using YuukoProtocol;
 
 namespace XRUIOS.Barebones
 {
-    public class AlarmClass : XRUIOSFunction
+    public class AlarmClass 
     {
-        public override string FunctionName => "Alarm";
+         
         public static readonly AlarmClass Instance = new();
         private AlarmClass() { }
 

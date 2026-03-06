@@ -6,9 +6,9 @@ using YuukoProtocol;
 
 namespace XRUIOS.Barebones
 {
-    public class RecentlyRecordedClass : XRUIOSFunction
+    public class RecentlyRecordedClass 
     {
-        public override string FunctionName => "Recently Recorded";
+         
         public static readonly RecentlyRecordedClass Instance = new();
         private RecentlyRecordedClass() { }
 

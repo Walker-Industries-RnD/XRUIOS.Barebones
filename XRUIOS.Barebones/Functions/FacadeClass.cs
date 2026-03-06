@@ -5,9 +5,9 @@ using System.Text;
 
 namespace XRUIOS.Barebones.Functions
 {
-    public class FacadeClass : XRUIOSFunction
+    public class FacadeClass 
     {
-        public override string FunctionName => "Facade";
+         
         public static readonly FacadeClass Instance = new();
         private FacadeClass() { }
 

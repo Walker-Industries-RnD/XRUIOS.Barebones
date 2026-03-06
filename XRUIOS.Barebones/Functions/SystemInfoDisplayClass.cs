@@ -6,9 +6,9 @@ using static XRUIOS.Barebones.Interfaces.SystemInfoDisplayClass.SystemInfoDispla
 
 namespace XRUIOS.Barebones.Functions
 {
-    public class SystemInfoDisplayClass : XRUIOSFunction
+    public class SystemInfoDisplayClass 
     {
-        public override string FunctionName => "System Info Display";
+         
         public static readonly SystemInfoDisplayClass Instance = new();
         private SystemInfoDisplayClass() { }
 

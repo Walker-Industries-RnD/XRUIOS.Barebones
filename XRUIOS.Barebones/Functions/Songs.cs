@@ -1,4 +1,5 @@
 ﻿using ATL;
+using EclipseProject;
 using Pariah_Cybersecurity;
 using System.Text.Json.Nodes;
 using static Pariah_Cybersecurity.DataHandler;
@@ -14,9 +15,9 @@ using MusicInfoStyle = XRUIOS.Barebones.Interfaces.Songs.SongClass.MusicInfoStyl
 
 namespace XRUIOS.Barebones
 {
-    public class Songs : XRUIOSFunction
+    public class Songs 
     {
-        public override string FunctionName => "Songs";
+         
         public static readonly Songs Instance = new();
         private Songs() { }
 
@@ -186,6 +187,7 @@ namespace XRUIOS.Barebones
 
             //C
             //Auto tag does nothing for now but later will auto find names, artists, etc.
+            [SeaOfDirac("Songs.SongClass.CreateSongInfo", new[] { "audioFile", "directoryUUID", "autoTag" }, typeof(Task), typeof(string), typeof(string), typeof(bool))]
             public static async Task<(SongOverview, SongDetailed)> CreateSongInfo(string audioFile, string directoryUUID, bool autoTag = false)
             {
                 var directoryPath = Path.Combine(DataPath, "Music");
@@ -393,6 +395,7 @@ namespace XRUIOS.Barebones
                 return (overview, detailed);
             }
             //R
+            [SeaOfDirac("Songs.SongClass.GetSongInfo", new[] { "audioFile", "directoryUUID", "getData", "autoCreateIfMissing", "autoTagIfMissing" }, typeof(Task), typeof(string), typeof(string), typeof(MusicInfoStyle), typeof(bool), typeof(bool))]
             public static async Task<(SongOverview?, SongDetailed?)> GetSongInfo(
                 string audioFile,
                 string directoryUUID,
@@ -477,6 +480,7 @@ namespace XRUIOS.Barebones
 
             //U 
 
+            [SeaOfDirac("Songs.SongClass.UpdateSongInfo", new[] { "audioFile", "directoryUUID", "patch", "mode", "forceReParseFromAudio" }, typeof(Task), typeof(string), typeof(string), typeof(SongInfoPatch), typeof(MusicInfoStyle), typeof(bool))]
             public static async Task UpdateSongInfo(string audioFile, string directoryUUID, SongInfoPatch patch,
                 MusicInfoStyle mode = MusicInfoStyle.both, bool forceReParseFromAudio = false)
             {
@@ -613,6 +617,7 @@ namespace XRUIOS.Barebones
 
             //D
 
+            [SeaOfDirac("Songs.SongClass.DeleteSongInfo", new[] { "audioFile", "directoryUUID", "deleteSong" }, typeof(Task), typeof(string), typeof(string), typeof(bool))]
             public static async Task DeleteSongInfo(string audioFile, string directoryUUID, bool deleteSong = true)
             {
 
@@ -670,6 +675,7 @@ namespace XRUIOS.Barebones
             //Song Directories
 
             //C
+            [SeaOfDirac("Songs.SongDirectoriesClass.AddSongDirectory", new[] { "directory", "directoryName" }, typeof(Task), typeof(string), typeof(string))]
             public static async Task AddSongDirectory(string directory, string directoryName)
             {
                 var directoryPath = Path.Combine(DataPath, "Music");
@@ -708,6 +714,7 @@ namespace XRUIOS.Barebones
 
             }
             //R
+            [SeaOfDirac("Songs.SongDirectoriesClass.GetSongDirectories", null, typeof(Task))]
             public static async Task<(List<DirectoryRecord>, List<DirectoryRecord>)> GetSongDirectories()
             {
 
@@ -746,6 +753,7 @@ namespace XRUIOS.Barebones
 
             }
 
+            [SeaOfDirac("Songs.SongDirectoriesClass.GetSongDirectoryPaths", new[] { "onlyResolved" }, typeof(Task), typeof(bool))]
             public static async Task<List<string>> GetSongDirectories(bool onlyResolved = true)
             {
                 var (resolved, unresolved) = await GetSongDirectories();
@@ -753,6 +761,7 @@ namespace XRUIOS.Barebones
             }
 
             //U
+            [SeaOfDirac("Songs.SongDirectoriesClass.UpdateSongDirectory", new[] { "uuid", "newDirectory", "newDirectoryName" }, typeof(Task), typeof(string), typeof(string), typeof(string))]
             public static async Task UpdateSongDirectory(string uuid, string newDirectory, string newDirectoryName)
             {
                 var directoryPath = Path.Combine(DataPath, "Music");
@@ -801,6 +810,7 @@ namespace XRUIOS.Barebones
                 }
             }
             //D
+            [SeaOfDirac("Songs.SongDirectoriesClass.RemoveSongDirectory", new[] { "uuid", "deleteDirectory" }, typeof(Task), typeof(string), typeof(bool))]
             public static async Task RemoveSongDirectory(string uuid, bool deleteDirectory = false)
             {
                 var directoryPath = Path.Combine(DataPath, "Music");
@@ -848,6 +858,7 @@ namespace XRUIOS.Barebones
             //Favorite Songs
 
             //C
+            [SeaOfDirac("Songs.SongFavoritesClass.AddToFavorites", new[] { "audioFileName", "directoryUUID" }, typeof(Task), typeof(string), typeof(string))]
             public static async Task AddToFavorites(string audioFileName, string directoryUUID)
             {
                 var directoryPath = Path.Combine(DataPath, "Music");
@@ -884,6 +895,7 @@ namespace XRUIOS.Barebones
             }
 
             //R
+            [SeaOfDirac("Songs.SongFavoritesClass.GetFavorites", null, typeof(Task))]
             public static async Task<(List<string>, List<string>)> GetFavorites()
             {
                 var directoryPath = Path.Combine(DataPath, "Music");
@@ -921,6 +933,7 @@ namespace XRUIOS.Barebones
                 return (resolvedFiles, unresolvedFiles);
             }
 
+            [SeaOfDirac("Songs.SongFavoritesClass.GetFavoritePathsAsync", new[] {"onlyResolved"}, typeof(Task), typeof(bool))]
             public static async Task<List<string>> GetFavoritePathsAsync(bool onlyResolved = true)
             {
                 var (resolved, unresolved) = await GetFavorites();
@@ -936,6 +949,7 @@ namespace XRUIOS.Barebones
             }
 
             //D
+            [SeaOfDirac("Songs.SongFavoritesClass.RemoveFromFavorites", new[] {"audioFileName", "directoryUUID"}, typeof(Task), typeof(string), typeof(string))]
             public static async Task RemoveFromFavorites(string audioFileName, string directoryUUID)
             {
                 var directoryPath = Path.Combine(DataPath, "Music");
@@ -965,6 +979,7 @@ namespace XRUIOS.Barebones
             //Get Songs
 
             // Returns full paths to audio files
+            [SeaOfDirac("Songs.SongGetClass.GetAllSongs", new[] {"onlyFavorites"}, typeof(Task), typeof(bool))]
             public static async Task<(List<string> Resolved, List<string> Unresolved)> GetAllSongs(
                 bool onlyFavorites = false)
             {
@@ -1030,6 +1045,7 @@ namespace XRUIOS.Barebones
                 return (resolved, unresolved);
             }
 
+            [SeaOfDirac("Songs.SongGetClass.GetAllSongPaths", new[] {"onlyResolved", "onlyFavorites"}, typeof(List<string>), typeof(bool), typeof(bool))]
             public static async Task<List<string>> GetAllSongs(
                bool onlyResolved = true,
                bool onlyFavorites = false)
@@ -1050,6 +1066,7 @@ namespace XRUIOS.Barebones
             }
 
 
+            [SeaOfDirac("Songs.SongGetClass.GetSongsInDirectoryAsync", new[] {"directoryUUID", "onlyFavorites"}, typeof(Task), typeof(string), typeof(bool))]
             public static async Task<(List<string> ResolvedSongs, List<string> UnresolvedSongs)> GetSongsInDirectoryAsync(string directoryUUID, bool onlyFavorites = false)
             {
                 var directoryPath = Path.Combine(DataPath, "Music");
@@ -1099,6 +1116,7 @@ namespace XRUIOS.Barebones
 
 
 
+            [SeaOfDirac("Songs.SongGetClass.GetSongsByNameAsync", new[] {"nameFragment", "comparison", "onlyFavorites"}, typeof(Task), typeof(string), typeof(StringComparison), typeof(bool))]
             public static async Task<List<string>> GetSongsByNameAsync(string nameFragment, StringComparison comparison = StringComparison.OrdinalIgnoreCase,
             bool onlyFavorites = false)
             {
@@ -1113,6 +1131,7 @@ namespace XRUIOS.Barebones
 
 
 
+            [SeaOfDirac("Songs.SongGetClass.GetSongsByTag", new[] {"field", "value", "comparison", "onlyFavorites"}, typeof(Task), typeof(SongSearchField), typeof(string), typeof(StringComparison), typeof(bool))]
             public static async Task<List<string>> GetSongsByTag(
                 SongSearchField field,
                 string value,
@@ -1212,6 +1231,7 @@ namespace XRUIOS.Barebones
             //Favorite Songs
 
             //C
+            [SeaOfDirac("Songs.MusicHistoryClass.AddToPlayHistory", new[] {"audioFileName", "directoryUUID"}, typeof(Task), typeof(string), typeof(string))]
             public static async Task AddToPlayHistory(string audioFileName, string directoryUUID)
             {
                 var directoryPath = Path.Combine(DataPath, "Music");
@@ -1248,6 +1268,7 @@ namespace XRUIOS.Barebones
             }
 
             //R
+            [SeaOfDirac("Songs.MusicHistoryClass.GetPlayHistory", null, typeof(Task))]
             public static async Task<(List<string>, List<string>)> GetPlayHistory()
             {
                 var directoryPath = Path.Combine(DataPath, "Music");
@@ -1288,6 +1309,7 @@ namespace XRUIOS.Barebones
 
 
             //D
+            [SeaOfDirac("Songs.MusicHistoryClass.ClearPlayHistory", new[] {"audioFileName", "directoryUUID"}, typeof(Task), typeof(string), typeof(string))]
             public static async Task ClearPlayHIstory(string audioFileName, string directoryUUID)
             {
                 var directoryPath = Path.Combine(DataPath, "Music");
@@ -1317,6 +1339,7 @@ namespace XRUIOS.Barebones
 
             // CREATE - Add a new playlist (like RecentlyRecorded pattern)
 
+            [SeaOfDirac("Songs.Playlists.CreatePlaylist", new[] {"newPlaylist"}, typeof(Task), typeof(Playlist))]
             public static async Task<string> CreatePlaylist(Playlist newPlaylist)
             {
                 var directoryPath = Path.Combine(DataPath, "Music", "Playlists");
@@ -1346,6 +1369,7 @@ namespace XRUIOS.Barebones
 
             // READ - Get all playlists
 
+            [SeaOfDirac("Songs.Playlists.GetAllPlaylists", null, typeof(Task))]
             public static async Task<List<Playlist>> GetAllPlaylists()
             {
                 var directoryPath = Path.Combine(DataPath, "Music", "Playlists");
@@ -1359,6 +1383,7 @@ namespace XRUIOS.Barebones
 
             // READ - Get specific playlist
 
+            [SeaOfDirac("Songs.Playlists.GetPlaylist", new[] {"playlistId"}, typeof(Task), typeof(string))]
             public static async Task<Playlist?> GetPlaylist(string playlistId)
             {
                 var playlists = await GetAllPlaylists();
@@ -1368,6 +1393,7 @@ namespace XRUIOS.Barebones
 
             // UPDATE - Update playlist metadata
 
+            [SeaOfDirac("Songs.Playlists.UpdatePlaylist", new[] {"updatedPlaylist"}, typeof(Task), typeof(Playlist))]
             public static async Task UpdatePlaylist(Playlist updatedPlaylist)
             {
                 var directoryPath = Path.Combine(DataPath, "Music", "Playlists");
@@ -1390,6 +1416,7 @@ namespace XRUIOS.Barebones
 
             // DELETE - Remove playlist
 
+            [SeaOfDirac("Songs.Playlists.DeletePlaylist", new[] {"playlistId"}, typeof(Task), typeof(string))]
             public static async Task DeletePlaylist(string playlistId)
             {
                 var directoryPath = Path.Combine(DataPath, "Music", "Playlists");
@@ -1409,6 +1436,7 @@ namespace XRUIOS.Barebones
 
             // SONG MANAGEMENT - Add song to playlist
 
+            [SeaOfDirac("Songs.Playlists.AddSongToPlaylist", new[] {"playlistId", "songFileName", "directoryUUID"}, typeof(Task), typeof(string), typeof(string), typeof(string))]
             public static async Task AddSongToPlaylist(string playlistId, string songFileName, string directoryUUID)
             {
                 var playlist = await GetPlaylist(playlistId);
@@ -1447,6 +1475,7 @@ namespace XRUIOS.Barebones
 
             // SONG MANAGEMENT - Remove song from playlist
 
+            [SeaOfDirac("Songs.Playlists.RemoveSongFromPlaylist", new[] {"playlistId", "songFileName", "directoryUUID"}, typeof(Task), typeof(string), typeof(string), typeof(string))]
             public static async Task RemoveSongFromPlaylist(string playlistId, string songFileName, string directoryUUID)
             {
                 var playlist = await GetPlaylist(playlistId);
@@ -1472,6 +1501,7 @@ namespace XRUIOS.Barebones
 
             // SONG MANAGEMENT - Reorder playlist
 
+            [SeaOfDirac("Songs.Playlists.ReorderPlaylist", new[] {"playlistId", "songOrder"}, typeof(Task), typeof(string), typeof(List<string>))]
             public static async Task ReorderPlaylist(string playlistId, List<string> songOrder)
             {
                 var playlist = await GetPlaylist(playlistId);
@@ -1527,6 +1557,7 @@ namespace XRUIOS.Barebones
 
             // FAVORITES - Mark playlist as favorite
 
+            [SeaOfDirac("Songs.Playlists.ToggleFavorite", new[] {"playlistId"}, typeof(Task), typeof(string))]
             public static async Task ToggleFavorite(string playlistId)
             {
                 var playlist = await GetPlaylist(playlistId);
@@ -1540,6 +1571,7 @@ namespace XRUIOS.Barebones
 
             // GET RESOLVED SONG PATHS (for playback)
 
+            [SeaOfDirac("Songs.Playlists.GetResolvedPlaylistSongs", new[] {"playlistId"}, typeof(Task), typeof(string))]
             public static async Task<List<string>> GetResolvedPlaylistSongs(string playlistId)
             {
                 var playlist = await GetPlaylist(playlistId);
@@ -1569,6 +1601,7 @@ namespace XRUIOS.Barebones
 
             // CREATE FROM FOLDER - Import all songs from a directory
 
+            [SeaOfDirac("Songs.Playlists.CreatePlaylistFromFolder", new[] {"playlistName", "directoryUUID", "description"}, typeof(Task), typeof(string), typeof(string), typeof(string))]
             public static async Task<string> CreatePlaylistFromFolder(
                 string playlistName,
                 string directoryUUID,
@@ -1590,6 +1623,7 @@ namespace XRUIOS.Barebones
 
             // CREATE FROM FAVORITES - Playlist of all favorites
 
+            [SeaOfDirac("Songs.Playlists.CreatePlaylistFromFavorites", new[] {"playlistName"}, typeof(Task), typeof(string))]
             public static async Task<string> CreatePlaylistFromFavorites(string playlistName)
             {
                 var (resolved, _) = await SongFavoritesClass.GetFavorites();

@@ -10,9 +10,9 @@ using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones.Functions
 {
-    public class NoteClass : XRUIOSFunction
+    public class NoteClass 
     {
-        public override string FunctionName => "Note";
+         
         public static readonly NoteClass Instance = new();
         private NoteClass() { }
 

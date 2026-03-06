@@ -4,9 +4,9 @@ using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones
 {
-    public class ChronoClass : XRUIOSFunction
+    public class ChronoClass 
     {
-        public override string FunctionName => "Chrono";
+         
         public static readonly ChronoClass Instance = new();
         private ChronoClass() { }
 

@@ -6,9 +6,9 @@ using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones.Functions
 {
-    public class VolumeClass : XRUIOSFunction
+    public class VolumeClass 
     {
-        public override string FunctionName => "Volume";
+         
         public static readonly VolumeClass Instance = new();
         private VolumeClass() { }
 

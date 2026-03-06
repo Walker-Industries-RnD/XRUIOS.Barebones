@@ -10,9 +10,9 @@ using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones
 {
-    public class GeoClass : XRUIOSFunction
+    public class GeoClass 
     {
-        public override string FunctionName => "Geo";
+         
         public static readonly GeoClass Instance = new();
         private GeoClass() { }
 

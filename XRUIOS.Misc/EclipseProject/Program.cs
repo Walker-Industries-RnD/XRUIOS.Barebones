@@ -8,7 +8,7 @@ namespace EclipseProject
         public static async Task Main()
         {
             
-            EclipseClient.Initialize();
+            await EclipseClient.Initialize();
             var g = EclipseClient.ListFunctions();
             Console.WriteLine("done");
         }

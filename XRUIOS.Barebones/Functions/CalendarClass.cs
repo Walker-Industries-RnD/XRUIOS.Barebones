@@ -10,9 +10,9 @@ using YuukoProtocol;
 
 namespace XRUIOS.Barebones
 {
-    public class CalendarClass : XRUIOSFunction
+    public class CalendarClass 
     {
-        public override string FunctionName => "Calendar";
+         
         public static readonly CalendarClass Instance = new();
         private CalendarClass() { }
 

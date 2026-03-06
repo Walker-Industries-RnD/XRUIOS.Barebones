@@ -6,9 +6,9 @@ using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones.Functions
 {
-    public class NotificationClass : XRUIOSFunction
+    public class NotificationClass 
     {
-        public override string FunctionName => "Notification";
+         
         public static readonly NotificationClass Instance = new();
         private NotificationClass() { }
 

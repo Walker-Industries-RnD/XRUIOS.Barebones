@@ -7,9 +7,9 @@ using static XRUIOS.Barebones.XRUIOS;
 
 namespace XRUIOS.Barebones
 {
-    public class StopwatchClass : XRUIOSFunction
+    public class StopwatchClass 
     {
-        public override string FunctionName => "Stopwatch";
+         
         public static readonly StopwatchClass Instance = new();
         private StopwatchClass() { }
 

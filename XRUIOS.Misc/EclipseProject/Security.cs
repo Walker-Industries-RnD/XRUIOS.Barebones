@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MessagePack;
 using EclipseLCL;
+using MessagePack.Resolvers;
 
 namespace EclipseProject
 {
@@ -185,9 +186,9 @@ namespace EclipseProject
             /// </summary>
             public byte[] PackAndEncrypt<T>(string method, T payload)
             {
-                byte[] serializedPayload = MessagePackSerializer.Serialize(payload);
+                byte[] serializedPayload = MessagePackSerializer.Serialize(payload, ContractlessStandardResolver.Options);
                 EncryptedEnvelope env = Encrypt(method, serializedPayload);
-                return MessagePackSerializer.Serialize<EncryptedEnvelope>(env, MessagePack.Resolvers.ContractlessStandardResolver.Options);
+                return MessagePackSerializer.Serialize<EncryptedEnvelope>(env, ContractlessStandardResolver.Options);
             }
 
             /// <summary>
@@ -196,7 +197,7 @@ namespace EclipseProject
             public T DecryptAndUnpack<T>(EncryptedEnvelope env)
             {
                 byte[] plaintext = Decrypt(env);
-                return MessagePackSerializer.Deserialize<T>(plaintext, MessagePack.Resolvers.ContractlessStandardResolver.Options);
+                return MessagePackSerializer.Deserialize<T>(plaintext, ContractlessStandardResolver.Options);
             }
 
             /// <summary>
@@ -205,13 +206,23 @@ namespace EclipseProject
             /// </summary>
             public T UnpackResponse<T>(byte[] serializedResp)
             {
-                DiracResponse resp = MessagePackSerializer.Deserialize<DiracResponse>(serializedResp);
+                DiracResponse resp = MessagePackSerializer.Deserialize<DiracResponse>(serializedResp, ContractlessStandardResolver.Options);
                 if (!resp.Success)
                     throw new Exception($"Function failed, server message: {resp.ServerMessage}");
-                EncryptedEnvelope data = MessagePackSerializer.Deserialize<EncryptedEnvelope>(resp.EncryptedData);
+                EncryptedEnvelope data = MessagePackSerializer.Deserialize<EncryptedEnvelope>(resp.EncryptedData, ContractlessStandardResolver.Options);
                 byte[] plaintext = Decrypt(data);
-                return MessagePackSerializer.Deserialize<T>(plaintext);
+
+                // if T is DiracResponse, void assumed so return DiracResponse. otherwise return plaintext
+                return MessagePackSerializer.Deserialize<T>((typeof(T) == typeof(DiracResponse)) ? serializedResp : plaintext, ContractlessStandardResolver.Options);
             }
+
+            public DiracResponse UnpackResponse(byte[] serializedResp)
+            {
+                DiracResponse resp = MessagePackSerializer.Deserialize<DiracResponse>(serializedResp, ContractlessStandardResolver.Options);
+                if (!resp.Success)
+                    throw new Exception($"Function failed, server message: {resp.ServerMessage}");
+                return resp;
+            }            
 
             public void Dispose()
             {
@@ -263,6 +274,7 @@ namespace EclipseProject
         }
         public sealed class SessionState : IDisposable
         {
+            public Dictionary<string, object?> Vault { get; init; } = new Dictionary<string, object?>();
             public string ClientId { get; }
             public byte[] SessionId8 { get; }           // 8 bytes, not super sensitive
             public uint Epoch { get; private set; }

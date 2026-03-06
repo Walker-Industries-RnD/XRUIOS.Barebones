@@ -19,18 +19,20 @@ using System.Collections;
 using System.Runtime;
 using System.Threading.Tasks;
 using MessagePack;
+using MessagePack.Resolvers;
 
 namespace EclipseProject
 {
     public class EclipseClient
     {
-        private static AeadChannel? clientChannel {get; set;}
-        private static AeadChannel? serverChannel {get; set;}
-        private static IDiracService? api {get; set;}
-        public static async void Initialize()
+        internal static AeadChannel? clientChannel {get; set;}
+        internal static AeadChannel? serverChannel {get; set;}
+        internal static IDiracService? api {get; set;}
+        internal static GrpcChannel? Channel {get; set;}
+        public static async Task Initialize()
         {
-            using var channel = GrpcChannel.ForAddress("http://127.0.0.1:5000");
-                api = MagicOnionClient.Create<IDiracService>(channel);
+            Channel = GrpcChannel.ForAddress("http://127.0.0.1:5000");
+                api = MagicOnionClient.Create<IDiracService>(Channel);
 
                 // enrollment, create clientId/PSK and SecureStore them. server will have access if it's with the same user
                 SecureRandom rand = new SecureRandom();
@@ -73,20 +75,21 @@ namespace EclipseProject
                     }
                 }
         }
-        public static async Task<DiracResponse> InvokeAsync(string methodName, IDictionary payload)
+        public static async Task<T> InvokeAsync<T>(string methodName, params (string key, object? value)[] args)
         {
             if (clientChannel == null || serverChannel == null || api == null)
             {
                 throw new Exception("Handshake protocol failed.");
             }
 
-            byte[] serializedEnv = clientChannel.PackAndEncrypt(methodName, payload);
+            Dictionary<string, object?> parameters = args.ToDictionary(a => a.key, a => a.value);
+            byte[] serializedEnv = clientChannel.PackAndEncrypt(methodName, parameters);
             byte[] serializedResp = await api.InvokeAsync(serializedEnv);
-            DiracResponse finalResults = serverChannel.UnpackResponse<DiracResponse>(serializedResp);
+            T? result = serverChannel.UnpackResponse<T>(serializedResp);
 
-            Console.WriteLine($"Response received.\nCONTENT: {finalResults}");
+            Console.WriteLine($"Response received.\nCONTENT: {result}");
 
-            return finalResults;
+            return result;
         }
 
         public static async void FinishAsync()
@@ -100,12 +103,10 @@ namespace EclipseProject
             Console.WriteLine($"Terminating connection. Success: {success}");
         }
 
-        public static async Task<IEnumerable<object>> ListFunctions()
+        public static async Task<IEnumerable<DiracFunction>> ListFunctions()
         {
             byte[] serializedFuncs = await api.ListFunctions();
-            IEnumerable<object> funcs = MessagePackSerializer.Deserialize<IEnumerable<Object>>(serializedFuncs, MessagePack.Resolvers.ContractlessStandardResolver.Options);
-
-            return funcs;
+            return MessagePackSerializer.Deserialize<IEnumerable<DiracFunction>>(serializedFuncs, ContractlessStandardResolver.Options);
         }
     }
 }

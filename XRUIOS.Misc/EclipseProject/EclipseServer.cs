@@ -25,6 +25,7 @@ using static EclipseProject.Security;
 using EclipseLCL;
 using MessagePack;
 using System.Reflection;
+using MessagePack.Resolvers;
 
 namespace EclipseProject
 {
@@ -156,7 +157,7 @@ namespace EclipseProject
 
         public async UnaryResult<byte[]> InvokeAsync(byte[] serializedEnv)
         {
-            EncryptedEnvelope env = MessagePackSerializer.Deserialize<EncryptedEnvelope>(serializedEnv, MessagePack.Resolvers.ContractlessStandardResolver.Options);
+            EncryptedEnvelope env = MessagePackSerializer.Deserialize<EncryptedEnvelope>(serializedEnv, ContractlessStandardResolver.Options);
 
             if (!_sessions.TryGet(env.ClientId, out SessionState s))
             {
@@ -174,16 +175,16 @@ namespace EclipseProject
                 throw new Exception("Ocean not found.");
             }
 
-            DiracRequest request = s.FromClient.DecryptAndUnpack<DiracRequest>(env);
+            Dictionary<string, object?> parameters = s.FromClient.DecryptAndUnpack<Dictionary<string, object?>>(env);
 
-            DiracResponse response = await ocean.HandleRequestAsync(request, s.ToClient);
-
-            return MessagePackSerializer.Serialize<DiracResponse>(response, MessagePack.Resolvers.ContractlessStandardResolver.Options);
+            DiracResponse response = await ocean.HandleRequestAsync(env.Method, parameters, s);
+            
+            return MessagePackSerializer.Serialize<DiracResponse>(response, ContractlessStandardResolver.Options);
         }
 
         public async UnaryResult<bool> FinishAsync(byte[] serializedEnv)
         {
-            EncryptedEnvelope env = MessagePackSerializer.Deserialize<EncryptedEnvelope>(serializedEnv);
+            EncryptedEnvelope env = MessagePackSerializer.Deserialize<EncryptedEnvelope>(serializedEnv, ContractlessStandardResolver.Options);
 
             if (!_sessions.TryGet(env.ClientId, out SessionState s))
             {
@@ -211,7 +212,7 @@ namespace EclipseProject
                 throw new Exception("Ocean not found.");
             }
 
-            return MessagePackSerializer.Serialize<IEnumerable<object>>(ocean.ListFunctionDetails());
+            return MessagePackSerializer.Serialize(ocean.ListFunctionDetails(), ContractlessStandardResolver.Options);
         }
     }
 }
