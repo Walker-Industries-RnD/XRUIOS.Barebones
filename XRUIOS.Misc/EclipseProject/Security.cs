@@ -161,6 +161,12 @@ namespace EclipseProject
                 if (env.Ciphertext is null)
                     throw new ArgumentException("Ciphertext missing.");
 
+                if (env.Ciphertext.Length == 0)
+                {
+                    _recvSeq = env.Seq;
+                    return [];
+                }
+
                 byte[] nonce12 = MakeNonce12(_sessionId8, env.Seq);
                 byte[] aad = MakeAad(_clientId, Epoch, env.Seq, env.Method ?? "");
 
@@ -204,13 +210,18 @@ namespace EclipseProject
             /// Deserialize a <see cref="DiracResponse"/> from <paramref name="serializedResp"/>,
             /// assert success, then decrypt and deserialize the result as <typeparamref name="T"/>.
             /// </summary>
-            public T UnpackResponse<T>(byte[] serializedResp)
+            public T? UnpackResponse<T>(byte[] serializedResp)
             {
                 DiracResponse resp = MessagePackSerializer.Deserialize<DiracResponse>(serializedResp, ContractlessStandardResolver.Options);
                 if (!resp.Success)
                     throw new Exception($"Function failed, server message: {resp.ServerMessage}");
                 EncryptedEnvelope data = MessagePackSerializer.Deserialize<EncryptedEnvelope>(resp.EncryptedData, ContractlessStandardResolver.Options);
                 byte[] plaintext = Decrypt(data);
+
+                if (plaintext.Length == 0)
+                {
+                    return default;
+                }
 
                 // if T is DiracResponse, void assumed so return DiracResponse. otherwise return plaintext
                 return MessagePackSerializer.Deserialize<T>((typeof(T) == typeof(DiracResponse)) ? serializedResp : plaintext, ContractlessStandardResolver.Options);

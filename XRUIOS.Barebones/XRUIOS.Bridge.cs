@@ -2,6 +2,7 @@ using EclipseProject;
 using System.Reflection;
 using System.Threading.Tasks;
 using EclipseLCL;
+using YuukoProtocol;
 
 public class XRUIOS_Bridge
 {
@@ -75,10 +76,10 @@ public class XRUIOS_Bridge
         Console.WriteLine("Created CreatorBase for YUNA");
 
         // Step 2: Get creator overview
-        DiracPackage overview = await EclipseClient.InvokeAsync<DiracPackage>("CreatorClass.CreatorFileClass.GetCreatorOverview",
+        KeyValuePair<string, string> overview = await EclipseClient.InvokeAsync<KeyValuePair<string, string>>("CreatorClass.CreatorFileClass.GetCreatorOverview",
             ("CreatorName", "YUNA"),
             ("CreatorType", creatorType));
-        Console.WriteLine($"Creator: {overview.Fields!["Item1"]}, Description: {overview.Fields["Item2"]}");
+        Console.WriteLine($"Creator: {overview.Key}, Description: {overview.Value}");
 
         // Step 3: Optionally add another random file (not the same one)
         if (Directory.Exists(musicFolder))
@@ -112,15 +113,13 @@ public class XRUIOS_Bridge
             ("CreatorType", creatorType));
 
         // Step 6: Get favorite creators
-        DiracPackage favorites = await EclipseClient.InvokeAsync<DiracPackage>("CreatorClass.CreatorFavoritesClass.GetFavorites",
+        ValueTuple<List<string>, List<string>> favorites = await EclipseClient.InvokeAsync<ValueTuple<List<string>, List<string>>>("CreatorClass.CreatorFavoritesClass.GetFavorites",
             ("CreatorType", creatorType));
         Console.WriteLine("Resolved favorites:");
-        if (favorites.Collection != null)
-            foreach (var f in favorites.Collection)
-                Console.WriteLine($" - {f}");
+        Console.WriteLine($" - {String.Join(", ", favorites.Item1)} - {String.Join(", ", favorites.Item2)}");
 
         // Step 7: Remove the first file safely
-        DiracPackage creator = await EclipseClient.InvokeAsync<DiracPackage>("CreatorClass.CreatorFileClass.GetCreator",
+        DiracPackage? creator = await EclipseClient.InvokeAsync<DiracPackage>("CreatorClass.CreatorFileClass.GetCreator",
             ("CreatorName", "YUNA"),
             ("CreatorType", creatorType));
         if (creator != null && creator.Collection?.Count > 0)

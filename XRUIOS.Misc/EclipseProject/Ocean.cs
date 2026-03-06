@@ -129,14 +129,17 @@ namespace EclipseProject
                 object? instance = regFunc.Method.IsStatic ? null : Activator.CreateInstance(regFunc.DeclaringType);
 
                 // Invoke the method
-                var result = regFunc.Method.Invoke(instance, args);
-                if (result is Task task)
+                var rawResult = regFunc.Method.Invoke(instance, args);
+                object? result;
+                if (rawResult is Task task)
                 {
                     await task;
-                    var taskType = task.GetType();
-                    result = taskType.IsGenericType && taskType.GetGenericTypeDefinition() == typeof(Task<>)
-                        ? taskType.GetProperty("Result")!.GetValue(task)
-                        : null;
+                    var taskResult = task.GetType().GetProperty("Result")?.GetValue(task);
+                    result = taskResult?.GetType().Name == "VoidTaskResult" ? null : taskResult;
+                }
+                else
+                {
+                    result = rawResult;
                 }
                 
                 byte[] serializedResult;
@@ -179,7 +182,20 @@ namespace EclipseProject
                     }
                 } else
                 {
-                    serializedResult = MessagePackSerializer.Serialize(attr.ReturnType, result, ContractlessStandardResolver.Options);
+                    /*Type resultType = result.GetType();
+                    bool isTuple = resultType.IsGenericType && resultType.FullName?.StartsWith("System.ValueTuple") == true;
+                    bool isKvp = resultType.IsGenericType && resultType.GetGenericTypeDefinition() == typeof(KeyValuePair<,>);
+                    if (isTuple || isKvp)
+                    {
+                        var list = new List<object?>();
+                        foreach (var field in resultType.GetFields())
+                            list.Add(field.GetValue(result));
+                        serializedResult = MessagePackSerializer.Serialize(list, ContractlessStandardResolver.Options);
+                    }
+                    else
+                    {*/
+                        serializedResult = MessagePackSerializer.Serialize(result, ContractlessStandardResolver.Options);
+                    //}
                 }
                 
                 EncryptedEnvelope env = channel.Encrypt(functionName, serializedResult);

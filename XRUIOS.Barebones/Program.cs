@@ -95,7 +95,7 @@ namespace XRUIOS.TestHarness
             Console.ResetColor();
             Console.WriteLine("Click any button to continue.");
 
-            Console.ReadKey();
+            //Console.ReadKey();
             Console.Clear();
 
 

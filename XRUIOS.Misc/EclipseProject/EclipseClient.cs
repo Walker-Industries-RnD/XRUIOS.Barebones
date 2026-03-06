@@ -75,7 +75,7 @@ namespace EclipseProject
                     }
                 }
         }
-        public static async Task<T> InvokeAsync<T>(string methodName, params (string key, object? value)[] args)
+        public static async Task<T?> InvokeAsync<T>(string methodName, params (string key, object? value)[] args)
         {
             if (clientChannel == null || serverChannel == null || api == null)
             {
