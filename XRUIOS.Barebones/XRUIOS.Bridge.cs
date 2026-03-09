@@ -8,42 +8,10 @@ public class XRUIOS_Bridge
 {
     public static async Task Initialize()
     {
-        EclipseServer.RunServer(Assembly.GetExecutingAssembly());
+        EclipseServer.RunServer("Eclipse Server",Assembly.GetExecutingAssembly());
         Console.WriteLine("[ECLIPSE] Server started.");
 
         await EclipseClient.Initialize();
-
-        /*Console.WriteLine("Creating stopwatch...");
-        string stopwatchId = await EclipseClient.InvokeAsync<string>("StopwatchClass.CreateStopwatch");
-
-        Console.WriteLine("Waiting 2 seconds...");
-        await Task.Delay(2000);
-
-        TimeSpan elapsed1 = await EclipseClient.InvokeAsync<TimeSpan>("StopwatchClass.GetTimeElapsed", ("id", stopwatchId));
-        Console.WriteLine($"Elapsed time: {elapsed1.TotalSeconds:F2} seconds");
-
-        Console.WriteLine("Creating first lap...");
-        DiracPackage lap1 = await EclipseClient.InvokeAsync<DiracPackage>("StopwatchClass.CreateLap", ("id", stopwatchId));
-        Console.WriteLine($"Lap {lap1.Fields!["LapCount"]} at {lap1.Fields["SecondsElapsed"]} seconds");
-
-        Console.WriteLine("Waiting 1 second...");
-        await Task.Delay(1000);
-
-        Console.WriteLine("Creating second lap...");
-        DiracPackage lap2 = await EclipseClient.InvokeAsync<DiracPackage>("StopwatchClass.CreateLap", ("id", stopwatchId));
-        Console.WriteLine($"Lap {lap2.Fields!["LapCount"]} at {lap2.Fields["SecondsElapsed"]} seconds");
-
-        Console.WriteLine("Destroying stopwatch and retrieving records...");
-        DiracPackage records = await EclipseClient.InvokeAsync<DiracPackage>("StopwatchClass.DestroyStopwatch", ("id", stopwatchId));
-        foreach (var record in records.Collection!)
-            Console.WriteLine($"Lap {record.Fields!["LapCount"]}: {record.Fields["SecondsElapsed"]} seconds");
-
-
-        Console.WriteLine("Saving records to CSV...");
-        EclipseClient.InvokeAsync("StopwatchClass.SaveStopwatchValuesAsSheet", ("Values", records), ("RecordedOn", DateTime.Now), ("FileName", "TestStopwatch"));
-        Console.WriteLine("Saved CSV in DataPath directory.");
-
-        Console.WriteLine("Test complete.");*/
         await TestCreator();
     }
 

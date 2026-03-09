@@ -26,6 +26,8 @@ using EclipseLCL;
 using MessagePack;
 using System.Reflection;
 using MessagePack.Resolvers;
+using Microsoft.AspNetCore.Hosting.Server;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 
 namespace EclipseProject
 {
@@ -34,18 +36,16 @@ namespace EclipseProject
         internal static Ocean? ocean {get; set;}
         internal static (Dictionary<string, byte[]> Public, Dictionary<string, byte[]> Private) ServerKyberKeys {get; set;}
         internal static bool enabled = false;
-        public static async void RunServer(System.Reflection.Assembly assembly, string[]? args = null, int port = 5000, bool useNamedPipesLater = false)
+        public static async void RunServer(string? serverName = "Test Eclipse Server", System.Reflection.Assembly? assembly = null, string[]? args = null, int port = 5000, bool useNamedPipesLater = false)
         {
             Console.WriteLine("Starting Eclipse Ocean gRPC Server...");
             assembly ??= Assembly.GetExecutingAssembly();
 
             ServerKyberKeys = EasyPQC.Keys.Initiate();
 
-            var builder = WebApplication.CreateBuilder(args);
+            var builder = WebApplication.CreateBuilder();
 
             builder.Services.AddSingleton<SessionStore>();
-
-            // Register MagicOnion services
             builder.Services.AddMagicOnion();
 
             // Auto-register all [SeaOfDirac] functions at startup
@@ -55,8 +55,9 @@ namespace EclipseProject
             // Kestrel config — localhost TCP for now
             builder.WebHost.ConfigureKestrel(options =>
             {
-                options.ListenLocalhost(5000, o => o.Protocols = HttpProtocols.Http2);
+                options.Listen(System.Net.IPAddress.Loopback, 0, o => o.Protocols = HttpProtocols.Http2);
             });
+
 
             var app = builder.Build();
 
@@ -65,7 +66,29 @@ namespace EclipseProject
 
             enabled = true;
 
-            await app.RunAsync();
+            // Start the server without awaiting (so we can grab the addresses)
+            var serverTask = app.StartAsync();
+
+            // Get the actual bound URL after Kestrel starts
+            var server = app.Services.GetRequiredService<IServer>();
+            var addressesFeature = server.Features.Get<IServerAddressesFeature>();
+
+            if (addressesFeature == null)
+                throw new Exception("Server initialization failed.");
+
+            // Wait until Kestrel actually binds
+            while (addressesFeature.Addresses.Count == 0)
+            {
+                await Task.Delay(50);
+            }
+
+            Console.WriteLine("Server running on: " + string.Join(", ", addressesFeature.Addresses));
+
+            // Save the bound address
+            SecureStore.Set(serverName!, addressesFeature.Addresses);
+
+            // Keep the server running
+            await serverTask;
         }
     }
     public class DiracService : ServiceBase<IDiracService>, IDiracService

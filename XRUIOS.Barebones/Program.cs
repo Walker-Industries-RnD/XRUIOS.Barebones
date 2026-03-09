@@ -179,6 +179,7 @@ namespace XRUIOS.TestHarness
 
             Console.WriteLine("\n  [ECLIPSE] Opening the Sea of Dirac.");
             await XRUIOS_Bridge.Initialize();
+            Console.ReadKey();
             await Task.Delay(10);
 
             // ──────────────────────────────────────────────────────────────
